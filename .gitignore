@@ -1,23 +1,16 @@
+# IGNORE node_modules - since it is recreated for everyone by just writing npm install
+# and its big and can differ for some modules between operating systems
+node_modules
 
-node_modules/
+# IGNORE db-credentials since it's a MAJOR security risk to have them public on git-hub!
+db-credentials.js
 
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.pdf
-*.mp3
-*.wav
-*.pptx
-*.docx
-*.zip
+# Also ignore folders with files (pdf, mp3, jpg, ppt etc in frontend)
+# for example:
+frontend/pdfs
+frontend/music
+frontend/photos
+frontend/powerpoint
 
-test_data/
-sample_files/
-
-.env
-config.json
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Ignore specials system files of no use for example .DS_Store on mac
+.DS_Store
