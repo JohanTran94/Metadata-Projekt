@@ -17,5 +17,8 @@
   },
   "homepage": "https://github.com/JohanTran94/Metadata-Projekt#readme",
   "description": "",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
