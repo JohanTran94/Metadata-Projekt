@@ -1,40 +1,38 @@
-// Import the git-ignored db credentials
-import dbCreds from './db.js';
 
-// Get the database driver
-import mysql from 'mysql2/promise';
-
-// Get express so that we can create a web server
 import express from 'express';
+import { readdir } from 'fs/promises';
+import path from 'path';
+import { parseFile } from 'music-metadata';
 
-// Create the connection to database
-const db = await mysql.createConnection(dbCreds);
-
-// Allow named placeholders in prepared statements
-db.config.namedPlaceholders = true;
-
-// Create a web server called app
 const app = express();
+const MUSIC_DIR = path.resolve(process.cwd(), '../music');
 
-// Create a REST route
-app.get('/api/search-by-firstname/:firstName', async (request, response) => {
-  // Read the request parameter firstName
-  let { firstName } = request.params;
-  // Add a wildcard for LIKE searches in the db
-  firstName = '%' + firstName + '%';
-  // Make a query as a prepared statement
-  const [rows] = await db.execute(`
-  SELECT *
-  FROM users
-  WHERE firstName LIKE :firstName`,
-    { firstName }
-  );
-  // Send the data as json response
-  response.json(rows);
+app.get('/api/mp3', async (req, res) => {
+  try {
+    const limit = Number(req.query.limit ?? 50);
+    const files = (await readdir(MUSIC_DIR))
+      .filter(f => f.toLowerCase().endsWith('.mp3'))
+      .slice(0, limit);
+
+    const items = [];
+    for (const f of files) {
+      try {
+        const mm = await parseFile(path.join(MUSIC_DIR, f));
+        items.push({
+          file: f,
+          title: mm.common?.title ?? null,
+          artist: mm.common?.artist ?? null,
+          album: mm.common?.album ?? null,
+          year: mm.common?.year ?? null,
+          durationSec: mm.format?.duration ?? null
+        });
+      } catch { /* hoppa över felaktig fil */ }
+    }
+    res.json(items);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// Let Express serve all the content from frontend folder
 app.use(express.static('frontend'));
-
-// Start the web server at port 3000
-app.listen(3000, () => console.log('Listening on http://localhost:3000'));
+app.listen(3000, () => console.log('http://localhost:3000'));
