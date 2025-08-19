@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="sv">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MP3-sök</title>
+  <style>
+    body {
+      font: 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      margin: 24px;
+    }
+
+    input {
+      padding: 10px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #e5e5e5;
+      text-align: left;
+    }
+
+    .muted {
+      color: #666;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>MP3-sök</h1>
+  <input id="q" placeholder="Sök titel, artist, album, genre..." autofocus />
+  <div id="summary" class="muted"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Fil</th>
+        <th>Titel</th>
+        <th>Artist</th>
+        <th>Album</th>
+        <th>År</th>
+        <th>Genre</th>
+        <th>Kbps</th>
+        <th>Ladda ned</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <script type="module">
+    const qEl = document.getElementById('q');
+    const rows = document.getElementById('rows');
+    const summary = document.getElementById('summary');
+
+    async function search(q = '') {
+      const res = await fetch('/api/mp3/search?' + new URLSearchParams({ q, limit: 200 }));
+      const { items, total } = await res.json();
+      summary.textContent = `Visar ${items.length} av ${total} träffar`;
+      rows.innerHTML = items.map(it => `
+        <tr>
+          <td>${it.file}</td>
+          <td>${it.title ?? ''}</td>
+          <td>${it.artist ?? ''}</td>
+          <td>${it.album ?? ''}</td>
+          <td>${it.year ?? ''}</td>
+          <td>${it.genre ?? ''}</td>
+          <td>${it.bitrate_kbps ?? ''}</td>
+          <td><a href="/music/${encodeURIComponent(it.file)}" download>⬇️</a></td>
+        </tr>
+      `).join('');
+    }
+
+    let t;
+    qEl.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(() => search(qEl.value.trim()), 200);
+    });
+    search('');
+  </script>
+</body>
+
+</html>

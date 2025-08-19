@@ -1,6 +1,6 @@
 // mp3.js
 import express from 'express';
-import { readdir } from 'fs/promises';
+import { readdir, readFile } from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
 import { parseFile } from 'music-metadata';
@@ -10,6 +10,26 @@ const MUSIC_DIR = path.resolve(process.cwd(), '../music');
 const OUT_DIR = path.resolve(process.cwd(), 'output');
 const OUT_FILE = path.join(OUT_DIR, 'metadata.json');
 
+// --- SÖK (toppnivå) ---
+app.get('/api/mp3/search', async (req, res) => {
+  try {
+    const q = (req.query.q || '').toString().trim().toLowerCase();
+    const limit = Number(req.query.limit ?? 200);
+    const offset = Number(req.query.offset ?? 0);
+
+    const all = JSON.parse(await readFile(OUT_FILE, 'utf8'));
+    const fields = ['title', 'artist', 'album', 'albumartist', 'genre', 'file'];
+    const filtered = q
+      ? all.filter(it => fields.some(k => (it[k] ?? '').toString().toLowerCase().includes(q)))
+      : all;
+
+    res.json({ total: filtered.length, items: filtered.slice(offset, offset + limit) });
+  } catch {
+    res.status(404).json({ error: 'metadata.json saknas. Kör /api/mp3?limit=all&save=1 först.' });
+  }
+});
+
+// --- LISTA/BUILDA ---
 app.get('/api/mp3', async (req, res) => {
   try {
     const limitParam = req.query.limit;
@@ -22,18 +42,22 @@ app.get('/api/mp3', async (req, res) => {
     const items = [];
     for (const f of files) {
       try {
-        const mm = await parseFile(path.join(MUSIC_DIR, f));
+        const mm = await parseFile(path.join(MUSIC_DIR, f), { skipCovers: true });
         items.push({
           file: f,
           title: mm.common?.title ?? null,
           artist: mm.common?.artist ?? null,
           album: mm.common?.album ?? null,
-          year: mm.common?.year ?? null
+          albumartist: mm.common?.albumartist ?? null,
+          year: mm.common?.year ?? null,
+          track: mm.common?.track?.no ?? null,
+          genre: Array.isArray(mm.common?.genre) ? mm.common.genre.join(', ') : (mm.common?.genre ?? null),
+          bitrate_kbps: mm.format?.bitrate ? Math.round(mm.format.bitrate / 1000) : null,
+          sampleRate_hz: mm.format?.sampleRate ?? null
         });
       } catch { }
     }
 
-    // Spara till output/metadata.json om ?save=1
     if (req.query.save === '1') {
       fs.mkdirSync(OUT_DIR, { recursive: true });
       fs.writeFileSync(OUT_FILE, JSON.stringify(items, null, 2), 'utf8');
@@ -44,6 +68,6 @@ app.get('/api/mp3', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-
+app.use('/music', express.static(MUSIC_DIR));
 app.use(express.static('frontend'));
 app.listen(3000, () => console.log('http://localhost:3000'));
