@@ -29,7 +29,7 @@ app.get('/api/mp3/search', async (req, res) => {
   }
 });
 
-// --- LISTA/BUILDA ---
+
 app.get('/api/mp3', async (req, res) => {
   try {
     const limitParam = req.query.limit;
