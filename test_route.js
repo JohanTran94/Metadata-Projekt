@@ -11,18 +11,21 @@ for (let powerpointMetadata of data) {
   // extract the file name (the property digest + '.ppt)
   let fileName = powerpointMetadata.digest + '.ppt';
 
-  // remove the file name
-  delete powerpointMetadata.digest;
 
-  // remove sha hashes as well (only needed for file authenticity checks)
+  // remove the unnecessary attributes
+  delete powerpointMetadata.digest;
   delete powerpointMetadata.sha256;
   delete powerpointMetadata.sha512;
+  delete powerpointMetadata.urlkey;
+  delete powerpointMetadata.timestamp;
+
+
 
   // console.log things to see that we have correct 
   // filname and metadata
   // (that eventually want to write to the db)
-  console.log('');
-  console.log(fileName);
+  //console.log('');
+  //console.log(fileName);
   console.log(powerpointMetadata);
 
   // TODO: Do something like this to INSERT the data in our database
@@ -33,3 +36,12 @@ for (let powerpointMetadata of data) {
   console.log(result);*/
 
 }
+
+let mimeTypes = new Set();
+for (let item of data) {
+  if (item.mimetype) {
+    mimeTypes.add(item.mimetype)
+  }
+}
+
+console.log([...mimeTypes])
