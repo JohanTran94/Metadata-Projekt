@@ -19,23 +19,17 @@ for (let powerpointMetadata of data) {
   delete powerpointMetadata.urlkey;
   delete powerpointMetadata.timestamp;
 
-
-
   // console.log things to see that we have correct 
   // filname and metadata
   // (that eventually want to write to the db)
   //console.log('');
   //console.log(fileName);
-  console.log(powerpointMetadata);
+  //console.log(powerpointMetadata);
 
-  // TODO: Do something like this to INSERT the data in our database
-  /*let result = await query(`
-    INSERT INTO powerpoints (fileName, metadata)
-    VALUES(?, ?)
-  `, [fileName, powerPointMetadata]);
-  console.log(result);*/
 
 }
+
+// Check for different mime types
 
 let mimeTypes = new Set();
 for (let item of data) {
@@ -44,4 +38,14 @@ for (let item of data) {
   }
 }
 
-console.log([...mimeTypes])
+let cleanedMimeTypes = [...mimeTypes].map(type => type.replace(/^(application\/)+/, ''));
+
+
+console.log(cleanedMimeTypes)
+
+// TODO: Do something like this to INSERT the data in our database
+/*let result = await query(`
+  INSERT INTO powerpoints (fileName, metadata)
+  VALUES(?, ?)
+`, [fileName, powerPointMetadata]);
+console.log(result);*/
