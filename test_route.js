@@ -7,7 +7,7 @@ let json = fs.readFileSync('./powerpoint.json', 'utf-8');
 // Convert from a string to a real data structure
 let data = JSON.parse(json);
 
-for (let powerpointMetadata of data) {
+for (let powerpointMetadata of data.slice(0, 25)) {
   // extract the file name (the property digest + '.ppt)
   let fileName = powerpointMetadata.digest + '.ppt';
 
@@ -26,22 +26,37 @@ for (let powerpointMetadata of data) {
   //console.log(fileName);
   //console.log(powerpointMetadata);
 
-
-}
-
-// Check for different mime types
-
-let mimeTypes = new Set();
-for (let item of data) {
-  if (item.mimetype) {
-    mimeTypes.add(item.mimetype)
+  // Check for different mime types
+  // Create set of mime types in the JSON data
+  let mimeTypes = new Set();
+  for (let item of data) {
+    if (item.mimetype) {
+      mimeTypes.add(item.mimetype)
+    }
   }
+
+  //Identify non-standard data types for removal
+
+  let toRemove = ['powerpoint', 'PowerPoint%202007%20File']
+
+  let cleanedMimeTypes = [...mimeTypes]
+
+    //Map the set
+    .map(type => type
+      //remove instances of the string "/application"
+      .replace(/^(application\/)+/, ''))
+    //filter out non-standard data types
+    .filter(type => !toRemove.includes(type));
+
+  cleanedMimeTypes = [...new Set(cleanedMimeTypes)];
+
+  console.log(data)
+
+
 }
 
-let cleanedMimeTypes = [...mimeTypes].map(type => type.replace(/^(application\/)+/, ''));
 
 
-console.log(cleanedMimeTypes)
 
 // TODO: Do something like this to INSERT the data in our database
 /*let result = await query(`
