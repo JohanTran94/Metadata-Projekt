@@ -1,56 +1,35 @@
-// Import the file system module
+// Import the file system module (fs)
 import fs from 'fs';
 
-let json = JSON.parse(fs.readFileSync('powerpoint.json', 'utf8'));
-console.log(json);
+// Read the json string from file
+let json = fs.readFileSync('./powerpoint.json', 'utf-8');
 
-/*
+// Convert from a string to a real data structure
+let data = JSON.parse(json);
 
-import { readdir } from 'fs/promises';
-import path from 'path';
-import { parseFile } from 'music-metadata';
+for (let powerpointMetadata of data) {
+  // extract the file name (the property digest + '.ppt)
+  let fileName = powerpointMetadata.digest + '.ppt';
 
-const files = await readdir(path.resolve(process.cwd(), '../music'));
+  // remove the file name
+  delete powerpointMetadata.digest;
 
-for (const file of files) {
-  if (!file.toLowerCase().endsWith('.mp3')) continue;
-  const full = path.resolve(process.cwd(), '../music', file);
-  const metadata = await parseFile(full);
+  // remove sha hashes as well (only needed for file authenticity checks)
+  delete powerpointMetadata.sha256;
+  delete powerpointMetadata.sha512;
+
+  // console.log things to see that we have correct 
+  // filname and metadata
+  // (that eventually want to write to the db)
   console.log('');
-  console.log(file);
-  console.log(metadata);
+  console.log(fileName);
+  console.log(powerpointMetadata);
+
+  // TODO: Do something like this to INSERT the data in our database
+  /*let result = await query(`
+    INSERT INTO powerpoints (fileName, metadata)
+    VALUES(?, ?)
+  `, [fileName, powerPointMetadata]);
+  console.log(result);*/
+
 }
-
-/*
-
-// Create a new array for metadata
-let metadataList = [];
-
-// Loop through the files
-for (let file of files) {
- // Get the meta data
- let metadata = await exifr.parse('./images/' + file);
- // Add the filename and the metadata to our meta data list
- metadataList.push({ file, metadata });
-}
-
-// Serialize the data to JSON
-let json = JSON.stringify(metadataList, null, '  ');
-
-// Log the list of metadata
-// console.log(json);
-
-// Remember the start time (ms)
-let startTime = Date.now();
-
-// Save the json as a file
-// (write json to the file metadata.json
-// using character encoding utf-8)
-fs.writeFileSync('./metadata.json', json, 'utf-8');
-
-// Remember the end time (ms)
-let endTime = Date.now();
-
-console.log('Time taken (ms)', endTime - startTime);
-
-*/
