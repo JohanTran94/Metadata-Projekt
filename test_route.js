@@ -10,10 +10,21 @@ let data = JSON.parse(json);
 for (let powerpointMetadata of data.slice(0, 5)) {
 
   // extract the file name (the property digest + '.ppt)
-  let fileName = powerpointMetadata.digest + '.ppt'
+  let fileName = powerpointMetadata
+    .digest + '.ppt'
 
   // add file name to attributes
-  powerpointMetadata.file_name = fileName
+  powerpointMetadata
+    .file_name = fileName
+
+  // clean mimetype and whitespace
+  let cleanedMimeType = (powerpointMetadata.mimetype || '')
+    .replace(/^(application\/+)/, '')
+    .trim();
+
+  // add cleaned mime type to the metadata
+  powerpointMetadata
+    .mimetype = cleanedMimeType
 
   // remove unnecessary attributes
   delete powerpointMetadata.digest;
@@ -22,14 +33,10 @@ for (let powerpointMetadata of data.slice(0, 5)) {
   delete powerpointMetadata.urlkey;
   delete powerpointMetadata.timestamp;
 
-  // clean mimetype 
-  let cleanedMimeType = (powerpointMetadata.mimetype || '')
-    .replace(/^(application\/+)/, '');
-
 
   let newJson = JSON.stringify(powerpointMetadata, null, '  ');
 
-  console.log(newJson)
+  fs.writeFileSync('./newJson.json', newJson, 'utf-8');
 
 
 
