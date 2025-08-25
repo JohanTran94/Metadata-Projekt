@@ -7,9 +7,9 @@ let json = fs.readFileSync('./powerpoint.json', 'utf-8');
 // Convert from a string to a real data structure
 let data = JSON.parse(json);
 
-let metadataList = [];
+let metadataListPowerpoint = [];
 
-for (let powerpointMetadata of data.slice(0, 5)) {
+for (let powerpointMetadata of data) {
 
   // extract the file name (the property digest + '.ppt)
   let fileName = powerpointMetadata
@@ -36,10 +36,10 @@ for (let powerpointMetadata of data.slice(0, 5)) {
   delete powerpointMetadata.timestamp;
 
   // convert to json string
-  let newJson = JSON.stringify(powerpointMetadata, null, '  ');
+  let cleanedJson = JSON.stringify(powerpointMetadata, null, '  ');
 
   // add metadata to the array
-  metadataList.push(powerpointMetadata);
+  metadataListPowerpoint.push(powerpointMetadata);
 
 
   console.log(JSON.stringify(powerpointMetadata, null, 2));
@@ -56,7 +56,7 @@ for (let powerpointMetadata of data.slice(0, 5)) {
 }
 
 // write to json file
-fs.writeFileSync('./newJson.json', JSON.stringify(metadataList, null, 2), 'utf-8');
+fs.writeFileSync('./cleanedPowerpointJson.json', JSON.stringify(metadataListPowerpoint, null, 2), 'utf-8');
 
 /*
 // TODO: Do something like this to INSERT the data in our database
