@@ -17,17 +17,17 @@ db.config.namedPlaceholders = true;
 const app = express();
 
 // Create a REST route
-app.get('/api/search-by-firstname/:firstName', async (request, response) => {
+app.get('/api/search-by-title/:title', async (request, response) => {
   // Read the request parameter firstName
-  let { firstName } = request.params;
+  let { title } = request.params;
   // Add a wildcard for LIKE searches in the db
-  firstName = '%' + firstName + '%';
+  title = '%' + title + '%';
   // Make a query as a prepared statement
   const [rows] = await db.execute(`
   SELECT *
   FROM users
-  WHERE firstName LIKE :firstName`,
-    { firstName }
+  WHERE title LIKE :title`,
+    { title }
   );
   // Send the data as json response
   response.json(rows);
