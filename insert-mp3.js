@@ -1,7 +1,7 @@
 
 import { readFile } from 'fs/promises';
 import mysql from 'mysql2/promise';
-import db from './db.js'; // db bråkade förut, verkar fungera nu. 
+import db from './db.js'; // db bråkade förut, fungerar nu
 
 const conn = await mysql.createConnection({ ...db, namedPlaceholders: true });
 
