@@ -19,8 +19,6 @@ CREATE TABLE IF NOT EXISTS mp3_metadata (
   genre         VARCHAR(255),
   bitrate_kbps  INT,
   sampleRate_hz INT,
-  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uniq_file (file)
 )`);
 
