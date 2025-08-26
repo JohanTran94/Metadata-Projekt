@@ -7,8 +7,11 @@
   <title>MP3-sök</title>
   <style>
     body {
-      font: 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      margin: 24px;
+      font: 16px;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f9f9f9;
     }
 
     input {
@@ -39,6 +42,8 @@
 
 <body>
   <h1>MP3-sök</h1>
+  <audio id="player" controls style="display:none; width:100%; max-width:560px"></audio>
+
   <input id="q" placeholder="Sök titel, artist, album, genre..." autofocus />
   <div id="summary" class="muted"></div>
   <table>
@@ -52,6 +57,7 @@
         <th>Genre</th>
         <th>Kbps</th>
         <th>Ladda ned</th>
+        <th>Spela upp</th>
       </tr>
     </thead>
     <tbody id="rows"></tbody>
@@ -66,6 +72,7 @@
       const res = await fetch('/api/mp3/search?' + new URLSearchParams({ q, limit: 200 }));
       const { items, total } = await res.json();
       summary.textContent = `Visar ${items.length} av ${total} träffar`;
+
       rows.innerHTML = items.map(it => `
         <tr>
           <td>${it.file}</td>
@@ -76,17 +83,42 @@
           <td>${it.genre ?? ''}</td>
           <td>${it.bitrate_kbps ?? ''}</td>
           <td><a href="/music/${encodeURIComponent(it.file)}" download>⬇️</a></td>
+          <td><button class="play" type="button" data-src="/music/${encodeURIComponent(it.file)}">▶</button></td>
         </tr>
       `).join('');
     }
 
+    // Sökfältet
     let t;
     qEl.addEventListener('input', () => {
       clearTimeout(t);
       t = setTimeout(() => search(qEl.value.trim()), 200);
     });
+
+    // spela upp
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.play');
+      if (!btn) return;
+
+      const url = btn.dataset.src;
+      const player = document.getElementById('player');
+
+      if (player.style.display === 'none') player.style.display = 'block';
+
+      // Window istället?
+      const abs = new URL(url, location.href).href;
+      if (player.src !== abs) player.src = url;
+
+      player.play();
+    });
+
+    // Initial laddning
     search('');
   </script>
+
+
+
+
 </body>
 
 </html>
