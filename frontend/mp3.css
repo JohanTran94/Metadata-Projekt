@@ -1,0 +1,31 @@
+body {
+  font: 16px;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+input {
+  padding: 10px;
+  width: 100%;
+  max-width: 560px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+th,
+td {
+  padding: 8px;
+  border-bottom: 1px solid #e5e5e5;
+  text-align: left;
+}
+
+.muted {
+  color: #666;
+  margin-top: 8px;
+}

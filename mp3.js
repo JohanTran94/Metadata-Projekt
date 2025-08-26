@@ -10,7 +10,7 @@ const MUSIC_DIR = path.resolve(process.cwd(), '../music');
 const OUT_DIR = path.resolve(process.cwd(), 'output');
 const OUT_FILE = path.join(OUT_DIR, 'metadata.json');
 
-// --- SÖK (toppnivå) ---
+//Läser den städade metadatan från .json filen.. pointless? (normaliserad i db)
 app.get('/api/mp3/search', async (req, res) => {
   try {
     const q = (req.query.q || '').toString().trim().toLowerCase();
@@ -29,7 +29,7 @@ app.get('/api/mp3/search', async (req, res) => {
   }
 });
 
-
+//Läser in mp3 data direkt från music (../), städad
 app.get('/api/mp3', async (req, res) => {
   try {
     const limitParam = req.query.limit;
@@ -68,6 +68,26 @@ app.get('/api/mp3', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+// Rå json från output/mp3-metadata.json
+app.get('/api/mp3/raw', async (req, res) => {
+  try {
+    const q = (req.query.q || '').toString().trim().toLowerCase();
+    const limit = Math.max(1, Math.min(1000, Number(req.query.limit ?? 500)));
+    const offset = Math.max(0, Number(req.query.offset ?? 0));
+
+    const raw = JSON.parse(await readFile(path.join(OUT_DIR, 'mp3-metadata.json'), 'utf8'));
+    const filtered = q ? raw.filter(it => JSON.stringify(it).toLowerCase().includes(q)) : raw;
+
+    res.json({ total: filtered.length, items: filtered.slice(offset, offset + limit), limit, offset });
+  } catch {
+    res.status(404).json({ error: 'mp3-metadata.json saknas i output/' });
+  }
+});
+
 app.use('/music', express.static(MUSIC_DIR));
 app.use(express.static('frontend'));
 app.listen(3000, () => console.log('http://localhost:3000'));
+
+
+// så--> api/mp3/raw , /api/mp3 , api/mp3/search
+// i frontend mappen har jag en basic /mp3.html med en enkel sökfunktion

@@ -5,39 +5,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MP3-sök</title>
-  <style>
-    body {
-      font: 16px;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f9f9f9;
-    }
 
-    input {
-      padding: 10px;
-      width: 100%;
-      max-width: 560px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 16px;
-    }
-
-    th,
-    td {
-      padding: 8px;
-      border-bottom: 1px solid #e5e5e5;
-      text-align: left;
-    }
-
-    .muted {
-      color: #666;
-      margin-top: 8px;
-    }
-  </style>
+  <link rel="stylesheet" href="mp3.css">
 </head>
 
 <body>
@@ -46,6 +15,7 @@
 
   <input id="q" placeholder="Sök titel, artist, album, genre..." autofocus />
   <div id="summary" class="muted"></div>
+
   <table>
     <thead>
       <tr>
@@ -63,61 +33,9 @@
     <tbody id="rows"></tbody>
   </table>
 
-  <script type="module">
-    const qEl = document.getElementById('q');
-    const rows = document.getElementById('rows');
-    const summary = document.getElementById('summary');
+  <!-- Länka in extern JS -->
 
-    async function search(q = '') {
-      const res = await fetch('/api/mp3/search?' + new URLSearchParams({ q, limit: 200 }));
-      const { items, total } = await res.json();
-      summary.textContent = `Visar ${items.length} av ${total} träffar`;
-
-      rows.innerHTML = items.map(it => `
-        <tr>
-          <td>${it.file}</td>
-          <td>${it.title ?? ''}</td>
-          <td>${it.artist ?? ''}</td>
-          <td>${it.album ?? ''}</td>
-          <td>${it.year ?? ''}</td>
-          <td>${it.genre ?? ''}</td>
-          <td>${it.bitrate_kbps ?? ''}</td>
-          <td><a href="/music/${encodeURIComponent(it.file)}" download>⬇️</a></td>
-          <td><button class="play" type="button" data-src="/music/${encodeURIComponent(it.file)}">▶</button></td>
-        </tr>
-      `).join('');
-    }
-
-    // Sökfältet
-    let t;
-    qEl.addEventListener('input', () => {
-      clearTimeout(t);
-      t = setTimeout(() => search(qEl.value.trim()), 200);
-    });
-
-    // spela upp
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest('.play');
-      if (!btn) return;
-
-      const url = btn.dataset.src;
-      const player = document.getElementById('player');
-
-      if (player.style.display === 'none') player.style.display = 'block';
-
-      // Window istället?
-      const abs = new URL(url, location.href).href;
-      if (player.src !== abs) player.src = url;
-
-      player.play();
-    });
-
-    // Initial laddning
-    search('');
-  </script>
-
-
-
+  <script type="module" src="mp3-client.js"></script>
 
 </body>
 
