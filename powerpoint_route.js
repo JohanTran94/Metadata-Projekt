@@ -18,20 +18,27 @@ const app = express();
 
 // Create a REST route
 app.get('/api/search-by-title/:title', async (request, response) => {
-  // Read the request parameter firstName
-  let { title } = request.params;
-  // Add a wildcard for LIKE searches in the db
-  title = '%' + title + '%';
-  // Make a query as a prepared statement
-  const [rows] = await db.execute(`
-  SELECT *
-  FROM users
-  WHERE title LIKE :title`,
-    { title }
-  );
-  // Send the data as json response
-  response.json(rows);
+  try {
+    let { title } = request.params;
+    title = `%${title}%`;
+
+    const [rows] = await db.execute(`
+      SELECT * 
+      FROM powerpoint_metadata
+      WHERE metadata->>'$.title' LIKE ?
+      LIMIT 5;
+    `, [title]);
+
+    response.json(rows);
+
+  } catch (err) {
+    console.error('DB error:', err);
+    response.status(500).send('Database error');
+  }
 });
+
+
+
 
 // Let Express serve all the content from frontend folder
 app.use(express.static('frontend'));
