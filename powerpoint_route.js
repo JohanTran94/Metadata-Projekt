@@ -23,10 +23,11 @@ app.get('/api/search-by-title/:title', async (request, response) => {
     title = `%${title}%`;
 
     const [rows] = await db.execute(`
-      SELECT * 
-      FROM powerpoint_metadata
-      WHERE metadata->>'$.title' LIKE ?
-      LIMIT 5;
+
+SELECT id, metadata->>'$.title' AS title
+FROM powerpoint_metadata
+WHERE metadata->>'$.title' LIKE ?
+LIMIT 5;
     `, [title]);
 
     response.json(rows);
@@ -38,10 +39,17 @@ app.get('/api/search-by-title/:title', async (request, response) => {
 });
 
 
-
-
 // Let Express serve all the content from frontend folder
 app.use(express.static('frontend'));
 
 // Start the web server at port 3000
 app.listen(3000, () => console.log('Listening on http://localhost:3000'));
+
+/*
+
+SELECT * 
+      FROM powerpoint_metadata
+      WHERE metadata->>'$.title' LIKE ?
+      LIMIT 5;
+
+      */
