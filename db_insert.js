@@ -10,8 +10,6 @@ let data = JSON.parse(json);
 // create database connection
 let db = await mysql.createConnection(dbCreds)
 
-console.log("Connected to the database!");
-
 // A small function for running queries
 async function query(sql, listOfValues) {
   let result = await db.execute(sql, listOfValues);
@@ -19,15 +17,15 @@ async function query(sql, listOfValues) {
 }
 
 // Insert data from JSON into database
-for (let file_name of data) {
-  console.log('A PowerPoint:');
-  console.log(file_name);
+for (let diverse of data) {
+  //console.log('A PowerPoint:');
+  //console.log(file_name);
 
   let result = await query(`
         INSERT INTO powerpoint_metadata (metadata)
         VALUES (?)
       `,
-    [JSON.stringify(file_name)]);  // Store the entire metadata as a JSON string
+    [JSON.stringify(diverse)]);  // Store the entire metadata as a JSON string
   console.log(result);
 }
 
