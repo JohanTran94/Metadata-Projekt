@@ -54,15 +54,19 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
 
 
     const sql = `
-      SELECT id,
-             meta->>'$.file'           AS fileName,
-             meta->>'$.common.title'   AS title,
-             meta->>'$.common.artist'  AS artist,
-             meta->>'$.common.album'   AS album,
-             meta->>'$.common.genre'   AS genre
-      FROM musicJson
-      WHERE LOWER(meta->>'$.common.${field}') LIKE LOWER(?)
-    `;
+  SELECT
+    id,
+    meta->>'$.file'                 AS fileName,
+    meta->>'$.common.title'         AS title,
+    meta->>'$.common.artist'        AS artist,
+    meta->>'$.common.album'         AS album,
+    meta->>'$.common.genre'         AS genre,
+    meta->>'$.common.year'          AS year,
+    ROUND( (meta->>'$.format.bitrate')/1000 ) AS kbps
+  FROM musicJson
+  WHERE LOWER(meta->>'$.common.${field}') LIKE LOWER(?)
+`;
+
     const params = [`%${searchValue}%`];
 
     const [rows] = await db.execute(sql, params);
@@ -72,7 +76,7 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
+app.use('/music', express.static(path.join(__dirname, '../music')));
 // Hämta all metadata för en låt
 app.get('/api/music-all-meta/:id', requireDb, async (req, res) => {
   try {
