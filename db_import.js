@@ -9,18 +9,20 @@ const db = await mysql.createConnection(dbCreds);
 
 await db.execute('DELETE FROM powerpoint_metadata');
 
-for (let file of data) {
+for (let fileMeta of data) {
   let dbImport = await db.execute(`
         INSERT INTO powerpoint_metadata (metadata)
         VALUES (?)
       `,
-    [JSON.stringify(file)]);
-  console.log(file, dbImport);
+    [JSON.stringify(fileMeta)]);
+  console.log(fileMeta, dbImport);
 
 }
 
-console.log('Metadata imported.')
-process.exit()
+console.log('Metadata imported.');
+process.exit();
+
+
 
 
 

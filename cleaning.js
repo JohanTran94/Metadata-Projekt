@@ -1,6 +1,22 @@
 // Import the file system module (fs)
 import fs from 'fs';
 
+function toCamelCaseKey(str) {
+  return str.replace(/[_-](\w)/g, (_, c) => c.toUpperCase());
+}
+
+function keysToCamelCase(obj) {
+  if (Array.isArray(obj)) {
+    return obj.map(v => keysToCamelCase(v));
+  } else if (obj !== null && typeof obj === 'object') {
+    return Object.entries(obj).reduce((acc, [key, value]) => {
+      acc[toCamelCaseKey(key)] = keysToCamelCase(value);
+      return acc;
+    }, {});
+  }
+  return obj;
+}
+
 // Read the json string from file
 let json = fs.readFileSync('./powerpoint.json', 'utf-8');
 
@@ -19,7 +35,7 @@ for (let powerpointMetadata of data) {
   powerpointMetadata
     .file_name = fileName
 
-  // clean mimetype and whitespace
+  // clean mimetype and whitespace (also removes non-standard datatypes)
   let cleanedMimeType = (powerpointMetadata.mimetype || '')
     .replace(/^(application\/+)/, '')
     .trim();
@@ -35,28 +51,22 @@ for (let powerpointMetadata of data) {
   delete powerpointMetadata.urlkey;
   delete powerpointMetadata.timestamp;
 
-  // convert to json string
-  let cleanedJson = JSON.stringify(powerpointMetadata, null, '  ');
+  let cleaned = keysToCamelCase(powerpointMetadata);
+
+  metadataListPowerpoint
+  .push(cleaned);
 
   // add metadata to the array
-  metadataListPowerpoint.push(powerpointMetadata);
-
-
-  console.log(JSON.stringify(powerpointMetadata, null, 2));
-
-
-  // console.log things to see that we have correct 
-  // filname and metadata
-  // (that eventually want to write to the db)
-  //console.log('');
-  //console.log(fileName);
-  //console.log(powerpointMetadata);
-
-
+  metadataListPowerpoint
+  .push(powerpointMetadata);
 }
 
 // write to json file
-fs.writeFileSync('./cleanedPowerpointJson.json', JSON.stringify(metadataListPowerpoint, null, 2), 'utf-8');
+fs.writeFileSync(
+  './cleanedPowerpointJson.json',
+  JSON.stringify(metadataListPowerpoint, null, 2), 
+  'utf-8'
+);
 
 /*
 // TODO: Do something like this to INSERT the data in our database
