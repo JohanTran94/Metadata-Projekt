@@ -1,29 +1,44 @@
-
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
-import { parseFile } from 'music-metadata';
+import * as musicMetadata from 'music-metadata';
+import mysql from 'mysql2/promise';
+import dbCredentials from './db.js';
+import { fileURLToPath } from 'url';
 
-const MUSIC_DIR = '../music';
-const OUT_FILE = './output/mp3-metadata.json';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-async function main() {
-  const files = await fs.readdir(MUSIC_DIR);
-  const items = []; // array som är tom där lagring komemr ske
+//  koppla mot DB likt tidigare 
+const db = await mysql.createConnection({ ...dbCredentials });
 
-  for (const file of files) {
-    if (!file.toLowerCase().endsWith('.mp3')) continue;  // loop, hoppar över ev trash som inte är mp3. Thomas ex på jpg/jpeg..
+// istället för manuellt
+await db.execute(`
+  CREATE TABLE IF NOT EXISTS musicJson (
+    id   INT AUTO_INCREMENT PRIMARY KEY,
+    file VARCHAR(255) NOT NULL UNIQUE,
+    meta JSON NOT NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+`);
 
-    const absPath = path.join(MUSIC_DIR, file);
-    const meta = await parseFile(absPath);
 
-    items.push({
-      file,
-      ...meta //sprider ut data i objekt
-    });
-  }
+const MUSIC_DIR = path.resolve(__dirname, '../music');
+const files = fs.readdirSync(MUSIC_DIR);
 
-  await fs.writeFile(OUT_FILE, JSON.stringify(items, null, 2), 'utf8'); //läsbar json 2= indentering 2 mellanslag
+await db.execute('DELETE FROM musicJson');
+
+for (const file of files) {
+  const fullPath = path.join(MUSIC_DIR, file);
+  const metadata = await musicMetadata.parseFile(fullPath);
+  const cleaned = { file, common: metadata.common, format: metadata.format };
+
+  await db.execute(
+    `INSERT INTO musicJson (file, meta)
+     VALUES (?, ?)
+     ON DUPLICATE KEY UPDATE meta = VALUES(meta)`,
+    [file, JSON.stringify(cleaned)]
+  );
 }
 
-main();
-
+console.log('All metadata imported!');
+await db.end();
+process.exit();

@@ -3,7 +3,7 @@ import { readFile } from 'fs/promises';
 import mysql from 'mysql2/promise';
 import db from './db.js'; // db bråkade förut, fungerar nu
 
-const conn = await mysql.createConnection({ ...db, namedPlaceholders: true });
+const conn = await mysql.createConnection({ ...db, namedPlaceholders: true }); //namedPlaceholders istället för "?"
 
 
 await conn.query(`
@@ -46,7 +46,7 @@ for (const it of rows) {
     year: Number.isFinite(+it.year) ? +it.year : null,
     track: Number.isFinite(+it.track) ? +it.track : null,
     genre: it.genre ?? null,
-    bitrate_kbps: Number.isFinite(+it.bitrate_kbps) ? +it.bitrate_kbps : null,
+    bitrate_kbps: Number.isFinite(+it.bitrate_kbps) ? +it.bitrate_kbps : null, //"is finite... få bort NaN"
     sampleRate_hz: Number.isFinite(+it.sampleRate_hz) ? +it.sampleRate_hz : null
   });
 }

@@ -1,7 +1,7 @@
 // import-json-to-db.js
 import fs from 'fs';
 import mysql from 'mysql2/promise';
-import dbConfig from './db.js'; // din git-ignorerade config
+import dbConfig from './db.js';
 
 const TABLE = 'mp3_metadata_json';
 
@@ -36,6 +36,7 @@ async function main() {
     const filePath = it.file ?? '';
     const title = it.common?.title ?? null;
 
+
     await db.execute(
       `INSERT INTO ${TABLE} (file_path, title, raw_json)
    VALUES (?, ?, CAST(? AS JSON))
@@ -50,10 +51,8 @@ async function main() {
   await db.end();
 }
 
-main().catch(err => {
-  console.error('Fel vid import:', err);
-  process.exit(1);
-});
+
+
 
 // Just nu så fylls databasen på med "duplicat", hur få bort.  file path unik?
 // Yes, med duplicate key update så fungerar det som det ska (tror jag)
