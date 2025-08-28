@@ -2,7 +2,7 @@
 import express from 'express';
 import mysql from 'mysql2/promise';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'url'; // musik ligger utanför projektet, 
 import dbCredentials from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -35,7 +35,7 @@ function requireDb(_req, res, next) {
   next();
 }
 
-// Sök (title/album/artist/genre/year/all-fields med 'any')
+// Sök (title/album/artist/genre/year')
 app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => {
   const { field, searchValue } = req.params;
   const allowed = ['title', 'album', 'artist', 'genre', 'year', 'any'];
@@ -44,7 +44,7 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
   let sql, params;
 
   if (field === 'any') {
-    // hur fungerar år
+    // ta bort? om man har specifika sökkriterier?
     sql = `
       SELECT
         id,
@@ -52,7 +52,7 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
         meta->>'$.common.title' AS title,
         meta->>'$.common.artist'AS artist,
         meta->>'$.common.album' AS album,
-        meta->>'$.common.genre'AS genre,
+        JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
         meta->>'$.common.year'AS year,
         ROUND((meta->>'$.format.bitrate')/1000) AS kbps
       FROM musicJson
@@ -75,12 +75,12 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
     sql = `
       SELECT
         id,
-        meta->>'$.file'               AS fileName,
-        meta->>'$.common.title'       AS title,
-        meta->>'$.common.artist'      AS artist,
-        meta->>'$.common.album'       AS album,
-        meta->>'$.common.genre'       AS genre,
-        meta->>'$.common.year'        AS year,
+        meta->>'$.file'AS fileName,
+        meta->>'$.common.title'AS title,
+        meta->>'$.common.artist'AS artist,
+        meta->>'$.common.album' AS album,
+        JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
+        meta->>'$.common.year'AS year,
         ROUND((meta->>'$.format.bitrate')/1000) AS kbps
       FROM musicJson
       WHERE LOWER(COALESCE(meta->>'$.common.year','')) LIKE LOWER(?)
@@ -96,12 +96,12 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
     sql = `
       SELECT
         id,
-        meta->>'$.file'               AS fileName,
-        meta->>'$.common.title'       AS title,
-        meta->>'$.common.artist'      AS artist,
-        meta->>'$.common.album'       AS album,
-        meta->>'$.common.genre'       AS genre,
-        meta->>'$.common.year'        AS year,
+        meta->>'$.file' AS fileName,
+        meta->>'$.common.title'AS title,
+        meta->>'$.common.artist'AS artist,
+        meta->>'$.common.album' AS album,
+        JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
+        meta->>'$.common.year' AS year,
         ROUND((meta->>'$.format.bitrate')/1000) AS kbps
       FROM musicJson
       WHERE LOWER(COALESCE(meta->>'$.common.${field}', '')) LIKE LOWER(?)
@@ -133,16 +133,16 @@ app.get('/api/music', requireDb, async (req, res) => {
   if (!Number.isFinite(limit) || limit < 1) limit = 100;
   if (!Number.isFinite(offset) || offset < 0) offset = 0;
   if (limit > 200) limit = 200;
-  //Få in bpm istället för kbps!
+  //Få in bpm istället för kbps! eller inget alls? överflödigt?
   const sql = `
     SELECT
       id,
-      meta->>'$.file'               AS fileName,
-      meta->>'$.common.title'       AS title,
-      meta->>'$.common.artist'      AS artist,
-      meta->>'$.common.album'       AS album,
-      meta->>'$.common.genre'       AS genre,
-      meta->>'$.common.year'        AS year,
+      meta->>'$.file'  AS fileName,
+      meta->>'$.common.title' AS title,
+      meta->>'$.common.artist' AS artist,
+      meta->>'$.common.album' AS album,
+      JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
+      meta->>'$.common.year' AS year,
       ROUND((meta->>'$.format.bitrate')/1000) AS kbps
     FROM musicJson
     ORDER BY

@@ -9,6 +9,24 @@
 
 <body>
   <h1>MP3-sök</h1>
+  <button id="themeToggle">Dark mode</button>
+
+  <script>
+    const btn = document.getElementById('themeToggle');
+    btn.addEventListener('click', () => {
+      if (document.body.style.background === 'black') {
+        // Tillbaka till ljust
+        document.body.style.background = 'white';
+        document.body.style.color = 'black';
+        btn.textContent = 'Dark mode';
+      } else {
+        // Växla till mörkt
+        document.body.style.background = 'black';
+        document.body.style.color = 'white';
+        btn.textContent = 'Light mode';
+      }
+    });
+  </script>
 
   <label>
     Sök i:
