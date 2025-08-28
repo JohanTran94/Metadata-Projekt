@@ -1,4 +1,4 @@
-// server.js (ESM, minimalist)
+
 import express from 'express';
 import mysql from 'mysql2/promise';
 import path from 'path';
@@ -7,11 +7,11 @@ import dbCredentials from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const PORT = process.env.PORT || 3000;
+
 
 const app = express();
 
-// Statiska filer (frontend)
+
 const FRONTEND_DIR = path.join(__dirname, 'frontend');
 app.use(express.static(FRONTEND_DIR));
 
@@ -29,7 +29,7 @@ async function connectDb() {
 }
 await connectDb();
 
-// Middleware: kräver DB för /api/*
+
 function requireDb(_req, res, next) {
   if (!db) return res.status(503).json({ error: 'Database not connected' });
   next();
@@ -44,16 +44,16 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
   let sql, params;
 
   if (field === 'any') {
-    // Fri text över alla fält (år jämförs som text)
+    // hur fungerar år
     sql = `
       SELECT
         id,
-        meta->>'$.file'               AS fileName,
-        meta->>'$.common.title'       AS title,
-        meta->>'$.common.artist'      AS artist,
-        meta->>'$.common.album'       AS album,
-        meta->>'$.common.genre'       AS genre,
-        meta->>'$.common.year'        AS year,
+        meta->>'$.file' AS fileName,
+        meta->>'$.common.title' AS title,
+        meta->>'$.common.artist'AS artist,
+        meta->>'$.common.album' AS album,
+        meta->>'$.common.genre'AS genre,
+        meta->>'$.common.year'AS year,
         ROUND((meta->>'$.format.bitrate')/1000) AS kbps
       FROM musicJson
       WHERE
@@ -66,12 +66,12 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
         meta->>'$.common.artist',
         meta->>'$.common.album',
         meta->>'$.common.title'
-      LIMIT 200
+      LIMIT 500
     `;
     const like = `%${searchValue}%`;
     params = [like, like, like, like, like];
   } else if (field === 'year') {
-    // Jämför år – LIKE för att "201" kan matcha 2012 om man vill
+
     sql = `
       SELECT
         id,
@@ -88,11 +88,11 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
         meta->>'$.common.artist',
         meta->>'$.common.album',
         meta->>'$.common.title'
-      LIMIT 200
+      LIMIT 500
     `;
     params = [`%${searchValue}%`];
   } else {
-    // Enskilt fält (title/artist/album/genre)
+
     sql = `
       SELECT
         id,
@@ -109,7 +109,7 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
         meta->>'$.common.artist',
         meta->>'$.common.album',
         meta->>'$.common.title'
-      LIMIT 200
+      LIMIT 500
     `;
     params = [`%${searchValue}%`];
   }
@@ -125,17 +125,15 @@ app.get('/api/music-all-meta/:id', requireDb, async (req, res) => {
   res.json(rows);
 });
 
-// Hämta första N poster (default 100) för startöversikt
-// Hämta första N poster (default 100) för startöversikt
+//Tillåter dom 100 första att ladda upp vid start
 app.get('/api/music', requireDb, async (req, res) => {
-  // Sanera och tvinga till heltal
+
   let limit = Number.parseInt(req.query.limit ?? '100', 10);
   let offset = Number.parseInt(req.query.offset ?? '0', 10);
   if (!Number.isFinite(limit) || limit < 1) limit = 100;
   if (!Number.isFinite(offset) || offset < 0) offset = 0;
   if (limit > 200) limit = 200;
-
-  // Interpolera EFTER sanering för att slippa bindningsstrul i LIMIT/OFFSET
+  //Få in bpm istället för kbps!
   const sql = `
     SELECT
       id,
@@ -158,7 +156,7 @@ app.get('/api/music', requireDb, async (req, res) => {
   res.json({ items: rows, limit, offset });
 });
 
-// Starta servern (enda console.log)
-app.listen(PORT, () => {
-  console.log(`Listening on http://localhost:${PORT}`);
+
+app.listen(3000, () => {
+  console.log(`Listening on http://localhost:3000`);
 });

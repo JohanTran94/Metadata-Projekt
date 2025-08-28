@@ -2,19 +2,30 @@
 <html lang="sv">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
   <title>MP3-sök</title>
-
   <link rel="stylesheet" href="mp3.css">
 </head>
 
 <body>
   <h1>MP3-sök</h1>
-  <audio id="player" controls style="display:none; width:100%; max-width:560px"></audio>
 
-  <input id="q" placeholder="Sök titel, artist, album, genre..." autofocus />
+  <label>
+    Sök i:
+    <select id="field">
+      <option value="any">Alla fält</option>
+      <option value="title">Titel</option>
+      <option value="artist">Artist</option>
+      <option value="album">Album</option>
+      <option value="genre">Genre</option>
+      <option value="year">År</option>
+    </select>
+  </label>
+  <input id="q" placeholder="Sök..." />
+
   <div id="summary" class="muted"></div>
+
+  <audio id="player" controls style="display:none; width:100%; max-width:560px"></audio>
 
   <table>
     <thead>
@@ -27,16 +38,15 @@
         <th>Genre</th>
         <th>Kbps</th>
         <th>Ladda ned</th>
-        <th>Spela upp</th>
+        <th>Spela</th>
+        <th>Metadata</th>
       </tr>
     </thead>
     <tbody id="rows"></tbody>
   </table>
 
-  <!-- Länka in extern JS -->
 
   <script type="module" src="mp3-client.js"></script>
-
 </body>
 
 </html>

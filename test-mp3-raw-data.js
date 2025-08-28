@@ -24,7 +24,7 @@ await db.execute(`
 const MUSIC_DIR = path.resolve(__dirname, '../music');
 const files = fs.readdirSync(MUSIC_DIR);
 
-await db.execute('DELETE FROM musicJson');
+//await db.execute('DELETE FROM musicJson');
 
 for (const file of files) {
   const fullPath = path.join(MUSIC_DIR, file);
