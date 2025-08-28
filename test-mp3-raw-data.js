@@ -3,7 +3,7 @@ import path from 'path';
 import * as musicMetadata from 'music-metadata';
 import mysql from 'mysql2/promise';
 import dbCredentials from './db.js';
-import { fileURLToPath } from 'url'; //nödvändigt pga musikstruktur utanför projekt?
+import { fileURLToPath } from 'url'; //nödvändigt pga musikstruktur utanför projekt? ../music. Hur göra sen när allt ska i main? all data samlas för att köra adekvat.
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
