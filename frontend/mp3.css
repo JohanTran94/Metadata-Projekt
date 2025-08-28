@@ -29,3 +29,24 @@ td {
   color: #666;
   margin-top: 8px;
 }
+
+
+pre {
+  background: #f6f8fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0 0;
+  max-height: 320px;
+  /* scroll inuti meta? mer läsbart */
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* gör kolumnen smalare så pre hamnar under knappen */
+td:last-child {
+  white-space: nowrap;
+  vertical-align: top;
+}

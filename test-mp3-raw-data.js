@@ -3,12 +3,12 @@ import path from 'path';
 import * as musicMetadata from 'music-metadata';
 import mysql from 'mysql2/promise';
 import dbCredentials from './db.js';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'url'; //nödvändigt pga musikstruktur utanför projekt?
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-//  koppla mot DB likt tidigare 
+
 const db = await mysql.createConnection({ ...dbCredentials });
 
 // istället för manuellt

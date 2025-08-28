@@ -1,8 +1,8 @@
 const qEl = document.getElementById('q');       // sökruta
 const fieldEl = document.getElementById('field'); // dropdown
-const rowsEl = document.getElementById('rows');   // tabellkroppen
-const summaryEl = document.getElementById('summary'); // summeringstext
-const playerEl = document.getElementById('player');   // ljudspelare
+const rowsEl = document.getElementById('rows');
+const summaryEl = document.getElementById('summary');
+const playerEl = document.getElementById('player');   // spela upp
 
 function rowHtml(it) {
   const file = it.fileName || it.file;
@@ -57,11 +57,11 @@ async function doSearch() {
   render(items, `Visar ${items.length} träffar för ${field} innehåller "${value}"`);
 }
 
-// sökning med 300ms fördröj
+// sökning med 200ms fördröj
 let t;
 function debouncedSearch() {
   clearTimeout(t);
-  t = setTimeout(doSearch, 300);
+  t = setTimeout(doSearch, 200);
 }
 
 
@@ -77,7 +77,7 @@ document.body.addEventListener('click', async e => {
     return;
   }
 
-  const r = await fetch('/api/music-all-meta/' + btn.dataset.id);
+  const r = await fetch('/api/music-all-meta/' + btn.dataset.id); //möjliggör data i "Visa metadata"
   let data = await r.json();
   if (Array.isArray(data)) data = data[0];
 
