@@ -1,0 +1,42 @@
+body {
+  font-family: Verdana;
+}
+
+main {
+  width: 700px;
+  margin: 0 auto;
+}
+
+article {
+  margin-bottom: 40px;
+}
+
+h1 {
+  color: red;
+  font-size: 40px;
+}
+
+p {
+  color: rgb(35, 85, 18);
+  font-weight: bold;
+}
+
+img {
+  width: 50%;
+}
+
+table {
+  width: 100%;
+}
+
+tr:nth-child(odd) {
+  background-color: #eee;
+}
+
+td {
+  padding: 8px 12px;
+}
+
+td:nth-child(2) {
+  text-align: right
+}
