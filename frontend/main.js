@@ -22,10 +22,10 @@ function showContent(label) {
       <label>
         Sök på: <select name="pdf-meta-field">
           <option value="Title">Titel</option>
-          <option value="Author">Författare</option>
-          <option value="Subject">Ämne</option>
-          <option value="Keywords">Nyckelord</option>
-          <option value="Pages">Antal sidor</option> <!-- ✅ Nytt alternativ -->
+          <option value="Author">Author</option>
+          <option value="Subject">Subject</option>
+          <option value="Keywords">Keywords</option>
+          <option value="Pages">Pages</option> <!-- ✅ Nytt alternativ -->
         </select>
       </label>
       <label>
@@ -54,16 +54,27 @@ document.body.addEventListener('change', event => {
   pdfSearch();
 });
 
-// Visa all metadata för en PDF
+// Visa eller dölj all metadata för en PDF
 document.body.addEventListener('click', async event => {
   let button = event.target.closest('.btn-show-all-pdf-metadata');
   if (!button) return;
+
+  let nextElement = button.nextElementSibling;
+  if (nextElement && nextElement.classList.contains('pdf-meta-block')) {
+    nextElement.remove(); // Döljer metadata
+    button.textContent = 'Show all metadata';
+    return;
+  }
+
   let id = button.getAttribute('data-id');
   let rawResponse = await fetch('/api/pdf-all-meta/' + id);
   let result = await rawResponse.json();
+
   let pre = document.createElement('pre');
+  pre.classList.add('pdf-meta-block');
   pre.innerHTML = JSON.stringify(result, null, 2);
   button.after(pre);
+  button.textContent = 'Hide all metadata';
 });
 
 // Sökfunktion för PDF
