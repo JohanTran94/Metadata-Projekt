@@ -54,19 +54,14 @@ for (let powerpointMetadata of data) {
   let cleaned = keysToCamelCase(powerpointMetadata);
 
   metadataListPowerpoint
-  .push(cleaned);
+    .push(cleaned);
 
-  // add metadata to the array
-  metadataListPowerpoint
-  .push(powerpointMetadata);
-}
-
-// write to json file
-fs.writeFileSync(
-  './cleanedPowerpointJson.json',
-  JSON.stringify(metadataListPowerpoint, null, 2), 
-  'utf-8'
-);
+  // write to json file
+  fs.writeFileSync(
+    './cleanedPowerpointJson.json',
+    JSON.stringify(metadataListPowerpoint, null, 2),
+    'utf-8'
+  );
 
 /*
 // TODO: Do something like this to INSERT the data in our database

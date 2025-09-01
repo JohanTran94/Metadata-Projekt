@@ -7,6 +7,11 @@ let data = JSON.parse(cleanJson);
 
 const db = await mysql.createConnection(dbCreds);
 
+await db.execute(`CREATE TABLE IF NOT EXISTS powerpoint_metadata (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+  metadata JSON )
+`);
+
 await db.execute('DELETE FROM powerpoint_metadata');
 
 for (let fileMeta of data) {
@@ -19,7 +24,7 @@ for (let fileMeta of data) {
 
 }
 
-console.log('Metadata imported.');
+console.log('Powerpoint metadata imported.');
 process.exit();
 
 
