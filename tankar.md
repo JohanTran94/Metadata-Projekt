@@ -15,7 +15,7 @@ Startsida.
 Här kan man klicka in på specifika sökmotorer baserat på fil, dropdown?
 klick på mp3-->mp3.html laddas. Här finns också en "tillbaka" knapp till huvudmenyn. 
 
-
+Hur hantera data och import för Thomas? 
 
 
 Överblick;
@@ -25,3 +25,8 @@ test-mp3-raw-data.json--> dåligt namn, byt. Läser in till  DB och skapar table
 mp3.html--> det visuella för användaren, basic structure
 mp3-client.js--> nyttjar api och pratar med html
 mp3.css--> visuellt, inte viktigt nu.
+
+
+
+
+bryta ut api/rest routes 

@@ -15,7 +15,6 @@ function rowHtml(it) {
       <td>${it.album || ''}</td>
       <td>${it.year || ''}</td>
       <td>${it.genre || ''}</td>
-      <td>${it.kbps || ''}</td>
       <td><a href="${url}" download>Hämta</a></td>
       <td><button data-play="${url}">▶︎</button></td>
       <td><button class="btn-show-all-music-metadata" data-id="${it.id}">Visa metadata</button></td>

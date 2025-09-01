@@ -53,8 +53,7 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
         meta->>'$.common.artist'AS artist,
         meta->>'$.common.album' AS album,
         JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
-        meta->>'$.common.year'AS year,
-        ROUND((meta->>'$.format.bitrate')/1000) AS kbps
+        meta->>'$.common.year'AS year
       FROM musicJson
       WHERE
         LOWER(COALESCE(meta->>'$.common.title',  '')) LIKE LOWER(?) OR
@@ -80,8 +79,7 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
         meta->>'$.common.artist'AS artist,
         meta->>'$.common.album' AS album,
         JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
-        meta->>'$.common.year'AS year,
-        ROUND((meta->>'$.format.bitrate')/1000) AS kbps
+        meta->>'$.common.year'AS year
       FROM musicJson
       WHERE LOWER(COALESCE(meta->>'$.common.year','')) LIKE LOWER(?)
       ORDER BY
@@ -101,8 +99,7 @@ app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => 
         meta->>'$.common.artist'AS artist,
         meta->>'$.common.album' AS album,
         JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
-        meta->>'$.common.year' AS year,
-        ROUND((meta->>'$.format.bitrate')/1000) AS kbps
+        meta->>'$.common.year' AS year
       FROM musicJson
       WHERE LOWER(COALESCE(meta->>'$.common.${field}', '')) LIKE LOWER(?)
       ORDER BY
@@ -142,8 +139,7 @@ app.get('/api/music', requireDb, async (req, res) => {
       meta->>'$.common.artist' AS artist,
       meta->>'$.common.album' AS album,
       JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre, 
-      meta->>'$.common.year' AS year,
-      ROUND((meta->>'$.format.bitrate')/1000) AS kbps
+      meta->>'$.common.year' AS year
     FROM musicJson
     ORDER BY
       meta->>'$.common.artist',
