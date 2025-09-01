@@ -141,7 +141,7 @@ app.get('/api/music', requireDb, async (req, res) => {
       meta->>'$.common.title' AS title,
       meta->>'$.common.artist' AS artist,
       meta->>'$.common.album' AS album,
-      JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
+      JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre, 
       meta->>'$.common.year' AS year,
       ROUND((meta->>'$.format.bitrate')/1000) AS kbps
     FROM musicJson
@@ -151,7 +151,7 @@ app.get('/api/music', requireDb, async (req, res) => {
       meta->>'$.common.title'
     LIMIT ${limit} OFFSET ${offset};
   `;
-
+  // hämta hela arrayen och tar bort hakarna. 
   const [rows] = await db.query(sql);
   res.json({ items: rows, limit, offset });
 });
