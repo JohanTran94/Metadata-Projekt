@@ -4,25 +4,25 @@ const rowsEl = document.getElementById('rows');
 const summaryEl = document.getElementById('summary');
 const playerEl = document.getElementById('player');   // spela upp
 
-function rowHtml(it) {
-  const file = it.fileName || it.file;
-  const url = `/music/${encodeURIComponent(file)}`;
+function rowHtml({ fileName, file, title, artist, album, year, genre, id }) {   // Skapar tabellstruktur för varje låt 
+  const realFile = fileName || file;
+  const url = `/music/${encodeURIComponent(realFile)}`;
   return `
     <tr>
-      <td>${file}</td>
-      <td>${it.title || ''}</td>
-      <td>${it.artist || ''}</td>
-      <td>${it.album || ''}</td>
-      <td>${it.year || ''}</td>
-      <td>${it.genre || ''}</td>
+      <td>${realFile}</td>
+      <td>${title || ''}</td>
+      <td>${artist || ''}</td>
+      <td>${album || ''}</td>
+      <td>${year || ''}</td>
+      <td>${genre || ''}</td>
       <td><a href="${url}" download>Hämta</a></td>
       <td><button data-play="${url}">▶︎</button></td>
-      <td><button class="btn-show-all-music-metadata" data-id="${it.id}">Visa metadata</button></td>
+      <td><button class="btn-show-all-music-metadata" data-id="${id}">Visa metadata</button></td>
     </tr>`;
 }
 
 function render(items, label) {
-  summaryEl.textContent = label || `Visar ${items.length} låtar`;
+  summaryEl.textContent = label || `Visar ${items.length} låtar`; // X sökträff genererar ett result 
   rowsEl.innerHTML = items.map(rowHtml).join('');
 }
 
@@ -35,13 +35,13 @@ rowsEl.addEventListener('click', e => {
   playerEl.play();
 });
 
-// hämta JSON
+// hämta JSON och visa det i läsaren
 async function fetchJson(url) {
   const r = await fetch(url);
   return r.json();
 }
 
-// lista 100 första som en start. Skönt nu pga se att alla specifika sök fungerar
+// lista 100 första som en start
 async function loadBrowse() {
   const { items } = await fetchJson('/api/music?limit=100');
   render(items, `Visar ${items.length} låtar`);
@@ -49,9 +49,9 @@ async function loadBrowse() {
 
 // sök
 async function doSearch() {
-  const field = fieldEl.value;
-  const value = qEl.value.trim();
-  if (!value) return loadBrowse();
+  const field = fieldEl.value; //fälten som visas 
+  const value = qEl.value.trim(); // innehåller från sökrutan
+  if (!value) return loadBrowse(); // tomt---> mina 100 första 
   const items = await fetchJson(`/api/music-search/${field}/${encodeURIComponent(value)}`);
   render(items, `Visar ${items.length} träffar för ${field} innehåller "${value}"`);
 }
@@ -63,8 +63,7 @@ function debouncedSearch() {
   t = setTimeout(doSearch, 200);
 }
 
-
-window.addEventListener('DOMContentLoaded', loadBrowse);
+window.addEventListener('DOMContentLoaded', loadBrowse); //100 första vid start av sidan. Möjliggör att testa enkelt 
 
 // visa metadata (samlad från /api/music-all-meta/:id)
 document.body.addEventListener('click', async e => {
@@ -76,7 +75,7 @@ document.body.addEventListener('click', async e => {
     return;
   }
 
-  const r = await fetch('/api/music-all-meta/' + btn.dataset.id); //möjliggör data i "Visa metadata"
+  const r = await fetch('/api/music-all-meta/' + btn.dataset.id);
   let data = await r.json();
   if (Array.isArray(data)) data = data[0];
 
@@ -85,6 +84,6 @@ document.body.addEventListener('click', async e => {
   btn.after(pre);
 });
 
-// input/dropdown
+// input/dropdown/sök fungerar
 qEl.addEventListener('input', debouncedSearch);
 fieldEl.addEventListener('change', debouncedSearch);
