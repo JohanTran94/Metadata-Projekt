@@ -2,7 +2,7 @@
 import express from 'express';
 import mysql from 'mysql2/promise';
 import path from 'path';
-import { fileURLToPath } from 'url'; // musik ligger utanför projektet, 
+import { fileURLToPath } from 'url'; // musik ligger utanför projektet.
 import dbCredentials from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,7 +15,7 @@ const app = express();
 const FRONTEND_DIR = path.join(__dirname, 'frontend');
 app.use(express.static(FRONTEND_DIR));
 
-// Serva musikfiler
+// Serva musikfiler, ligger på samma nivå right now som projektet. 
 app.use('/music', express.static(path.join(__dirname, '../music')));
 
 // DB-koppling
