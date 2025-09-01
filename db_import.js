@@ -46,6 +46,7 @@ for (let fileMeta of data) {
       [JSON.stringify(fileMeta)]
     );
     console.log(fileMeta, dbImport);
+
     // catch and log import errors
   } catch (err) {
     errors.push(`Metadata: ${JSON.stringify(fileMeta)} | Fel: ${err.message}`);
@@ -72,62 +73,3 @@ if (errors.length > 0) {
   console.log("Powerpoint metadata import klar.");
   process.exit(0);
 }
-
-
-/*
-
-
-for (let fileMeta of data) {
-  let dbImport = await db.execute(`
-        INSERT INTO powerpoint_metadata (metadata)
-        VALUES (?)
-      `,
-    [JSON.stringify(fileMeta)]);
-  console.log(fileMeta, dbImport);
-
-}
-
-console.log('Powerpoint metadata imported.');
-
-// close down database connection
-
-process.exit();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-console.log("Connected to the database!");
-
-// A small function for running queries
-async function query(sql, listOfValues) {
-  let result = await db.execute(sql, listOfValues);
-  return result[0];
-}
-
-// Insert data from JSON into database
-for (let file_name of data) {
-  console.log('A PowerPoint:');
-  console.log(file_name);
-
-  let result = await query(`
-        INSERT INTO powerpoint_metadata (metadata)
-        VALUES (?)
-      `,
-    [JSON.stringify(file_name)]);  // Store the entire metadata as a JSON string
-  console.log(result);
-}
-
-// Close the connection after the operations
-await db.end();
-
-*/
