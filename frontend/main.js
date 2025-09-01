@@ -1,4 +1,4 @@
-// Navigera via meny
+// Navigation in meny
 document.body.addEventListener('click', event => {
   let navLink = event.target.closest('header nav a');
   if (!navLink) return;
@@ -7,7 +7,7 @@ document.body.addEventListener('click', event => {
   showContent(linkText);
 });
 
-// Visa innehåll beroende på menyval
+// Show Content based on menu selection
 function showContent(label) {
   let content;
   if (label === 'Start') {
@@ -25,44 +25,45 @@ function showContent(label) {
           <option value="Author">Author</option>
           <option value="Subject">Subject</option>
           <option value="Keywords">Keywords</option>
-          <option value="Pages">Pages</option> <!-- ✅ Nytt alternativ -->
+          <option value="Pages">Pages</option>
         </select>
       </label>
       <label>
         <input name="pdf-search" type="text" placeholder="Sök bland PDF-filer">
       </label>
+      <p class="pdf-search-count">0 results</p> 
       <section class="pdf-search-result"></section>
     `;
   }
   document.querySelector('main').innerHTML = content;
 }
 
-// Visa startsidan direkt
+// Show startpage by default
 showContent('Start');
 
-// Sök vid tangenttryckning
+// search on keyup in input field
 document.body.addEventListener('keyup', event => {
   let inputField = event.target.closest('input[name="pdf-search"]');
   if (!inputField) return;
   pdfSearch();
 });
 
-// Sök vid ändring av fält
+// search on change in select field
 document.body.addEventListener('change', event => {
   let select = event.target.closest('select[name="pdf-meta-field"]');
   if (!select) return;
   pdfSearch();
 });
 
-// Visa eller dölj all metadata för en PDF
+// Show and hide all metadata for a PDF
 document.body.addEventListener('click', async event => {
   let button = event.target.closest('.btn-show-all-pdf-metadata');
   if (!button) return;
 
   let nextElement = button.nextElementSibling;
   if (nextElement && nextElement.classList.contains('pdf-meta-block')) {
-    nextElement.remove(); // Döljer metadata
-    button.textContent = 'Show all metadata';
+    nextElement.remove(); // hide metadata
+    button.textContent = 'Visa all metadata';
     return;
   }
 
@@ -74,16 +75,21 @@ document.body.addEventListener('click', async event => {
   pre.classList.add('pdf-meta-block');
   pre.innerHTML = JSON.stringify(result, null, 2);
   button.after(pre);
-  button.textContent = 'Hide all metadata';
+  button.textContent = 'Dölj metadata';
 });
 
-// Sökfunktion för PDF
+// search function for PDFs
 async function pdfSearch() {
   let inputField = document.querySelector('input[name="pdf-search"]');
+  let countElement = document.querySelector('.pdf-search-count');
+  let resultContainer = document.querySelector('.pdf-search-result');
+
   if (inputField.value === '') {
-    document.querySelector('.pdf-search-result').innerHTML = '';
+    resultContainer.innerHTML = '';
+    countElement.textContent = '0 resultat';
     return;
   }
+
   let field = document.querySelector('select[name="pdf-meta-field"]').value;
   let rawResponse = await fetch(`/api/pdf-search/${field}/${inputField.value}`);
   let result = await rawResponse.json();
@@ -96,11 +102,13 @@ async function pdfSearch() {
         <p><b>Author:</b> ${author || 'Unknowned'}</p>
         <p><b>Subject:</b> ${subject || 'Not specified'}</p>
         <p><b>Keywords:</b> ${keywords || 'None'}</p>
-        <p><b>Numbers of pages:</b> ${numpages || 'unknowned'}</p> <!-- ✅ Nytt fält -->
+        <p><b>Numbers of pages:</b> ${numpages || 'unknowned'}</p>
         <p><a href="/pdf/${filename}" download>Ladda ned PDF</a></p>
         <p><button class="btn-show-all-pdf-metadata" data-id="${id}">Visa all metadata</button></p>
       </article>
     `;
   }
-  document.querySelector('.pdf-search-result').innerHTML = resultAsHtml;
+
+  resultContainer.innerHTML = resultAsHtml;
+  countElement.textContent = `${result.length} resultat`;
 }
