@@ -4,10 +4,11 @@ node_modules
 
 # IGNORE db-credentials since it's a MAJOR security risk to have them public on git-hub!
 db-credentials.js
+db.js
 
 # Also ignore folders with files (pdf, mp3, jpg, ppt etc in frontend)
 # for example:
-frontend/pdfs
+frontend/pdf
 frontend/music
 frontend/photos
 frontend/powerpoint
