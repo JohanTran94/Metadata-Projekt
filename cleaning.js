@@ -63,37 +63,4 @@ for (let powerpointMetadata of data) {
     'utf-8'
   );
 
-/*
-// TODO: Do something like this to INSERT the data in our database
-/*let result = await query(`
-  INSERT INTO powerpoints (fileName, metadata)
-  VALUES(?, ?)
-`, [fileName, powerPointMetadata]);
-console.log(result);
-
-
-//Identify non-standard data types for removal
-let toRemove = ['powerpoint', 'PowerPoint%202007%20File']
-
-// Check for different mime types
-// Create set of mime types found in the JSON data
-let mimeTypes = new Set();
-for (let item of data) {
-  if (item.mimetype) {
-    mimeTypes.add(item.mimetype)
-  }
-
-  let cleanedMimeTypes = [...mimeTypes]
-
-    //Map the set
-    
-
-  cleanedMimeTypes = [...new Set(cleanedMimeTypes)];
-
-
-
-.map(powerpointMetadata => powerpointMetadata
-      //remove instances of the string "/application"
-      .replace(/^(application\/)+/, ''))
-    //filter out non-standard data types
-    .filter(powerpointMetadata => !toRemove.includes(powerpointMetadata));*/
+}
