@@ -45,6 +45,7 @@ for (let fileMeta of data) {
       `INSERT INTO powerpoint_metadata (metadata) VALUES (?)`,
       [JSON.stringify(fileMeta)]
     );
+    console.log(fileMeta, dbImport);
     // catch and log import errors
   } catch (err) {
     errors.push(`Metadata: ${JSON.stringify(fileMeta)} | Fel: ${err.message}`);
