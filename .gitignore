@@ -7,10 +7,8 @@ db.js
 
 # Also ignore folders with files (pdf, mp3, jpg, ppt etc in frontend)
 # for example:
-frontend/pdfs
-frontend/music
-frontend/photos
-frontend/powerpoint
+frontend/warehouseFrontend/*
+!frontend/warehouseFrontend/.gitkeep
 
 # Ignore specials system files of no use for example .DS_Store on mac
 .DS_Store
