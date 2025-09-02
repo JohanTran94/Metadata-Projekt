@@ -1,7 +1,7 @@
 
 import fs from 'fs';
 import path from "path";
-import dbCreds from './db.js';
+import dbCreds from '../db.js';
 import mysql from 'mysql2/promise';
 
 // read file

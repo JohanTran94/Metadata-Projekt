@@ -1,5 +1,5 @@
 // Import the git-ignored db credentials
-import dbCreds from './db.js';
+import dbCreds from '../db.js';
 
 // Get the database driver
 import mysql from 'mysql2/promise';
