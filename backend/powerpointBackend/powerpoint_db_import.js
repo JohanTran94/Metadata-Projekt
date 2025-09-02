@@ -26,7 +26,7 @@ await db.execute('DELETE FROM powerpoint_metadata');
 
 // create error log catalog if needed
 
-const logDir = "./error_logs";
+const logDir = "./backend/powerpointBackend/error_logs";
 const logFile = path.join(logDir, "import_errors.log");
 
 if (!fs.existsSync(logDir)) {
