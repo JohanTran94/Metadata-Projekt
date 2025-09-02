@@ -1,6 +1,8 @@
 // Import the file system module (fs)
 import fs from 'fs';
 
+// change keys from snake_case to camelCase
+
 function toCamelCaseKey(str) {
   return str.replace(/[_-](\w)/g, (_, c) => c.toUpperCase());
 }
@@ -18,7 +20,7 @@ function keysToCamelCase(obj) {
 }
 
 // Read the json string from file
-let json = fs.readFileSync('.backend/powerpointBackend/cleaning.js', 'utf-8');
+let json = fs.readFileSync('.warehouse/dm23-powerpoints/csvjson.json', 'utf-8');
 
 // Convert from a string to a real data structure
 let data = JSON.parse(json);

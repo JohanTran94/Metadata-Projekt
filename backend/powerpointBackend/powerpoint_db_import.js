@@ -6,7 +6,7 @@ import mysql from 'mysql2/promise';
 
 // read file
 
-let cleanJson = fs.readFileSync('./cleanedPowerpointJson.json', 'utf-8');
+let cleanJson = fs.readFileSync('./output/cleanedPowerpointJson.json', 'utf-8');
 let data = JSON.parse(cleanJson);
 
 // establish data base connection
@@ -26,7 +26,7 @@ await db.execute('DELETE FROM powerpoint_metadata');
 
 // create error log catalog if needed
 
-const logDir = "./logs";
+const logDir = "./error_logs";
 const logFile = path.join(logDir, "import_errors.log");
 
 if (!fs.existsSync(logDir)) {
