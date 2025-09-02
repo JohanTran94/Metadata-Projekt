@@ -21,3 +21,9 @@ funderingar.md
 
 frontend/warehouseFrontend/*
 !frontend/warehouseFrontend/.gitkeep
+
+warehouse/*
+!warehouse/.gitkeep
+
+backend/powerpointBackend/output/*
+!backend/powerpointBackend/output/.gitkeep

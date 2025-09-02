@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import * as musicMetadata from 'music-metadata';
 import mysql from 'mysql2/promise';
-import dbCredentials from './db.js';
+import dbCredentials from '../db.js';
 import { fileURLToPath } from 'url'; //nödvändigt pga musikstruktur utanför projekt? ../music. Hur göra sen när allt ska i main? all data samlas för att köra adekvat.
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,7 +21,7 @@ await db.execute(`
 `);
 
 
-const MUSIC_DIR = path.resolve(__dirname, '../../music');
+const MUSIC_DIR = path.resolve(__dirname, '../../warehouse/music');
 const files = fs.readdirSync(MUSIC_DIR);
 
 //await db.execute('DELETE FROM musicJson'); nice om man kastar in nya filer och vill uppdatera db

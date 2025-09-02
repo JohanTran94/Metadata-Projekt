@@ -16,7 +16,8 @@ const FRONTEND_DIR = path.join(__dirname, '../../frontend');
 app.use(express.static(FRONTEND_DIR));
 
 // Serva musikfiler, ligger på samma nivå right now som projektet. 
-app.use('/music', express.static(path.join(__dirname, '../../music')));
+app.use('/music', express.static(path.join(__dirname, '../../warehouse/music')));
+
 
 // DB-koppling
 let db = null;
