@@ -1,4 +1,3 @@
-// simple state for paging
 const state = { page: 1, total: 0, pageSize: 20, lastQuery: '' };
 
 const form = document.getElementById('searchForm');
@@ -30,7 +29,7 @@ nextBtn.addEventListener('click', () => {
   }
 });
 
-// initial search on load
+
 runSearch();
 
 async function runSearch(keepQuery = false) {
@@ -70,19 +69,19 @@ function buildQueryParams(keepQuery) {
     ? new URLSearchParams(state.lastQuery)
     : new URLSearchParams();
 
-  // base params
+
   params.set('type', 'image');
   params.set('page', String(state.page));
   params.set('pageSize', pageSize || '20');
 
-  // filters
+
   if (text) params.set('text', text); else params.delete('text');
   if (make) params.set('make', make); else params.delete('make');
   if (model) params.set('model', model); else params.delete('model');
   if (from) params.set('from', from); else params.delete('from');
   if (to) params.set('to', to); else params.delete('to');
 
-  // geo (only if all 3 present)
+
   if (nearLat && nearLon && radius) {
     params.set('nearLat', nearLat);
     params.set('nearLon', nearLon);
@@ -125,7 +124,7 @@ function renderResults(data) {
   pageInfo.textContent = `Page ${state.page} / ${maxPage}`;
 }
 
-// helpers
+
 function fmtNum(n) {
   return (n === null || n === undefined) ? '' : String(n);
 }
@@ -135,7 +134,7 @@ function fmtDate(dt) {
   return isNaN(d.getTime()) ? String(dt) : d.toISOString().slice(0, 19).replace('T', ' ');
 }
 function toStaticPath(filePath) {
-  // Your server serves /files from ../dm23-jpgs
+
   const parts = String(filePath || '').split(/[/\\]/);
   const filename = parts[parts.length - 1] || '';
   return `/files/${filename}`;
