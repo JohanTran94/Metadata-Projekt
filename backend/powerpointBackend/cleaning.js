@@ -18,7 +18,7 @@ function keysToCamelCase(obj) {
 }
 
 // Read the json string from file
-let json = fs.readFileSync('./powerpoint.json', 'utf-8');
+let json = fs.readFileSync('.backend/powerpointBackend/cleaning.js', 'utf-8');
 
 // Convert from a string to a real data structure
 let data = JSON.parse(json);
@@ -58,7 +58,7 @@ for (let powerpointMetadata of data) {
 
   // write to json file
   fs.writeFileSync(
-    './cleanedPowerpointJson.json',
+    './backend/powerpointBackend/output/cleanedPowerpointJson.json',
     JSON.stringify(metadataListPowerpoint, null, 2),
     'utf-8'
   );
