@@ -8,8 +8,8 @@ db.js
 # Also ignore folders with files (pdf, mp3, jpg, ppt etc in frontend)
 # for example:
 
-frontend/warehouseFrontend/*
-!frontend/warehouseFrontend/.gitkeep
+warehouse/*
+!warehouse/.gitkeep
 
 backend/powerpointBackend/output/*
 !backend/powerpointBackend/output/.gitkeep
