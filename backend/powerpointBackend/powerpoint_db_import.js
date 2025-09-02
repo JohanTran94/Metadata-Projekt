@@ -6,7 +6,7 @@ import mysql from 'mysql2/promise';
 
 // read file
 
-let cleanJson = fs.readFileSync('./output/cleanedPowerpointJson.json', 'utf-8');
+let cleanJson = fs.readFileSync('./backend/powerpointBackend/output/cleanedPowerpointJson.json', 'utf-8');
 let data = JSON.parse(cleanJson);
 
 // establish data base connection
