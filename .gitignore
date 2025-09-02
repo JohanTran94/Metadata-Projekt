@@ -10,6 +10,9 @@ db.js
 frontend/warehouseFrontend/*
 !frontend/warehouseFrontend/.gitkeep
 
+backend/powerpointBackend/output/*
+!backend/powerpointBackend/output/.gitkeep
+
 
 # Ignore specials system files of no use for example .DS_Store on mac
 .DS_Store
