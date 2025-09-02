@@ -16,3 +16,15 @@ frontend/powerpoint
 .DS_Store
 
 metadata.json
+
+# Also ignore folders with files (pdf, mp3, jpg, ppt etc in frontend)
+# for example:
+frontend/warehouseFrontend/*
+!frontend/warehouseFrontend/.gitkeep
+
+
+# Ignore specials system files of no use for example .DS_Store on mac
+.DS_Store
+
+# 
+.env
