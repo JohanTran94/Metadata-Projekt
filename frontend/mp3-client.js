@@ -21,10 +21,19 @@ function rowHtml({ fileName, file, title, artist, album, year, genre, id }) {   
     </tr>`;
 }
 
-function render(items, label) {
-  summaryEl.textContent = label || `Visar ${items.length} låtar`; // X sökträff genererar ett result 
+function render(items, label) { //Varför fungerar inte if variablerna? Läser mot db där det är tomt/null? 
+  for (const song of items) {
+    if (!song.title || String(song.title).trim() === "") song.title = "Okänd titel";
+    if (!song.artist || String(song.artist).trim() === "") song.artist = "Okänd artist";
+    if (!song.album || String(song.album).trim() === "") song.album = "Okänt album";
+    if (!song.year || String(song.year).trim() === "") song.year = "Okänt år";
+    if (!song.genre || String(song.genre).trim() === "") song.genre = "Okänd genre";
+  }
+
+  summaryEl.textContent = label || `Visar ${items.length} låtar`;
   rowsEl.innerHTML = items.map(rowHtml).join('');
 }
+
 
 // spela upp
 rowsEl.addEventListener('click', e => {
