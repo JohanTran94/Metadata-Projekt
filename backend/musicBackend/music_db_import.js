@@ -21,7 +21,7 @@ await db.execute(`
 `);
 
 
-const MUSIC_DIR = path.resolve(__dirname, '../music');
+const MUSIC_DIR = path.resolve(__dirname, '../../music');
 const files = fs.readdirSync(MUSIC_DIR);
 
 //await db.execute('DELETE FROM musicJson'); nice om man kastar in nya filer och vill uppdatera db
