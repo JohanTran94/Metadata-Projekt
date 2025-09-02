@@ -1,4 +1,3 @@
-// index-photo.js
 import dbCreds from './db.js';
 import mysql from 'mysql2/promise';
 import express from 'express';
@@ -11,7 +10,7 @@ db.config.namedPlaceholders = true;
 
 const app = express();
 
-/** Helper */
+
 function toIsoOrNull(v) {
   if (!v) return null;
   const d = new Date(v);
@@ -23,9 +22,6 @@ function toNumberOrNull(v) {
   return Number.isNaN(n) ? null : n;
 }
 
-/**
- * One-shot: Extract FULL metadata -> metadata.json (đủ metadata, chưa lọc)
- */
 app.get('/api/metadata', async (_req, res) => {
   const imagesFolder = path.resolve(process.cwd(), '../dm23-jpgs');
 
@@ -67,16 +63,13 @@ app.get('/api/metadata', async (_req, res) => {
     fs.writeFileSync(path.resolve(process.cwd(), 'metadata.json'),
       JSON.stringify(out, null, 2), 'utf-8');
 
-    res.json(out); // trả về toàn bộ mảng metadata
+    res.json(out);
   } catch (err) {
     res.status(500).json({ error: 'Failed to read images folder', details: err.message });
   }
 });
 
-/**
- * Search API (ưu tiên cột `file`, các field khác bóc từ JSON)
- * GET /api/image-search?text=&make=&model=&from=&to=&page=&pageSize=&nearLat=&nearLon=&radius=
- */
+
 app.get('/api/image-search', async (req, res) => {
   try {
     const {
@@ -252,7 +245,7 @@ app.get('/api/image-search', async (req, res) => {
   }
 });
 
-// Serve ảnh và frontend
+
 app.use('/files', express.static(path.resolve(process.cwd(), '../dm23-jpgs')));
 app.use(express.static('frontend'));
 
