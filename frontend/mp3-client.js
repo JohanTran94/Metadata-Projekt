@@ -10,11 +10,11 @@ function rowHtml({ fileName, file, title, artist, album, year, genre, id }) {   
   return `
     <tr>
       <td>${realFile}</td>
-      <td>${title || ''}</td>
-      <td>${artist || ''}</td>
-      <td>${album || ''}</td>
-      <td>${year || ''}</td>
-      <td>${genre || ''}</td>
+      <td>${title || 'Okänd titel'}</td>
+      <td>${artist || 'Okänd artist'}</td>
+      <td>${album || 'Okänt album'}</td>
+      <td>${year || 'Okänt år'}</td>
+      <td>${genre || 'Okänd genre'}</td>
       <td><a href="${url}" download>Hämta</a></td>
       <td><button data-play="${url}">▶︎</button></td>
       <td><button class="btn-show-all-music-metadata" data-id="${id}">Visa metadata</button></td>
