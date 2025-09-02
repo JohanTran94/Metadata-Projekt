@@ -1,19 +1,101 @@
-<!DOCTYPE html>
-<html lang="sv">
+<!doctype html>
+<html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>First name search</title>
-  <!-- Add a link tag here to load your CSS, no CSS in this example-->
+  <meta charset="utf-8" />
+  <title>Image Metadata – DB-backed Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
-  <label>
-    Sök på förnamn: <input name="firstName" type="text">
-  </label>
-  <main></main>
+  <h1>Image Metadata – DB-backed Search</h1>
+  <p class="muted">
+    This UI calls <code>/api/search</code> to query MySQL (<em>server-side filtering, sorting & pagination</em>).
+  </p>
+
+  <form id="searchForm">
+    <div class="controls">
+      <div>
+        <label for="text">Text</label>
+        <input id="text" name="text" placeholder="DSC, SONY, model..." />
+      </div>
+      <div>
+        <label for="make">Make</label>
+        <input id="make" name="make" placeholder="SONY, Canon..." />
+      </div>
+      <div>
+        <label for="model">Model</label>
+        <input id="model" name="model" placeholder="DSC-HX5V..." />
+      </div>
+      <div>
+        <label for="from">From</label>
+        <input id="from" name="from" type="date" />
+      </div>
+      <div>
+        <label for="to">To</label>
+        <input id="to" name="to" type="date" />
+      </div>
+      <div>
+        <label for="pageSize">Page size</label>
+        <select id="pageSize" name="pageSize">
+          <option>10</option>
+          <option selected>20</option>
+          <option>50</option>
+          <option>100</option>
+        </select>
+      </div>
+      <div>
+        <button type="submit">Search</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div>
+        <label for="nearLat">Near Lat</label>
+        <input id="nearLat" name="nearLat" type="number" step="any" placeholder="59.33" />
+      </div>
+      <div>
+        <label for="nearLon">Near Lon</label>
+        <input id="nearLon" name="nearLon" type="number" step="any" placeholder="18.06" />
+      </div>
+      <div>
+        <label for="radius">Radius (km)</label>
+        <input id="radius" name="radius" type="number" step="any" placeholder="5" />
+      </div>
+      <span class="muted">Fill all three for geo-search.</span>
+    </div>
+  </form>
+
+  <div class="results">
+    <div id="summary" class="muted"></div>
+    <table id="resultTable" hidden>
+      <thead>
+        <tr>
+          <th>File Name</th>
+          <th>Make</th>
+          <th>Model</th>
+          <th>Date</th>
+          <th>Width</th>
+          <th>Height</th>
+          <th>Lat</th>
+          <th>Lon</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+  </div>
+
+  <div class="pagination" id="pagination" hidden>
+    <button id="prevBtn">Prev</button>
+    <span id="pageInfo" class="muted"></span>
+    <button id="nextBtn">Next</button>
+  </div>
+
   <script src="main.js"></script>
+
 </body>
 
 </html>
