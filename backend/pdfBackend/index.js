@@ -4,10 +4,10 @@ import mysql from 'mysql2/promise';
 import dbConfig from '../../db.js';
 import pdf_route from './pdf_route.js';
 
-// Skapa en express-app
+//create express app
 const app = express();
 
-// Skapa databasanslutning en gång
+//create db connection
 let db;
 try {
   db = await mysql.createConnection({
@@ -18,11 +18,11 @@ try {
     database: dbConfig.database
   });
 } catch (err) {
-  console.error('Kunde inte ansluta till databasen:', err.message);
+  console.error('Unable to connect to databas:', err.message);
   process.exit(1);
 }
 
-// Registrera dina PDF-routes
+// Initialize PDF routes
 pdf_route(app, db);
 
 // Extra route om du vill hämta all metadata (kan tas bort om du använder pdf-all-meta istället)
@@ -36,10 +36,10 @@ pdf_route(app, db);
 //}
 //});
 
-// Servera statiska filer från frontend-mappen
+// Serve static files from the frontend folder
 app.use(express.static('frontend'));
 
-// Starta servern
+// Start server
 app.listen(3000, () => {
   console.log(' Servern lyssnar på http://localhost:3000');
 });
