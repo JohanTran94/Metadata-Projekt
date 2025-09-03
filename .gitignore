@@ -15,3 +15,9 @@ frontend/powerpoint
 
 # Ignore specials system files of no use for example .DS_Store on mac
 .DS_Store
+
+warehouse/*
+!warehouse/.gitkeep
+
+backend/powerpointBackend/output/*
+!backend/powerpointBackend/output/.gitkeep
