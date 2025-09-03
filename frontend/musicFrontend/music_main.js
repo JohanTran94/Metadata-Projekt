@@ -1,98 +1,172 @@
-const qEl = document.getElementById('q');       // sökruta
-const fieldEl = document.getElementById('field'); // dropdown
-const rowsEl = document.getElementById('rows');
-const summaryEl = document.getElementById('summary');
-const playerEl = document.getElementById('player');   // spela upp
+// Allt som tidigare fanns i <body> i mp3.html flyttas hit in i render()
 
-function rowHtml({ fileName, file, title, artist, album, year, genre, id }) {   // Skapar tabellstruktur för varje låt 
-  const realFile = fileName || file;
-  const url = `/music/${encodeURIComponent(realFile)}`;
-  return `
-    <tr>
-      <td>${realFile}</td>
-      <td>${title || 'Okänd titel'}</td>
-      <td>${artist || 'Okänd artist'}</td>
-      <td>${album || 'Okänt album'}</td>
-      <td>${year || 'Okänt år'}</td>
-      <td>${genre || 'Okänd genre'}</td>
-      <td><a href="${url}" download>Hämta</a></td>
-      <td><button data-play="${url}">▶︎</button></td>
-      <td><button class="btn-show-all-music-metadata" data-id="${id}">Visa metadata</button></td>
-    </tr>`;
-}
+export async function render(appEl) {
+  appEl.innerHTML = `
+    <section>
+      <div class="row" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <h2 style="margin:0;">MP3-sök</h2>
+        <button id="themeToggle" type="button">Dark mode</button>
+      </div>
 
-function render(items, label) { //Varför fungerar inte if variablerna? Läser mot db där det är tomt/null? 
-  for (const song of items) {
-    if (!song.title || String(song.title).trim() === "") song.title = "Okänd titel";
-    if (!song.artist || String(song.artist).trim() === "") song.artist = "Okänd artist";
-    if (!song.album || String(song.album).trim() === "") song.album = "Okänt album";
-    if (!song.year || String(song.year).trim() === "") song.year = "Okänt år";
-    if (!song.genre || String(song.genre).trim() === "") song.genre = "Okänd genre";
+      <div class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+        <label>
+          Sök i:
+          <select id="field">
+            <option value="any">Alla sökfält</option>
+            <option value="title">Titel</option>
+            <option value="artist">Artist</option>
+            <option value="album">Album</option>
+            <option value="genre">Genre</option>
+            <option value="year">År</option>
+          </select>
+        </label>
+        <input id="q" placeholder="Sök..." />
+      </div>
+
+      <div id="summary" class="muted" style="margin-top:8px;"></div>
+
+      <audio id="player" controls class="hidden" style="width:100%; max-width:560px"></audio>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Fil</th>
+            <th>Titel</th>
+            <th>Artist</th>
+            <th>Album</th>
+            <th>År</th>
+            <th>Genre</th>
+            <th>Ladda ned</th>
+            <th>Spela</th>
+            <th>Metadata</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
+  `;
+
+  // ==== Elementrefs ====
+  const btnTheme = document.getElementById('themeToggle');
+  const qEl = document.getElementById('q');
+  const fieldEl = document.getElementById('field');
+  const rowsEl = document.getElementById('rows');
+  const summaryEl = document.getElementById('summary');
+  const playerEl = document.getElementById('player');
+
+  //
+  const THEME_KEY = 'theme';
+  function applyTheme() {
+    const t = localStorage.getItem(THEME_KEY) || 'light';
+    document.body.classList.toggle('dark', t === 'dark');
+    btnTheme.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
+  }
+  btnTheme.addEventListener('click', () => {
+    const cur = localStorage.getItem(THEME_KEY) || 'light';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme();
+  });
+  applyTheme();
+
+  // 
+  function rowHtml(it) {
+    const file = it.fileName || it.file;
+    const url = `/music/${encodeURIComponent(file)}`;
+    const idAttr = it.id != null ? `data-id="${String(it.id)}"` : '';
+    return `
+      <tr ${idAttr}>
+        <td>${file || ''}</td>
+        <td>${it.title || ''}</td>
+        <td>${it.artist || ''}</td>
+        <td>${it.album || ''}</td>
+        <td>${it.year || ''}</td>
+        <td>${it.genre || ''}</td>
+        <td><a href="${url}" download>Hämta</a></td>
+        <td><button class="btn-play" data-play="${url}">▶︎</button></td>
+        <td><button class="btn-show-all-music-metadata">Visa metadata</button></td>
+      </tr>
+    `;
   }
 
-  summaryEl.textContent = label || `Visar ${items.length} låtar`;
-  rowsEl.innerHTML = items.map(rowHtml).join('');
-}
-
-
-// spela upp
-rowsEl.addEventListener('click', e => {
-  const btn = e.target.closest('button[data-play]');
-  if (!btn) return;
-  playerEl.src = btn.dataset.play;
-  playerEl.style.display = 'block';
-  playerEl.play();
-});
-
-// hämta JSON och visa det i läsaren
-async function fetchJson(url) {
-  const r = await fetch(url);
-  return r.json();
-}
-
-// lista 100 första som en start
-async function loadBrowse() {
-  const { items } = await fetchJson('/api/music?limit=100');
-  render(items, `Visar ${items.length} låtar`);
-}
-
-// sök
-async function doSearch() {
-  const field = fieldEl.value; //fälten som visas 
-  const value = qEl.value.trim(); // innehåller från sökrutan
-  if (!value) return loadBrowse(); // tomt---> mina 100 första 
-  const items = await fetchJson(`/api/music-search/${field}/${encodeURIComponent(value)}`);
-  render(items, `Visar ${items.length} träffar för ${field} innehåller "${value}"`);
-}
-
-// sökning med 200ms fördröj
-let t;
-function debouncedSearch() {
-  clearTimeout(t);
-  t = setTimeout(doSearch, 200);
-}
-
-window.addEventListener('DOMContentLoaded', loadBrowse); //100 första vid start av sidan. Möjliggör att testa enkelt 
-
-// visa metadata (samlad från /api/music-all-meta/:id)
-document.body.addEventListener('click', async e => {
-  const btn = e.target.closest('.btn-show-all-music-metadata');
-  if (!btn) return;
-
-  if (btn.nextElementSibling?.tagName === 'PRE') {
-    btn.nextElementSibling.remove();
-    return;
+  function normalize(items) {
+    for (const it of items) {
+      if (!it.title || !String(it.title).trim()) it.title = 'Okänd titel';
+      if (!it.artist || !String(it.artist).trim()) it.artist = 'Okänd artist';
+      if (!it.album || !String(it.album).trim()) it.album = 'Okänt album';
+      if (!it.year || !String(it.year).trim()) it.year = 'Okänt år';
+      if (!it.genre || !String(it.genre).trim()) it.genre = 'Okänd genre';
+    }
+    return items;
   }
 
-  const r = await fetch('/api/music-all-meta/' + btn.dataset.id);
-  let data = await r.json();
-  if (Array.isArray(data)) data = data[0];
+  async function search() {
+    const q = qEl.value.trim();
+    const field = fieldEl.value;
 
-  const pre = document.createElement('pre');
-  pre.textContent = JSON.stringify(data.meta || data, null, 2);
-  btn.after(pre);
-});
+    // Bestäm rätt endpoint
+    let url;
+    if (!q) {
+      // Din list-endpoint returnerar { items, limit, offset }
+      url = `/api/music?limit=100&offset=0`;
+    } else if (!field || field === 'any') {
+      url = `/api/music-search/any/${encodeURIComponent(q)}`;
+    } else {
+      url = `/api/music-search/${encodeURIComponent(field)}/${encodeURIComponent(q)}`;
+    }
 
-// input/dropdown/sök fungerar
-qEl.addEventListener('input', debouncedSearch);
-fieldEl.addEventListener('change', debouncedSearch);
+    const res = await fetch(url);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`API ${res.status}: ${text.slice(0, 200)}`);
+    }
+
+    // /api/music -> { items: [...] }, /api/music-search -> [...]
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : (data.items || []);
+    normalize(list);
+
+    summaryEl.textContent = `Visar ${list.length} låtar`;
+    rowsEl.innerHTML = list.map(rowHtml).join('');
+  }
+
+
+  // ==== Händelser ====
+  qEl.addEventListener('input', search);
+  fieldEl.addEventListener('change', search);
+
+  rowsEl.addEventListener('click', async (e) => {
+    // Spela
+    const playBtn = e.target.closest('.btn-play');
+    if (playBtn) {
+      const src = playBtn.getAttribute('data-play');
+      playerEl.src = src;
+      playerEl.classList.remove('hidden');
+      try { await playerEl.play(); } catch { }
+      return;
+    }
+
+    // Visa metadata
+    const metaBtn = e.target.closest('.btn-show-all-music-metadata');
+    if (metaBtn) {
+      const tr = metaBtn.closest('tr');
+      const id = tr?.getAttribute('data-id');
+      if (!id) { alert('Ingen ID kopplad till raden.'); return; }
+      try {
+        const res = await fetch(`/api/music-all-meta/${encodeURIComponent(id)}`);
+        const data = await res.json();
+        // Minimal preview – byt gärna till modal senare
+        alert(JSON.stringify(data, null, 2));
+      } catch (err) {
+        alert('Kunde inte hämta metadata.');
+      }
+    }
+  });
+
+  // Första laddningen
+  await search();
+}
+
+export function cleanup() {
+  // Städa timers/observers om du lägger till sådana senare
+}
