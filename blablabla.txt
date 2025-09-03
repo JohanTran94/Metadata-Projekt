@@ -1,0 +1,222 @@
+import fs from 'fs';
+import path from 'path';
+import pdfParse from 'pdf-parse-fork';
+import express from 'express';
+import dbCreds from './db.js';
+import mysql from 'mysql2/promise';
+
+
+
+let db = await mysql.createConnection({
+  host: dbCreds.host,
+  port: dbCreds.port,
+  user: dbCreds.user,
+  password: dbCreds.password,
+  database: dbCreds.database
+});
+
+let app = express();
+
+// Normalisera camelCase
+function normalizeKeys(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+
+  const map = {
+    createdate: 'createDate',
+    creationdate: 'creationDate',
+    modifydate: 'modifyDate',
+    moddate: 'modDate',
+    metadatadate: 'metadataDate',
+    instanceid: 'instanceId',
+    documentid: 'documentId',
+    creatortool: 'creatorTool',
+    producer: 'producer',
+    format: 'format',
+    title: 'title',
+    creator: 'creator',
+    pdfversion: 'pdfVersion',
+    lastsaved: 'lastSaved',
+    sourcemodified: 'sourceModified',
+    xpressprivate: 'xpressPrivate',
+
+  };
+
+  const newObj = {};
+  for (let key of Object.keys(obj)) {
+    const lowerKey = key.toLowerCase();
+    const newKey = map[lowerKey] || key;
+    newObj[newKey] = normalizeKeys(obj[key]); // rekursivt om nested
+  }
+  return newObj;
+}
+
+// Rensa metadata för borttagna PDF-filer
+async function cleanupRemovedPDFs() {
+  const folderPath = './frontend/pdf';
+  const filesInFolder = fs.existsSync(folderPath)
+    ? fs.readdirSync(folderPath).filter(f => f.endsWith('.pdf'))
+    : [];
+
+  const [rows] = await db.execute('SELECT filename FROM PdfMetadata');
+  const filenamesInDB = rows.map(row => row.filename);
+
+  const removedFiles = filenamesInDB.filter(filename => !filesInFolder.includes(filename));
+
+  for (let filename of removedFiles) {
+    await db.execute('DELETE FROM PdfMetadata WHERE filename = ?', [filename]);
+    console.log(`Tog bort metadata för saknad PDF: ${filename}`);
+  }
+}
+
+// Exportera metadata till metadata.json
+async function exportMetadataToJson() {
+  try {
+    const [rows] = await db.execute('SELECT * FROM PdfMetadata');
+
+    const metadataList = rows.map(row => ({
+      file: row.filename,
+      numpages: row.numpages,
+      text: row.text,
+      xmp: normalizeKeys(typeof row.xmp === 'object' ? row.xmp : JSON.parse(row.xmp || '{}')),
+      info: normalizeKeys(typeof row.info === 'object' ? row.info : JSON.parse(row.info || '{}'))
+    }));
+
+    fs.writeFileSync('metadata.json', JSON.stringify(metadataList, null, 2));
+    console.log('metadata.json skapad!');
+  } catch (err) {
+    console.error('Fel vid export till JSON:', err);
+  }
+}
+
+// Importera metadata från metadata.json till databasen
+async function importMetadataFromJson() {
+  try {
+    const rawData = fs.readFileSync('metadata.json', 'utf-8');
+    const metadataList = JSON.parse(rawData);
+
+    for (let item of metadataList) {
+      await db.execute(
+        `REPLACE INTO pdf_metadata (filename, numpages, text, xmp, info)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          item.file,
+          item.numpages,
+          item.text,
+          JSON.stringify(normalizeKeys(item.xmp || {})),
+          JSON.stringify(normalizeKeys(item.info || {}))
+        ]
+      );
+    }
+
+    console.log('Import från metadata.json till databasen klar!');
+  } catch (err) {
+    console.error('Fel vid import från metadata.json:', err);
+  }
+}
+
+// Importera nya PDF-filer från ./pdf
+async function importNewPDFs() {
+  const folderPath = './frontend/pdf';
+
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath);
+    console.log(`Skapade mapp: ${folderPath}`);
+  }
+
+  const files = fs.readdirSync(folderPath);
+
+  for (let file of files) {
+    if (!file.endsWith('.pdf')) continue;
+
+    const [existing] = await db.execute(
+      'SELECT 1 FROM pdf_metadata WHERE filename = ?',
+      [file]
+    );
+    if (existing.length > 0) continue;
+
+    const buffer = fs.readFileSync(path.join(folderPath, file));
+    const data = await pdfParse(buffer);
+
+    await db.execute(
+      'INSERT INTO pdf_metadata (filename, numpages, text, xmp, info) VALUES (?, ?, ?, ?, ?)',
+      [
+        file,
+        data.numpages,
+        data.text,
+        JSON.stringify(normalizeKeys(data.xmp) || {}),
+        JSON.stringify(normalizeKeys(data.info) || {})
+      ]
+    );
+
+    console.log(`Importerade ny PDF: ${file}`);
+  }
+
+  await cleanupRemovedPDFs();
+  await exportMetadataToJson();
+}
+
+// REST-route: Hämta metadata från databasen
+app.get('/api/metadata', async (_req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT * FROM pdf_metadata');
+
+    const metadataList = rows.map(row => ({
+      file: row.filename,
+      numpages: row.numpages,
+      text: row.text,
+      xmp: normalizeKeys(typeof row.xmp === 'object' ? row.xmp : JSON.parse(row.xmp || '{}')),
+      info: normalizeKeys(typeof row.info === 'object' ? row.info : JSON.parse(row.info || '{}'))
+    }));
+
+    res.json(metadataList);
+  } catch (err) {
+    console.error('Fel vid hämtning från databasen:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// REST-route: Manuell import av nya PDF-filer
+app.post('/api/import', async (_req, res) => {
+  try {
+    await importNewPDFs();
+    res.json({ status: 'Import klar' });
+  } catch (err) {
+    console.error('Fel vid manuell import:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// REST-route: Manuell export till metadata.json
+app.post('/api/export-json', async (_req, res) => {
+  try {
+    await exportMetadataToJson();
+    res.json({ status: 'metadata.json created' });
+  } catch (err) {
+    console.error('Fel vid export till JSON:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// REST-route: Importera metadata från metadata.json
+app.post('/api/import-json', async (_req, res) => {
+  try {
+    await importMetadataFromJson();
+    res.json({ status: 'Import från metadata.json klar' });
+  } catch (err) {
+    console.error('Fel vid import från metadata.json:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Servera statiska filer från frontend-mappen
+app.use(express.static('frontend'));
+
+// Automatisk import varje minut
+setInterval(() => {
+  importNewPDFs().catch(err => console.error('Fel vid automatisk import:', err));
+}, 60 * 1000);
+
+// Starta servern
+app.listen(3000, () => {
+  console.log('Server Listening to http://localhost:3000');
+});
