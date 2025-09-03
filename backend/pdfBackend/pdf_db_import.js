@@ -1,7 +1,7 @@
 import fs from 'fs';
 import pdfParse from 'pdf-parse-fork';
 import mysql from 'mysql2/promise';
-import dbConfig from db.js
+import dbConfig from '../../db.js';
 
 const pathToPdfs = './frontend/pdf';
 
@@ -14,7 +14,7 @@ const importMetadata = async () => {
     database: dbConfig.database
   });
 
-  // 🧱 Skapa tabell om den inte finns
+  // Skapa tabell om den inte finns
   await db.execute(`
     CREATE TABLE IF NOT EXISTS pdf_metadata (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,13 +55,13 @@ const importMetadata = async () => {
       [file, numPages, textSnippet, xmpJson, infoJson]
     );
 
-    console.log(`✅ Importerad: ${file}`);
+    console.log(`Importerad: ${file}`);
   }
 
   await db.end();
-  console.log('🎉 Importen är klar!');
+  console.log('Importen är klar!');
 };
 
 importMetadata().catch(err => {
-  console.error('🚨 Fel vid import:', err);
+  console.error('Fel vid import:', err);
 });
