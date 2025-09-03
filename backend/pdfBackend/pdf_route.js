@@ -1,4 +1,4 @@
-export default function pdfRestRoute(app, db) {
+export default function pdf_route(app, db) {
 
   // Sök PDF-filer baserat på metadatafält i `info` eller antal sidor
   app.get('/api/pdf-search/:field/:searchValue', async (req, res) => {
