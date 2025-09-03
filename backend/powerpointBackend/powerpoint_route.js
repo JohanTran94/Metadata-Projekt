@@ -1,3 +1,22 @@
+//chattis-kod. Kolla!
+
+import { Router } from 'express';
+const router = Router();
+
+// exempel-endpoint
+router.get('/', (req, res) => {
+  res.json({ msg: 'Music API' });
+});
+
+export default router;
+
+// chattiskod slut
+
+
+
+
+
+
 // Import the git-ignored db credentials
 import dbCreds from '../db.js';
 
