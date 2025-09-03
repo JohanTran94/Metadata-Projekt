@@ -14,7 +14,7 @@ const importMetadata = async () => {
     database: dbConfig.database
   });
 
-  // Skapa tabell om den inte finns
+  // Create table if not exists
   await db.execute(`
     CREATE TABLE IF NOT EXISTS pdf_metadata (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -34,7 +34,7 @@ const importMetadata = async () => {
     const buffer = fs.readFileSync(`${pathToPdfs}/${file}`);
     const metadata = await pdfParse(buffer);
 
-    // Förenkla XMP
+    // Simplyfy XMP
     metadata.xmp = metadata.metadata._metadata;
     delete metadata.metadata;
 
@@ -55,13 +55,13 @@ const importMetadata = async () => {
       [file, numPages, textSnippet, xmpJson, infoJson]
     );
 
-    console.log(`Importerad: ${file}`);
+    console.log(`Imported: ${file}`);
   }
 
   await db.end();
-  console.log('Importen är klar!');
+  console.log('Import done!!');
 };
 
 importMetadata().catch(err => {
-  console.error('Fel vid import:', err);
+  console.error('error import data:', err);
 });
