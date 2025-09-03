@@ -1,7 +1,7 @@
 import fs from 'fs';
 import pdfParse from 'pdf-parse-fork';
 import mysql from 'mysql2/promise';
-import dbConfig from '../../db.js';
+import dbConfig from db.js
 
 const pathToPdfs = './frontend/pdf';
 
