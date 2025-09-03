@@ -1,9 +1,13 @@
+//I need to figure out the search
+
 // Grab the input field firstName
-let inputField = document.querySelector('input[title="title"]');
+let searchField = document.querySelector('input[Search="search"]');
+
+
 // Listen to when the user types a character in the field
-inputField.addEventListener('keyup', async () => {
+searchField.addEventListener('keyup', async () => {
   // Read the value of the input field
-  let searchValue = inputField.value;
+  let searchValue = searchField.value;
   // Grab the main element
   let main = document.querySelector('main');
   // If the value is empty do not try to search
@@ -12,8 +16,10 @@ inputField.addEventListener('keyup', async () => {
     main.innerHTML = '';
     return;
   }
+
+  
   // Ask the database to search for users via a REST-api route
-  let rawData = await fetch('/api/search-by-title/' + searchValue);
+  let rawData = await fetch('/api/powerpoint-search/' + searchValue);
   // Convert rawData from json to a js data structure
   let data = await rawData.json();
 

@@ -2,20 +2,26 @@
 
 export default function powerpointRoute(app, db) {
 
-  app.get('/api/search-by-title/:title', async (request, response) => {
+  app.get('/api/powerpoint-search/:field/:searchValue', async (req, res) => {
     try {
-      let { title } = request.params;
-      title = `%${title}%`;
+      const { field, searchValue } = req.params;
+      if (!['title', 'original', 'company', 'creation_date'].includes(field)) {
+        res.json({ error: 'Invalid field name!' });
+        return;
+      }  
   
-      const [rows] = await db.execute(`
+      const [result] = await db.execute(`
   
-  SELECT id, metadata->>'$.title' AS title
+  SELECT id, metadata->>'$.title' AS title,
+      meta->>'$.original' AS original,
+      meta->>'$.company' AS company,
+      meta->>'$.creationDate' AS creation_date
   FROM powerpoint_metadata
-  WHERE metadata->>'$.title' LIKE ?
+  WHERE LOWER (metadata->>'${field}') LIKE LOWER(?)
   LIMIT 5;
-      `, [title]);
+      `, ['%' + searchValue + '%']);
   
-      response.json(rows);
+      res.json(result);
   
     } catch (err) {
       console.error('DB error:', err);
