@@ -1,42 +1,12 @@
-//chattis-kod. Kolla!
-
-import { Router } from 'express';
-const router = Router();
-
-// exempel-endpoint
-router.get('/', (req, res) => {
-  res.json({ msg: 'Music API' });
-});
-
-export default router;
-
-// chattiskod slut
-
-
-
-
-
-
-// Import the git-ignored db credentials
-import dbCreds from '../db.js';
-
-// Get the database driver
+import express from 'express';
+import dbCreds from './db.js';
 import mysql from 'mysql2/promise';
 
-// Get express so that we can create a web server
-import express from 'express';
-
-// Create the connection to database
 const db = await mysql.createConnection(dbCreds);
 
-// Allow named placeholders in prepared statements
-db.config.namedPlaceholders = true;
+const router = express.Router();
 
-// Create a web server called app
-const app = express();
-
-// Create a REST route
-app.get('/api/search-by-title/:title', async (request, response) => {
+router.get('/api/search-by-title/:title', async (request, response) => {
   try {
     let { title } = request.params;
     title = `%${title}%`;
@@ -57,18 +27,4 @@ LIMIT 5;
   }
 });
 
-
-// Let Express serve all the content from frontend folder
-app.use(express.static('frontend'));
-
-// Start the web server at port 3000
-app.listen(3000, () => console.log('Listening on http://localhost:3000'));
-
-/*
-
-SELECT * 
-      FROM powerpoint_metadata
-      WHERE metadata->>'$.title' LIKE ?
-      LIMIT 5;
-
-      */
+export default router;
