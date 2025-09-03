@@ -1,8 +1,8 @@
 
 import express from 'express';
 import mysql from 'mysql2/promise';
-import dbConfig from db.js
-import pdf_route from './backend/pdfBackend/pdf_route.js';
+import dbConfig from '../../db.js';
+import pdf_route from './pdf_route.js';
 
 // Skapa en express-app
 const app = express();
@@ -31,7 +31,7 @@ pdf_route(app, db);
 //const [rows] = await db.execute('SELECT * FROM pdf_metadata ORDER BY id ASC');
 //res.json(rows);
 //} //catch (err) {
-//console.error('🚨 Fel vid hämtning från databasen:', err.message);
+//console.error('Fel vid hämtning från databasen:', err.message);
 //res.status(500).json({ error: 'Kunde inte hämta metadata från databasen' });
 //}
 //});
