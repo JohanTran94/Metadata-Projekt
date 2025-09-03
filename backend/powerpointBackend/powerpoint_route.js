@@ -1,31 +1,74 @@
 
+export default function powerpointRoute(app, db) {
+  app.get('/api/powerpoint-search/:field/:searchValue', async (req, res) => {
+    try {
+      const { field, searchValue } = req.params;
 
+      
+      const fieldMap = {
+        title: "$.title",
+        URL: "$.original",
+        company: "$.company",
+        creation_date: "$.creationDate"
+      };
+
+      const jsonField = fieldMap[field];
+      if (!jsonField) {
+        return res.status(400).json({ error: 'Invalid field name!' });
+      }
+
+      
+      const sql = `
+        SELECT id,
+               metadata->>'$.title'        AS title,
+               metadata->>'$.original'     AS URL,
+               metadata->>'$.company'      AS company,
+               metadata->>'$.creationDate' AS creation_date
+        FROM powerpoint_metadata
+        WHERE LOWER(metadata->>?) LIKE LOWER(?)
+        LIMIT 5
+      `;
+
+      const [rows] = await db.execute(sql, [jsonField, `%${searchValue}%`]);
+      res.json(rows);
+
+    } catch (err) {
+      console.error('DB error:', err);
+      res.status(500).send('Database error');
+    }
+  });
+}
+
+
+/*
 export default function powerpointRoute(app, db) {
 
   app.get('/api/powerpoint-search/:field/:searchValue', async (req, res) => {
     try {
       const { field, searchValue } = req.params;
-      if (!['title', 'original', 'company', 'creation_date'].includes(field)) {
+      if (!['title', 'URL', 'company', 'creation_date'].includes(field)) {
         res.json({ error: 'Invalid field name!' });
         return;
       }  
   
-      const [result] = await db.execute(`
-  
+  const [result] = await db.execute(`
   SELECT id, metadata->>'$.title' AS title,
-      meta->>'$.original' AS original,
-      meta->>'$.company' AS company,
-      meta->>'$.creationDate' AS creation_date
+    metadata->>'$.original' AS URL,
+    metadata->>'$.company' AS company,
+    metadata->>'$.creationDate' AS creation_date
   FROM powerpoint_metadata
   WHERE LOWER (metadata->>'${field}') LIKE LOWER(?)
   LIMIT 5;
-      `, ['%' + searchValue + '%']);
+`, ['%' + searchValue + '%']
+    );
   
-      res.json(result);
-  
-    } catch (err) {
+    res.json(result);
+
+    }
+
+    catch (err) {
       console.error('DB error:', err);
-      response.status(500).send('Database error');
+      res.status(500).send('Database error');
     }
   });
 
