@@ -64,7 +64,7 @@ document.body.addEventListener('click', async event => {
   let nextElement = button.nextElementSibling;
   if (nextElement && nextElement.classList.contains('pdf-meta-block')) {
     nextElement.remove(); // hide metadata
-    button.textContent = 'Visa all metadata';
+    button.textContent = 'Show all metadata';
     return;
   }
 
@@ -76,7 +76,7 @@ document.body.addEventListener('click', async event => {
   pre.classList.add('pdf-meta-block');
   pre.innerHTML = JSON.stringify(result, null, 2);
   button.after(pre);
-  button.textContent = 'Dölj metadata';
+  button.textContent = 'Hide metadata';
 });
 
 // search function for PDFs with highlighting and truncated text
@@ -111,14 +111,14 @@ async function pdfSearch() {
   for (let { id, filename, title, author, subject, keywords, numpages, text } of result) {
     resultAsHtml += `
       <article>
-        <h2>${highlight(title) || 'Ingen titel'}</h2>
-        <p><b>Author:</b> ${highlight(author) || 'Okänd'}</p>
-        <p><b>Subject:</b> ${highlight(subject) || 'Ej angivet'}</p>
-        <p><b>Keywords:</b> ${highlight(keywords) || 'Inga'}</p>
-        <p><b>Antal sidor:</b> ${numpages || 'Okänt'}</p>
-        <p><b>Text:</b> ${highlight(truncate(text)) || 'Ingen text tillgänglig'}</p>
-        <p><a href="/pdf/${filename}" download>Ladda ned PDF</a></p>
-        <p><button class="btn-show-all-pdf-metadata" data-id="${id}">Visa all metadata</button></p>
+        <h2>${highlight(title) || 'No title'}</h2>
+        <p><b>Author:</b> ${highlight(author) || 'Unknown'}</p>
+        <p><b>Subject:</b> ${highlight(subject) || 'Not specified'}</p>
+        <p><b>Keywords:</b> ${highlight(keywords) || 'None'}</p>
+        <p><b>Antal sidor:</b> ${numpages || 'Unknown'}</p>
+        <p><b>Text:</b> ${highlight(truncate(text)) || 'No text available'}</p>
+        <p><a href="/pdf/${filename}" download>Download PDF</a></p>
+        <p><button class="btn-show-all-pdf-metadata" data-id="${id}">Show all metadata</button></p>
       </article>
     `;
   }
