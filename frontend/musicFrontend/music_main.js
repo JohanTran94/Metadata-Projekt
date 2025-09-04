@@ -142,7 +142,6 @@ export async function render(appEl) {
       try {
         const res = await fetch(`/api/music-all-meta/${encodeURIComponent(id)}`);
         const data = await res.json();
-        // Minimal preview – byt gärna till modal senare
         alert(JSON.stringify(data, null, 2));
       } catch (err) {
         alert('Kunde inte hämta metadata.');
