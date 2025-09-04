@@ -20,10 +20,11 @@ function showContent(label) {
       <h1>Sök PowerPoint</h1>
       <label>
         Sök på: <select name="ppt-meta-field">
+        <option value="fileName">Filnamn</option>
         <option value="title">Titel</option>
-        <option value="URL">URL</option>
+        <option value="original">URL</option>
         <option value="company">Företag</option>
-        <option value="creation_date">Skapad datum</option>
+        <option value="creationDate">Skapad datum</option>
       </select>
       </label>
       <label>
@@ -52,7 +53,6 @@ document.body.addEventListener('change', event => {
   pptSearch();
 });
 
-
 // Funktion för att söka
 async function pptSearch() {
   let inputField = document.querySelector('input[name="ppt-search"]');
@@ -68,18 +68,21 @@ async function pptSearch() {
   let rawResponse = await fetch(
     `/api/ppt-search/${field}/${inputField.value}`
   );
-  let result = await rawResponse.json();
 
+  let result = await rawResponse.json();
 
   // rendera HTML
   let resultAsHtml = '';
-  for (let { id, title, URL, company, creation_date } of result) {
+  for (let { id, fileName, title, original, company, creationDate } of result) {
     resultAsHtml += `
       <article>
-        <h2>${title || 'Okänd titel'}</h2>
-        <p><b>Företag:</b> ${company || 'Okänt företag'}</p>
-        <p><b>Skapad:</b> ${creation_date || 'Okänt datum'}</p>
-        <p><a href="${URL || '#'}" target="_blank">${URL || 'Ingen länk'}</a></p>
+        <p>${title || 'Okänd'}</p>
+        <p><b>id:</b> ${id || 'Okänt'}</p>
+         <p><b>Organisation:</b> ${company || 'Okänd'}</p>
+        <p><b>Filnamn:</b> ${fileName || 'Okänt'}</p>
+        <p><b>Företag:</b> ${company || 'Okänt'}</p>
+        <p><b>Skapad:</b> ${creationDate || 'Okänt'}</p>
+        <p><a href="${original || '#'}" target="_blank">${original || 'Ingen länk'}</a></p>
       </article>
     `;
   }

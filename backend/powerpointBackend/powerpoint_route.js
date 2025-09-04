@@ -13,8 +13,14 @@ export default function powerpointRoute(app, db) {
 
     // run the db query as a prepared statement
     const [result] = await db.execute(`
-  SELECT *
-  FROM powerpoint_metadata
+    SELECT id,
+	    metadata->>'$.fileName' AS fileName,
+      metadata->>'$.title' AS title,
+      metadata->>'$.company' AS company,
+      metadata->>'$.creationDate' AS creationDate,
+      metadata->>'$.original' AS original
+    FROM powerpoint_metadata
+    WHERE LOWER (metadata->>'${field}') LIKE LOWER(?)
  `, ['%' + searchValue + '%']
     );
 
