@@ -2,7 +2,7 @@
 import express from 'express';
 import mysql from 'mysql2/promise';
 import path from 'path';
-import { fileURLToPath } from 'url'; // musik ligger utanför projektet.
+import { fileURLToPath } from 'url';
 import dbCredentials from '../db.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,7 +15,7 @@ const app = express();
 const FRONTEND_DIR = path.join(__dirname, '../../frontend');
 app.use(express.static(FRONTEND_DIR));
 
-// Serva musikfiler, ligger på samma nivå right now som projektet. Rev, ny mappstruktur
+// musik flyttade in i warehouse istället för rotnivå på projektet.
 app.use('/music', express.static(path.join(__dirname, '../../warehouse/music')));
 
 
@@ -36,7 +36,7 @@ function requireDb(_req, res, next) {
   next();
 }
 
-// Sök (title/album/artist/genre/year')
+// Sök (title/album/artist/genre....')
 app.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => {
   const { field, searchValue } = req.params;
   const allowed = ['title', 'album', 'artist', 'genre', 'year', 'any'];
@@ -131,7 +131,7 @@ app.get('/api/music', requireDb, async (req, res) => {
   if (!Number.isFinite(limit) || limit < 1) limit = 100;
   if (!Number.isFinite(offset) || offset < 0) offset = 0;
   if (limit > 200) limit = 200;
-  //Få in bpm istället för kbps! eller inget alls? överflödigt?
+  //Få in bpm istället för kbps! eller inget alls? överflödigt? Meh, behövs inte för detta
   const sql = `
     SELECT
       id,
