@@ -1,6 +1,6 @@
 // Check out diffrent stuff regarding a hub page for our main.js files in frontend
 // is it needed? who knows
-
+//
 
 const routes = {
   music: './musicFrontend/music_main.js',
@@ -11,12 +11,12 @@ const routes = {
 
 
 let current = { cleanup: null };
-
+// start med musik då det är min branch & jag inte har någon mockdata för de andra filtyperna
 async function loadRoute() {
   const hash = (location.hash || '#music').slice(1).toLowerCase();
   const path = routes[hash] || routes.music;
 
-  // Städa föregående vy om modul har cleanup()
+
   if (typeof current.cleanup === 'function') {
     try { current.cleanup(); } catch { }
   }

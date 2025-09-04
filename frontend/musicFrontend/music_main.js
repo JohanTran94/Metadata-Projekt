@@ -4,8 +4,8 @@ export async function render(appEl) {
   appEl.innerHTML = `
     <section>
       <div class="row" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-        <h2 style="margin:0;">MP3-sök</h2>
-        <button id="themeToggle" type="button">Dark mode</button>
+        <h2 style="margin:0;">Här kan du söka på olika mp3 filter--> Det finns även olika kategorier att filtrera på.</h2>
+        
       </div>
 
       <div class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
@@ -54,20 +54,7 @@ export async function render(appEl) {
   const summaryEl = document.getElementById('summary');
   const playerEl = document.getElementById('player');
 
-  //
-  const THEME_KEY = 'theme';
-  function applyTheme() {
-    const t = localStorage.getItem(THEME_KEY) || 'light';
-    document.body.classList.toggle('dark', t === 'dark');
-    btnTheme.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
-  }
-  btnTheme.addEventListener('click', () => {
-    const cur = localStorage.getItem(THEME_KEY) || 'light';
-    const next = cur === 'dark' ? 'light' : 'dark';
-    localStorage.setItem(THEME_KEY, next);
-    applyTheme();
-  });
-  applyTheme();
+
 
   // 
   function rowHtml(it) {
@@ -107,7 +94,7 @@ export async function render(appEl) {
     // Bestäm rätt endpoint
     let url;
     if (!q) {
-      // Din list-endpoint returnerar { items, limit, offset }
+      // list-endpoint returnerar { items, limit, offset }
       url = `/api/music?limit=100&offset=0`;
     } else if (!field || field === 'any') {
       url = `/api/music-search/any/${encodeURIComponent(q)}`;
@@ -121,7 +108,7 @@ export async function render(appEl) {
       throw new Error(`API ${res.status}: ${text.slice(0, 200)}`);
     }
 
-    // /api/music -> { items: [...] }, /api/music-search -> [...]
+
     const data = await res.json();
     const list = Array.isArray(data) ? data : (data.items || []);
     normalize(list);
@@ -131,7 +118,7 @@ export async function render(appEl) {
   }
 
 
-  // ==== Händelser ====
+  // 
   qEl.addEventListener('input', search);
   fieldEl.addEventListener('change', search);
 
@@ -168,5 +155,5 @@ export async function render(appEl) {
 }
 
 export function cleanup() {
-  // Städa timers/observers om du lägger till sådana senare
+
 }
