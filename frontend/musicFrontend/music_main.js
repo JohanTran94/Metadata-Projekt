@@ -4,7 +4,7 @@ export async function render(appEl) {
   appEl.innerHTML = `
     <section>
       <div class="row" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-        <h2 style="margin:0;">Här kan du söka på olika mp3 filter--> Det finns även olika kategorier att filtrera på.</h2>
+        <h2 style="margin:0;">Här kan du söka på massa olika låtar--> Det finns även olika kategorier att filtrera på.</h2>
         
       </div>
 
