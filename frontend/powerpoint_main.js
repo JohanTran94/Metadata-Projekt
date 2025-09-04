@@ -7,7 +7,6 @@ document.body.addEventListener('click', event => {
   showContent(linkText);
 });
 
-
 function showContent(label) {
   let content;
   if (label === 'Start') {
@@ -37,7 +36,7 @@ function showContent(label) {
 }
 
 // Startvy
-showContent('Start');
+showContent('Sök PowerPoint');
 
 // Lyssna på inputfält
 document.body.addEventListener('keyup', event => {
@@ -54,7 +53,6 @@ document.body.addEventListener('change', event => {
 });
 
 
-
 // Funktion för att söka
 async function pptSearch() {
   let inputField = document.querySelector('input[name="ppt-search"]');
@@ -68,11 +66,10 @@ async function pptSearch() {
 
   // hämta data från API
   let rawResponse = await fetch(
-    `/api/powerpoint-search/${field}/${encodeURIComponent(inputField.value)}`
+    `/api/ppt-search/${field}/${inputField.value}`
   );
   let result = await rawResponse.json();
 
-  console.log(result); // bra att debugga med första gången
 
   // rendera HTML
   let resultAsHtml = '';

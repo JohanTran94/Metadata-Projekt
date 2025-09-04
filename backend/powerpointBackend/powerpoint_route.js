@@ -1,10 +1,41 @@
+export default function powerpointRoute(app, db) {
+
+  app.get('/api/ppt-search/:field/:searchValue', async (req, res) => {
+    // get field and searhValue from the request parameters
+    const { field, searchValue } = req.params;
+    /*
+      // check that field is a valid field, if not do nothing
+      if (!['title', 'album', 'artist', 'genre'].includes(field)) {
+        res.json({ error: 'Invalid field name!' });
+        return;
+      }
+      */
+
+    // run the db query as a prepared statement
+    const [result] = await db.execute(`
+  SELECT *
+  FROM powerpoint_metadata
+ `, ['%' + searchValue + '%']
+    );
+
+    //return the result as json
+    res.json(result);
+  });
+
+}
+
+
+
+
+
+/*
 
 export default function powerpointRoute(app, db) {
   app.get('/api/powerpoint-search/:field/:searchValue', async (req, res) => {
     try {
       const { field, searchValue } = req.params;
 
-      
+
       const fieldMap = {
         title: "$.title",
         URL: "$.original",
@@ -17,13 +48,13 @@ export default function powerpointRoute(app, db) {
         return res.status(400).json({ error: 'Invalid field name!' });
       }
 
-      
+
       const sql = `
         SELECT id,
                metadata->>'$.title'        AS title,
-               metadata->>'$.original'     AS URL,
-               metadata->>'$.company'      AS company,
-               metadata->>'$.creationDate' AS creation_date
+              -- metadata->>'$.original'     AS URL,
+              -- metadata->>'$.company'      AS company,
+              -- metadata->>'$.creationDate' AS creation_date
         FROM powerpoint_metadata
         WHERE LOWER(metadata->>?) LIKE LOWER(?)
         LIMIT 5
