@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import mysql from 'mysql2/promise';
-import dbCreds from './db.js';
+import dbCreds from '../db.js';
 
 function basename(p) { return p ? path.basename(String(p)) : null; }
 

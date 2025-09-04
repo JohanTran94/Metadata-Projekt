@@ -1,9 +1,11 @@
-import dbCreds from './db.js';
+import dbCreds from '../db.js';
 import mysql from 'mysql2/promise';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import exifr from 'exifr';
+
+const IMAGES_DIR = path.resolve(process.cwd(), 'frontend/warehouse/dm23-jpgs');
 
 const db = await mysql.createConnection(dbCreds);
 db.config.namedPlaceholders = true;
@@ -23,7 +25,7 @@ function toNumberOrNull(v) {
 }
 
 app.get('/api/metadata', async (_req, res) => {
-  const imagesFolder = path.resolve(process.cwd(), '../dm23-jpgs');
+  const imagesFolder = IMAGES_DIR;
 
   try {
     const files = fs.readdirSync(imagesFolder)
@@ -246,7 +248,7 @@ app.get('/api/image-search', async (req, res) => {
 });
 
 
-app.use('/files', express.static(path.resolve(process.cwd(), '../dm23-jpgs')));
+app.use('/files', express.static(IMAGES_DIR));
 app.use(express.static('frontend'));
 
 app.listen(3000, () => console.log('Server listening on http://localhost:3000'));
