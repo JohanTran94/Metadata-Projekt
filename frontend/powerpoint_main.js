@@ -48,7 +48,7 @@ document.body.addEventListener('keyup', event => {
 
 // Lyssna på dropdown
 document.body.addEventListener('change', event => {
-  let select = event.target.closest('select[name="ppt-meta-field"]');
+  let select = event.target.closest('select[name="ppt-dropdown-field"]');
   if (!select) { return; }
   pptSearch();
 });
@@ -62,7 +62,7 @@ async function pptSearch() {
   }
 
   // hämta valt fält
-  let field = document.querySelector('select[name="ppt-meta-field"]').value;
+  let field = document.querySelector('select[name="ppt-dropdown-field"]').value;
 
   // hämta data från API
   let rawResponse = await fetch(
