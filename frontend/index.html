@@ -1,29 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="sv">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF SearchEngine</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Metadata-sök</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
-  <header>
-    <div class="logo">Vårt företag</div>
-    <nav>
-      <ul>
-        <li><a href="start">Start</a></li>
-        <li><a href="sok">Sök PDF</a></li>
-      </ul>
+  <header class="site-header">
+    <h1>Metadata-sök för olika filtyper! :) Ingen startsida än, tbc</h1>
+    <nav class="tabs">
+      <a href="#music">Musik</a>
+      <a href="#pdf">PDF</a>
+      <a href="#powerpoint">PowerPoint</a>
+      <a href="#image">Bilder</a>
     </nav>
   </header>
-  <main>
-  </main>
-  <footer>
-    © 2025 Vårt företag
-  </footer>
-  <script type="module" src="pdfFrontend/pdf_main.js"></script>
+
+  <main id="app" class="container"></main>
+
+  <script type="module" src="./main.js"></script>
+
 </body>
 
 </html>
