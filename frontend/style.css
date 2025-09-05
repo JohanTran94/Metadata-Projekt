@@ -1,118 +1,77 @@
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Permanent+Marker&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+:root {
+  --gap: 16px;
+  --muted: #666;
+}
 
-/* Use box sizing - padding is included in widths */
-*,
-*:before,
-*:after {
+* {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-size: 18px;
-  background-color: #eee;
-  font-family: 'Crimson Text';
+  font: 16px/1.4 system-ui, Arial, sans-serif;
+  background: #f7f7f7;
+  color: #111;
 }
 
-header {
-  background-color: #2f5703;
-  /* text-color */
-  color: #fff;
-
-  padding: 20px;
-
-  a {
-    color: #fff;
-    text-decoration: none;
-    font-family: 'Roboto';
-  }
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: var(--gap);
+  position: sticky;
+  top: 0;
 }
 
-.logo {
-  font-size: 30px;
-  margin-bottom: 10px;
-  font-family: 'Permanent Marker'
-}
-
-nav {
-  ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  li {
-    display: inline-block;
-    padding-right: 10px;
-  }
-}
-
-main {
-  max-width: 700px;
-  margin: 0 auto;
-  background-color: #fff;
-  padding: 20px;
-}
-
-footer {
-  background-color: #2f5703;
-  color: #fff;
-  padding: 20px;
-  text-align: center;
-  font-family: 'Roboto';
-}
-
-
-/* Sticky footer fix */
-body {
+.tabs {
   display: flex;
-  min-height: 100vh;
-  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
 }
 
-main {
-  flex: 1;
-}
-
-h1,
-h2,
-h3,
-h4 {
-  font-family: 'Roboto';
-  margin: 0;
-}
-
-p {
-  margin: 0;
-  margin-bottom: 12px;
-}
-
-input[type="text"] {
-  width: 660px;
-}
-
-article {
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid #999;
+.tabs a {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
   border-radius: 10px;
+  background: #fafafa;
+  text-decoration: none;
+  color: #111;
 }
 
-article:nth-child(even) {
-  background-color: #eee;
+.tabs a:hover {
+  background: #fff;
 }
 
-article h3 {
-  font-variant: small-caps;
+.container {
+  padding: var(--gap);
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-pre {
-  overflow-x: auto;
-  white-space: pre-wrap;
-  font-size: 14px;
+input,
+select,
+button {
+  padding: 8px 10px;
 }
 
-label {
-  display: block;
-  margin: 20px 0;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--gap);
+  background: #fff;
+}
+
+th,
+td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.hidden {
+  display: none !important;
 }
