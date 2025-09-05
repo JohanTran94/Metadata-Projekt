@@ -2,7 +2,7 @@
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
-      <h2>PDF Sök</h2>
+      <h2>Sök PDF</h2>
 
       <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
@@ -75,11 +75,11 @@ export function render(appEl) {
           <p><b>Author:</b> ${highlight(author, term)}</p>
           <p><b>Subject:</b> ${highlight(subject, term)}</p>
           <p><b>Keywords:</b> ${highlight(keywords, term)}</p>
-          <p><b>Antal sidor:</b> ${pages}</p>
+          <p><b>Pages:</b> ${pages}</p>
           <p><b>Text:</b> ${highlight(truncate(text), term)}</p>
           <p>
             ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
-            ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Öppna</a>` : ''}
+            ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Open</a>` : ''}
           </p>
           <p><button class="btn-show-all-pdf-metadata" data-id="${r.id}">Show all metadata</button></p>
           <pre class="pdf-meta-block hidden"></pre>
