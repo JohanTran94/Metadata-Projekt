@@ -1,128 +1,124 @@
-// Navigation in meny
-document.body.addEventListener('click', event => {
-  let navLink = event.target.closest('header nav a');
-  if (!navLink) return;
-  event.preventDefault();
-  let linkText = navLink.textContent;
-  showContent(linkText);
-});
+// frontend/pdfFrontend/pdf_main.js
+export function render(appEl) {
+  appEl.innerHTML = `
+    <section>
+      <h2>PDF Sök</h2>
 
-// Show Content based on menu selection
-function showContent(label) {
-  let content;
-  if (label === 'Start') {
-    content = `
-      <h1>Start</h1>
-      <p>Välkommen till vår PDF-sökmotor för metadata. Här kan du söka efter dokument baserat på titel, författare, ämne eller nyckelord.</p>
-      <p>Kontakta <b>data manager</b> Thomas om du har fler PDF-filer att indexera. <a href="mailto:thomas@nodehill.com">thomas@nodehill.com</a></p>
-    `;
-  } else if (label === 'Sök PDF') {
-    content = `
-      <h1>Sök PDF</h1>
-      <label>
-        Sök på: <select name="pdf-meta-field">
-          <option value="Title">Titel</option>
-          <option value="Author">Author</option>
-          <option value="Subject">Subject</option>
-          <option value="Text">Text</option>
-          <option value="Keywords">Keywords</option>
-          <option value="Pages">Pages</option>
-        </select>
-      </label>
-      <label>
-        <input name="pdf-search" type="text" placeholder="Sök bland PDF-filer">
-      </label>
-      <p class="pdf-search-count">0 resultat</p> 
-      <section class="pdf-search-result"></section>
-    `;
-  }
-  document.querySelector('main').innerHTML = content;
-}
+      <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+        <label>
+          Sök på:
+          <select id="pdf-field">
+            <option value="Title">Titel</option>
+            <option value="Author">Author</option>
+            <option value="Subject">Subject</option>
+            <option value="Text">Text</option>
+            <option value="Keywords">Keywords</option>
+            <option value="Pages">Pages</option>
+          </select>
+        </label>
+        <input id="pdf-q" type="text" placeholder="Sök bland PDF-filer (ex: 'AI', '>10', '5-15')" />
+        <button id="pdf-do">Sök</button>
+      </div>
 
-// Show startpage by default
-showContent('Start');
+      <p id="pdf-count" class="muted" style="margin-top:8px;">0 resultat</p>
+      <section id="pdf-results"></section>
+    </section>
+  `;
 
-// search on keyup in input field
-document.body.addEventListener('keyup', event => {
-  let inputField = event.target.closest('input[name="pdf-search"]');
-  if (!inputField) return;
-  pdfSearch();
-});
+  const fieldEl = appEl.querySelector('#pdf-field');
+  const qEl = appEl.querySelector('#pdf-q');
+  const doBtn = appEl.querySelector('#pdf-do');
+  const countEl = appEl.querySelector('#pdf-count');
+  const resultsEl = appEl.querySelector('#pdf-results');
 
-// search on change in select field
-document.body.addEventListener('change', event => {
-  let select = event.target.closest('select[name="pdf-meta-field"]');
-  if (!select) return;
-  pdfSearch();
-});
-
-// Show and hide all metadata for a PDF
-document.body.addEventListener('click', async event => {
-  let button = event.target.closest('.btn-show-all-pdf-metadata');
-  if (!button) return;
-
-  let nextElement = button.nextElementSibling;
-  if (nextElement && nextElement.classList.contains('pdf-meta-block')) {
-    nextElement.remove(); // hide metadata
-    button.textContent = 'Visa all metadata';
-    return;
-  }
-
-  let id = button.getAttribute('data-id');
-  let rawResponse = await fetch('/api/pdf-all-meta/' + id);
-  let result = await rawResponse.json();
-
-  let pre = document.createElement('pre');
-  pre.classList.add('pdf-meta-block');
-  pre.innerHTML = JSON.stringify(result, null, 2);
-  button.after(pre);
-  button.textContent = 'Dölj metadata';
-});
-
-// search function for PDFs with highlighting and truncated text
-async function pdfSearch() {
-  let inputField = document.querySelector('input[name="pdf-search"]');
-  let countElement = document.querySelector('.pdf-search-count');
-  let resultContainer = document.querySelector('.pdf-search-result');
-
-  let searchTerm = inputField.value.trim().toLowerCase();
-
-  if (searchTerm === '') {
-    resultContainer.innerHTML = '';
-    countElement.textContent = '0 resultat';
-    return;
-  }
-
-  let field = document.querySelector('select[name="pdf-meta-field"]').value;
-  let rawResponse = await fetch(`/api/pdf-search/${field}/${searchTerm}`);
-  let result = await rawResponse.json();
-
-  const highlight = (text) => {
-    if (!text) return '';
-    return text.replace(new RegExp(`(${searchTerm})`, 'gi'), '<mark>$1</mark>');
+  const highlight = (text, term) => {
+    if (!text || !term) return text || '';
+    return String(text).replace(new RegExp(`(${escapeReg(term)})`, 'gi'), '<mark>$1</mark>');
   };
-
   const truncate = (text, maxLength = 500) => {
     if (!text) return '';
-    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+    return String(text).length > maxLength ? String(text).slice(0, maxLength) + '…' : String(text);
   };
+  const escapeReg = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-  let resultAsHtml = '';
-  for (let { id, filename, title, author, subject, keywords, numpages, text } of result) {
-    resultAsHtml += `
-      <article>
-        <h2>${highlight(title) || 'Ingen titel'}</h2>
-        <p><b>Author:</b> ${highlight(author) || 'Okänd'}</p>
-        <p><b>Subject:</b> ${highlight(subject) || 'Ej angivet'}</p>
-        <p><b>Keywords:</b> ${highlight(keywords) || 'Inga'}</p>
-        <p><b>Antal sidor:</b> ${numpages || 'Okänt'}</p>
-        <p><b>Text:</b> ${highlight(truncate(text)) || 'Ingen text tillgänglig'}</p>
-        <p><a href="/pdf/${filename}" download>Ladda ned PDF</a></p>
-        <p><button class="btn-show-all-pdf-metadata" data-id="${id}">Visa all metadata</button></p>
-      </article>
-    `;
+  async function search() {
+    const field = fieldEl.value;
+    const term = qEl.value.trim();
+    if (!term) {
+      resultsEl.innerHTML = '';
+      countEl.textContent = '0 resultat';
+      return;
+    }
+    // call API (khớp backend PDF)
+    const res = await fetch(`/api/pdf-search/${encodeURIComponent(field)}/${encodeURIComponent(term.toLowerCase())}`);
+    if (!res.ok) {
+      const t = await res.text();
+      resultsEl.innerHTML = `<div class="muted">Fel: ${res.status} ${t.slice(0, 200)}</div>`;
+      countEl.textContent = '0 resultat';
+      return;
+    }
+    const rows = await res.json();
+    countEl.textContent = `${rows.length} resultat`;
+
+    resultsEl.innerHTML = rows.map(r => {
+      const filename = r.filename || '';
+      const title = r.title || r.xmp_title || 'No title';
+      const author = r.author || 'Unknown';
+      const subject = r.subject || 'Not specified';
+      const keywords = r.keywords || 'None';
+      const pages = r.numpages ?? 'Unknown';
+      const text = r.text || '';
+
+      return `
+        <article>
+          <h3>${highlight(title, term)}</h3>
+          <p><b>Author:</b> ${highlight(author, term)}</p>
+          <p><b>Subject:</b> ${highlight(subject, term)}</p>
+          <p><b>Keywords:</b> ${highlight(keywords, term)}</p>
+          <p><b>Antal sidor:</b> ${pages}</p>
+          <p><b>Text:</b> ${highlight(truncate(text), term)}</p>
+          <p>
+            ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
+            ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Öppna</a>` : ''}
+          </p>
+          <p><button class="btn-show-all-pdf-metadata" data-id="${r.id}">Show all metadata</button></p>
+          <pre class="pdf-meta-block hidden"></pre>
+        </article>
+      `;
+    }).join('');
   }
 
-  resultContainer.innerHTML = resultAsHtml;
-  countElement.textContent = `${result.length} resultat`;
+  // events (scoped)
+  doBtn.addEventListener('click', search);
+  qEl.addEventListener('keyup', (e) => { if (e.key === 'Enter') search(); });
+  fieldEl.addEventListener('change', search);
+
+  // toggle show-all-metadata
+  resultsEl.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn-show-all-pdf-metadata');
+    if (!btn) return;
+    const pre = btn.parentElement.nextElementSibling; // <pre>
+    if (!pre) return;
+
+    if (!pre.classList.contains('hidden')) {
+      pre.classList.add('hidden');
+      pre.textContent = '';
+      btn.textContent = 'Show all metadata';
+      return;
+    }
+
+    const id = btn.getAttribute('data-id');
+    try {
+      const res = await fetch(`/api/pdf-all-meta/${encodeURIComponent(id)}`);
+      const data = await res.json();
+      pre.textContent = JSON.stringify(data, null, 2);
+      pre.classList.remove('hidden');
+      btn.textContent = 'Hide metadata';
+    } catch {
+      pre.textContent = 'Kunde inte hämta metadata.';
+      pre.classList.remove('hidden');
+    }
+  });
 }
+
+export function cleanup() { /* optional */ }
