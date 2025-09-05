@@ -30,3 +30,4 @@ frontend/warehouseFrontend/*
 .env
 
 frontend/warehouse/dm23-jpgs
+frontend/warehouse/music

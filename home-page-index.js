@@ -23,6 +23,6 @@ app.use(express.static(path.resolve(process.cwd(), 'frontend')));
 app.use('/files', express.static(path.resolve(process.cwd(), 'frontend/warehouse/dm23-jpgs')));
 
 // Nhạc (đặt đúng thư mục mp3 thực tế)
-app.use('/music', express.static(path.resolve(process.cwd(), 'frontend/warehouse/mp3')));
+app.use('/music', express.static(path.resolve(process.cwd(), 'frontend/warehouse/music')));
 
 app.listen(3000, () => console.log('Server listening on http://localhost:3000'));
