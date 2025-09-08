@@ -4,6 +4,7 @@ import { Router } from 'express';
 export default function setupPdfRestRoutes(app, db) {
   const router = Router();
 
+
   // /api/pdf-search/:field/:searchValue
   router.get('/api/pdf-search/:field/:searchValue', async (req, res) => {
     const { field, searchValue } = req.params;
