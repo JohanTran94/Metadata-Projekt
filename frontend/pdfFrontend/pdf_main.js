@@ -75,7 +75,7 @@ export function render(appEl) {
           <p><b>Author:</b> ${highlight(author, term)}</p>
           <p><b>Subject:</b> ${highlight(subject, term)}</p>
           <p><b>Keywords:</b> ${highlight(keywords, term)}</p>
-          <p><b>Antal sidor:</b> ${pages}</p>
+          <p><b>pages:</b> ${pages}</p>
           <p><b>Text:</b> ${highlight(truncate(text), term)}</p>
           <p>
             ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
