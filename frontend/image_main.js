@@ -1,4 +1,4 @@
-// frontend/imageFrontend/image_main.js
+// frontend/image_main.js
 export function render(appEl) {
   appEl.innerHTML = `
     <section>

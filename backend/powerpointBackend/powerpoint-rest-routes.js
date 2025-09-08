@@ -15,7 +15,9 @@ export default function powerpointRoute(app, db) {
     const { field, searchValue } = req.params;
 
     if (!allowedFields[field]) {
-      res.status(400).json({ error: "Invalid field name" });
+      res
+        .status(400)
+        .json({ error: "Invalid field name" });
       return;
     }
 
@@ -23,8 +25,9 @@ export default function powerpointRoute(app, db) {
 
     try {
 
-      const [result] = await db.execute(
-        `
+      const [result] = await db
+        .execute(
+          `
   SELECT id, metadata,
          metadata->>'$.fileName' AS fileName,
          metadata->>'$.title' AS title,
@@ -35,14 +38,17 @@ export default function powerpointRoute(app, db) {
   WHERE LOWER(metadata->>'${sqlPath}') LIKE LOWER(?)
   LIMIT 5
   `,
-        [`%${searchValue}%`]
-      );
-      console.log(result)
-      res.json(result);
+          [`%${searchValue}%`]
+        );
+      res
+        .json(result);
 
     } catch (err) {
-      console.error("Database error:", err);
-      res.status(500).json({ error: "Database query failed" });
+      console
+        .error("Database error:", err);
+      res
+        .status(500)
+        .json({ error: "Database query failed" });
     }
   });
 }

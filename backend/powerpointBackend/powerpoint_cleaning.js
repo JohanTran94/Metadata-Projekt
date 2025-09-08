@@ -4,26 +4,34 @@ import fs from 'fs';
 // change keys from snake_case to camelCase
 
 function toCamelCaseKey(str) {
-  return str.replace(/[_-](\w)/g, (_, c) => c.toUpperCase());
+  return str
+    .replace(/[_-](\w)/g, (_, c) => c
+      .toUpperCase());
 }
 
 function keysToCamelCase(obj) {
-  if (Array.isArray(obj)) {
-    return obj.map(v => keysToCamelCase(v));
+  if (Array
+    .isArray(obj)) {
+    return obj
+      .map(v => keysToCamelCase(v));
   } else if (obj !== null && typeof obj === 'object') {
-    return Object.entries(obj).reduce((acc, [key, value]) => {
-      acc[toCamelCaseKey(key)] = keysToCamelCase(value);
-      return acc;
-    }, {});
+    return Object
+      .entries(obj)
+      .reduce((acc, [key, value]) => {
+        acc[toCamelCaseKey(key)] = keysToCamelCase(value);
+        return acc;
+      }, {});
   }
   return obj;
 }
 
 // Read the json string from file
-let json = fs.readFileSync('./warehouse/powerpoint/csvjson.json', 'utf-8');
+let json = fs
+  .readFileSync('./warehouse/powerpoint/csvjson.json', 'utf-8');
 
 // Convert from a string to a real data structure
-let data = JSON.parse(json);
+let data = JSON
+  .parse(json);
 
 let metadataListPowerpoint = [];
 
@@ -61,7 +69,8 @@ for (let powerpointMetadata of data) {
   // write to json file
   fs.writeFileSync(
     './backend/powerpointBackend/output/cleanedPowerpointJson.json',
-    JSON.stringify(metadataListPowerpoint, null, 2),
+    JSON
+      .stringify(metadataListPowerpoint, null, 2),
     'utf-8'
   );
 
