@@ -79,7 +79,7 @@ export function render(appEl) {
           <p><b>Text:</b> ${highlight(truncate(text), term)}</p>
           <p>
             ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
-            ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Öppna</a>` : ''}
+            ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Open</a>` : ''}
           </p>
           <p><button class="btn-show-all-pdf-metadata" data-id="${r.id}">Show all metadata</button></p>
           <pre class="pdf-meta-block hidden"></pre>
