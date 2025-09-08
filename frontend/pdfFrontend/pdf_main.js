@@ -49,7 +49,7 @@ export function render(appEl) {
       countEl.textContent = '0 resultat';
       return;
     }
-    // call API (khớp backend PDF)
+    // call API
     const res = await fetch(`/api/pdf-search/${encodeURIComponent(field)}/${encodeURIComponent(term.toLowerCase())}`);
     if (!res.ok) {
       const t = await res.text();
@@ -93,7 +93,7 @@ export function render(appEl) {
   qEl.addEventListener('keyup', (e) => { if (e.key === 'Enter') search(); });
   fieldEl.addEventListener('change', search);
 
-  // toggle show-all-metadata
+  // show all metadata
   resultsEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('.btn-show-all-pdf-metadata');
     if (!btn) return;
