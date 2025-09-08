@@ -18,13 +18,13 @@ setupImageRestRoutes(app, db);
 setupMusicRestRoutes(app, db);
 setupPdfRestRoutes(app, db);
 
-// Static for SPA (frontend chung của bạn bạn)
+// Static for SPA 
 app.use(express.static(path.resolve(process.cwd(), 'frontend')));
 
-// Ảnh
+//
 app.use('/files', express.static(path.resolve(process.cwd(), 'frontend/warehouse/dm23-jpgs')));
 
-// Nhạc (đặt đúng thư mục mp3 thực tế)
+// 
 app.use('/music', express.static(path.resolve(process.cwd(), 'frontend/warehouse/music')));
 
 app.use('/pdf', express.static(path.resolve(process.cwd(), 'frontend/warehouse/pdf')));
