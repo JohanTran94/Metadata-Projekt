@@ -31,3 +31,4 @@ app.use('/pdf', express.static(path.resolve(process.cwd(), 'frontend/warehouse/p
 
 
 app.listen(3000, () => console.log('Server listening on http://localhost:3000'));
+
