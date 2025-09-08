@@ -111,21 +111,21 @@ export default function setupMusicRestRoutes(app, db) {
     if (limit > 200) limit = 200;
 
     const sql = `
-      SELECT
-        id,
-        meta->>'$.file'             AS fileName,
-        meta->>'$.common.title'     AS title,
-        meta->>'$.common.artist'    AS artist,
-        meta->>'$.common.album'     AS album,
-        JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
-        meta->>'$.common.year'      AS year
-      FROM musicJson
-      ORDER BY
-        meta->>'$.common.artist',
-        meta->>'$.common.album',
-        meta->>'$.common.title'
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+        SELECT
+          id,
+          meta->>'$.file'             AS fileName,
+          meta->>'$.common.title'     AS title,
+          meta->>'$.common.artist'    AS artist,
+          meta->>'$.common.album'     AS album,
+          JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
+          meta->>'$.common.year'      AS year
+        FROM musicJson
+        ORDER BY
+          meta->>'$.common.artist',
+          meta->>'$.common.album',
+          meta->>'$.common.title'
+        LIMIT ${limit} OFFSET ${offset}
+      `;
     const [rows] = await db.query(sql);
     res.json({ items: rows, limit, offset });
   });

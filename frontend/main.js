@@ -5,7 +5,7 @@
 const routes = {
   music: './musicFrontend/music_main.js',
   pdf: './pdfFrontend/pdf_main.js',
-  powerpoint: './powerpointFrontend/powerpoint_main.js',
+  powerpoint: './powerpoint_main.js',
   image: './imageFrontend/image_main.js',
 };
 

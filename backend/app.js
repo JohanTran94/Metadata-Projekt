@@ -1,5 +1,6 @@
+/*
 import express from 'express';
-import dbCreds from './db.js'
+import dbCreds from '../db.js'
 import mysql from 'mysql2/promise';
 //import musicRoute from './musicBackend/music_route.js';
 import powerpointRoute from './powerpointBackend/powerpoint_route.js';
@@ -18,3 +19,4 @@ app.use(express.static('frontend'));
 
 // start the web server
 app.listen(3010, () => console.log('Listening on http://localhost:3010'));
+*/
