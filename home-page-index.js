@@ -6,6 +6,7 @@ import path from 'path';
 import setupImageRestRoutes from './backend/imageBackend/image-rest-routes.js';
 import setupMusicRestRoutes from './backend/musicBackend/music-rest-routes.js';
 import setupPdfRestRoutes from './backend/pdfBackend/pdf-rest-routes.js';
+import setupPptRestRoutes from './backend/pptBackend/ppt-rest-routes.js';
 
 const db = await mysql.createConnection(dbCredentials);
 db.config.namedPlaceholders = true;
@@ -17,17 +18,19 @@ app.use(express.json());
 setupImageRestRoutes(app, db);
 setupMusicRestRoutes(app, db);
 setupPdfRestRoutes(app, db);
+setupPptRestRoutes(app, db);
 
-// Static for SPA (frontend chung của bạn bạn)
+// Static for SPA
 app.use(express.static(path.resolve(process.cwd(), 'frontend')));
 
-// Ảnh
 app.use('/files', express.static(path.resolve(process.cwd(), 'frontend/warehouse/dm23-jpgs')));
 
-// Nhạc (đặt đúng thư mục mp3 thực tế)
+
 app.use('/music', express.static(path.resolve(process.cwd(), 'frontend/warehouse/music')));
 
 app.use('/pdf', express.static(path.resolve(process.cwd(), 'frontend/warehouse/pdf')));
+
+app.use('/ppt', express.static(path.resolve(process.cwd(), 'frontend/warehouse/ppt')));
 
 
 app.listen(3000, () => console.log('Server listening on http://localhost:3000'));
