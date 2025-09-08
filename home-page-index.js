@@ -22,7 +22,7 @@ setupPdfRestRoutes(app, db);   // mount API pdf
 app.use(express.static(path.resolve(process.cwd(), 'frontend')));
 
 // Ảnh
-app.use('/images', express.static(path.resolve(process.cwd(), '/warehouse/images')));
+app.use('/images', express.static(path.resolve(process.cwd(), '/warehouse/dm23-jpgs')));
 
 // Nhạc (đặt đúng thư mục mp3 thực tế)
 app.use('/music', express.static(path.resolve(process.cwd(), '/warehouse/music')));
@@ -30,3 +30,4 @@ app.use('/music', express.static(path.resolve(process.cwd(), '/warehouse/music')
 app.use('/dm23-pdfs', express.static(path.resolve(process.cwd(), '/warehouse/dm23-pdfs')));
 
 app.listen(3000, () => console.log('Server listening on http://localhost:3000'));
+
