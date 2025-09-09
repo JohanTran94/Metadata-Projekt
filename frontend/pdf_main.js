@@ -102,7 +102,7 @@ export function render(appEl) {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       search();
-    }, 300);
+    }, 100);
   });
 
   // show all metadata
