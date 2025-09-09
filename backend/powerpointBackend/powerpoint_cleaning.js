@@ -1,77 +1,70 @@
-// Import the file system module (fs)
 import fs from 'fs';
+import path from 'path';
+import { parse } from 'csv-parse/sync';
 
-// change keys from snake_case to camelCase
+const INPUT_PATH = './warehouse/powerpoint/';
+const CSV_FILE = path.join(INPUT_PATH, '_lcwa_gov_powerpoint_metadata.csv');
+const OUTPUT_FILE = path.join(INPUT_PATH, 'cleanedPowerpointJson.json');
 
 function toCamelCaseKey(str) {
-  return str
-    .replace(/[_-](\w)/g, (_, c) => c
-      .toUpperCase());
+  return str.replace(/[_-](\w)/g, (_, c) => c.toUpperCase());
 }
 
 function keysToCamelCase(obj) {
-  if (Array
-    .isArray(obj)) {
-    return obj
-      .map(v => keysToCamelCase(v));
-  } else if (obj !== null && typeof obj === 'object') {
-    return Object
-      .entries(obj)
-      .reduce((acc, [key, value]) => {
-        acc[toCamelCaseKey(key)] = keysToCamelCase(value);
-        return acc;
-      }, {});
+  if (Array.isArray(obj)) return obj.map(keysToCamelCase);
+  if (obj && typeof obj === 'object') {
+    return Object.entries(obj).reduce((acc, [key, value]) => {
+      acc[toCamelCaseKey(key)] = keysToCamelCase(value);
+      return acc;
+    }, {});
   }
   return obj;
 }
 
-// Read the json string from file
-let json = fs
-  .readFileSync('./warehouse/powerpoint/csvjson.json', 'utf-8');
 
-// Convert from a string to a real data structure
-let data = JSON
-  .parse(json);
+const csvBuffer = fs.readFileSync(CSV_FILE);
+const csvContent = csvBuffer.toString('utf16le');
 
-let metadataListPowerpoint = [];
+const records = parse(csvContent, {
+  columns: true,
+  skip_empty_lines: true,
+  trim: true,
+  delimiter: '\t',
+  relax_column_count: true
+});
 
-for (let powerpointMetadata of data) {
+const usedFileNames = new Set();
 
-  // extract the file name (the property digest + '.ppt)
-  let fileName = powerpointMetadata
-    .digest + '.ppt'
+const metadataListPowerpoint = records.map(record => {
 
-  // add file name to attributes
-  powerpointMetadata
-    .file_name = fileName
+  let baseFileName = record.digest ? `${record.digest}.ppt` : 'unknown.ppt';
+  let fileName = baseFileName;
+  let counter = 1;
+  while (usedFileNames.has(fileName)) {
+    fileName = `${baseFileName.replace(/\.ppt$/, '')}_${counter}.ppt`;
+    counter++;
+  }
+  usedFileNames.add(fileName);
 
-  // clean mimetype and whitespace (also removes non-standard datatypes)
-  let cleanedMimeType = (powerpointMetadata.mimetype || '')
-    .replace(/^(application\/+)/, '')
-    .trim();
 
-  // add cleaned mime type to the metadata
-  powerpointMetadata
-    .mimetype = cleanedMimeType
+  const cleaned = keysToCamelCase({
+    original: record.original || null,
+    mimetype: (record.mimetype || '').replace(/^application\/+/, '').trim(),
+    title: record.title || null,
+    organisation: record.company || null,
+    fileName,
+    creationDate: record.creation_date || null,
+    lastModified: record.last_modified || null,
+    revisionNumber: record.revision_number ? parseInt(record.revision_number, 10) : null,
+    slideCount: record.slide_count ? parseInt(record.slide_count, 10) : null,
+    wordCount: record.word_count ? parseInt(record.word_count, 10) : null,
+    fileSize: record.file_size ? parseInt(record.file_size, 10) : null
+  });
 
-  // remove unnecessary attributes
-  delete powerpointMetadata.digest;
-  delete powerpointMetadata.sha256;
-  delete powerpointMetadata.sha512;
-  delete powerpointMetadata.urlkey;
-  delete powerpointMetadata.timestamp;
+  return cleaned;
+});
 
-  let cleaned = keysToCamelCase(powerpointMetadata);
 
-  metadataListPowerpoint
-    .push(cleaned);
+fs.writeFileSync(OUTPUT_FILE, JSON.stringify(metadataListPowerpoint, null, 2), 'utf-8');
 
-  // write to json file
-  fs.writeFileSync(
-    './warehouse/powerpoint/cleanedPowerpointJson.json',
-    JSON
-      .stringify(metadataListPowerpoint, null, 2),
-    'utf-8'
-  );
-
-}
+console.log(`Processed ${metadataListPowerpoint.length} records. JSON saved to ${OUTPUT_FILE}`);
