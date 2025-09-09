@@ -1,34 +1,35 @@
-// Grab the input field firstName
-let inputField = document.querySelector('input[name="firstName"]');
-// Listen to when the user types a character in the field
-inputField.addEventListener('keyup', async () => {
-  // Read the value of the input field
-  let searchValue = inputField.value;
-  // Grab the main element
-  let main = document.querySelector('main');
-  // If the value is empty do not try to search
-  // but empty the main element
-  if (searchValue === '') {
-    main.innerHTML = '';
-    return;
-  }
-  // Ask the database to search for users via a REST-api route
-  let rawData = await fetch('/api/search-by-firstname/' + searchValue);
-  // Convert rawData from json to a js data structure
-  let data = await rawData.json();
+// Check out diffrent stuff regarding a hub page for our main.js files in frontend
+// is it needed? who knows
+//
 
-  // Convert the data to html
-  let html = '';
-  for (let { id, firstName, lastName, email } of data) {
-    html += `
-      <article>
-        <h2>${firstName} ${lastName}</h2>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Id:</b> ${id}</p>
-      </article>
-    `;
+const routes = {
+  music: './music_main.js',
+  pdf: './pdf_main.js',
+  powerpoint: './powerpoint_main.js',
+  image: './image_main.js',
+};
+
+
+let current = { cleanup: null };
+// start med musik då det är min branch & jag inte har någon mockdata för de andra filtyperna
+async function loadRoute() {
+  const hash = (location.hash || '#music').slice(1).toLowerCase();
+  const path = routes[hash] || routes.music;
+
+
+  if (typeof current.cleanup === 'function') {
+    try { current.cleanup(); } catch { }
   }
-  // Replace the content of the main element with
-  // our new html (the data converted from json)
-  main.innerHTML = html;
-});
+
+  const mod = await import(path);
+  const appEl = document.getElementById('app');
+  appEl.innerHTML = '';
+
+  if (typeof mod.render === 'function') {
+    await mod.render(appEl);
+  }
+  current.cleanup = typeof mod.cleanup === 'function' ? mod.cleanup : null;
+}
+
+window.addEventListener('hashchange', loadRoute);
+window.addEventListener('DOMContentLoaded', loadRoute);
