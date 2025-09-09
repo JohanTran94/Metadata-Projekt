@@ -1,7 +1,6 @@
 // backend/musicBackend/music-rest-routes.js
 import { Router } from 'express';
 
-// Lưu ý: DB và static đều do server chính lo. Ở đây CHỈ định nghĩa API.
 export default function setupMusicRestRoutes(app, db) {
   const router = Router();
 
@@ -21,30 +20,65 @@ export default function setupMusicRestRoutes(app, db) {
     let sql, params;
 
     if (field === 'any') {
-      const like = `%${searchValue}%`;
-      sql = `
-        SELECT
-          id,
-          meta->>'$.file'             AS fileName,
-          meta->>'$.common.title'     AS title,
-          meta->>'$.common.artist'    AS artist,
-          meta->>'$.common.album'     AS album,
-          JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
-          meta->>'$.common.year'      AS year
-        FROM musicJson
-        WHERE
-          LOWER(COALESCE(meta->>'$.common.title',  '')) LIKE LOWER(?) OR
-          LOWER(COALESCE(meta->>'$.common.artist', '')) LIKE LOWER(?) OR
-          LOWER(COALESCE(meta->>'$.common.album',  '')) LIKE LOWER(?) OR
-          LOWER(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(meta,'$.common.genre[0]')),  '')) LIKE LOWER(?) OR
-          LOWER(COALESCE(meta->>'$.common.year',   '')) LIKE LOWER(?)
-        ORDER BY
-          meta->>'$.common.artist',
-          meta->>'$.common.album',
-          meta->>'$.common.title'
-        LIMIT 500
-      `;
-      params = [like, like, like, like, like];
+      const raw = String(searchValue ?? '').trim();
+      // okänd funktionen fungerade visuellt utan sök på localhost (gjorde tomma rutor till okänd)--> ändrade i backend för att faktiskt kunna söka på det 
+      const asksUnknown = raw
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .startsWith('oka'); // matchar "okä", "okän", "okänd"
+
+      if (asksUnknown) {
+        // sök på allt--> visar kolumner där man kan söka på okänd och visa det
+        sql = `
+          SELECT
+            id,
+            meta->>'$.file'             AS fileName,
+            meta->>'$.common.title'     AS title,
+            meta->>'$.common.artist'    AS artist,
+            meta->>'$.common.album'     AS album,
+            JSON_UNQUOTE(JSON_EXTRACT(meta,'$.common.genre[0]')) AS genre,
+            meta->>'$.common.year'      AS year
+          FROM musicJson
+          WHERE
+            TRIM(COALESCE(meta->>'$.common.title',''))  = '' OR
+            TRIM(COALESCE(meta->>'$.common.artist','')) = '' OR
+            TRIM(COALESCE(meta->>'$.common.album',''))  = '' OR
+            TRIM(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(meta,'$.common.genre[0]')),'')) = '' OR
+            TRIM(COALESCE(meta->>'$.common.year',''))   = ''
+          ORDER BY
+            meta->>'$.common.artist',
+            meta->>'$.common.album',
+            meta->>'$.common.title'
+          LIMIT 500
+        `;
+        params = [];
+      } else {
+        const like = `%${searchValue}%`;
+        sql = `
+          SELECT
+            id,
+            meta->>'$.file'             AS fileName,
+            meta->>'$.common.title'     AS title,
+            meta->>'$.common.artist'    AS artist,
+            meta->>'$.common.album'     AS album,
+            JSON_UNQUOTE(JSON_EXTRACT(meta,'$.common.genre[0]')) AS genre,
+            meta->>'$.common.year'      AS year
+          FROM musicJson
+          WHERE
+            LOWER(COALESCE(meta->>'$.common.title',''))  LIKE LOWER(?) OR
+            LOWER(COALESCE(meta->>'$.common.artist','')) LIKE LOWER(?) OR
+            LOWER(COALESCE(meta->>'$.common.album',''))  LIKE LOWER(?) OR
+            LOWER(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(meta,'$.common.genre[0]')),'')) LIKE LOWER(?) OR
+            LOWER(COALESCE(meta->>'$.common.year',''))   LIKE LOWER(?)
+          ORDER BY
+            meta->>'$.common.artist',
+            meta->>'$.common.album',
+            meta->>'$.common.title'
+          LIMIT 500
+        `;
+        params = [like, like, like, like, like];
+      }
     } else if (field === 'year') {
       sql = `
         SELECT
@@ -53,7 +87,7 @@ export default function setupMusicRestRoutes(app, db) {
           meta->>'$.common.title'     AS title,
           meta->>'$.common.artist'    AS artist,
           meta->>'$.common.album'     AS album,
-          JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
+          JSON_UNQUOTE(JSON_EXTRACT(meta,'$.common.genre[0]')) AS genre,
           meta->>'$.common.year'      AS year
         FROM musicJson
         WHERE LOWER(COALESCE(meta->>'$.common.year','')) LIKE LOWER(?)
@@ -78,7 +112,7 @@ export default function setupMusicRestRoutes(app, db) {
           meta->>'$.common.title'     AS title,
           meta->>'$.common.artist'    AS artist,
           meta->>'$.common.album'     AS album,
-          JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
+          JSON_UNQUOTE(JSON_EXTRACT(meta,'$.common.genre[0]')) AS genre,
           meta->>'$.common.year'      AS year
         FROM musicJson
         WHERE LOWER(COALESCE(${path}, '')) LIKE LOWER(?)
@@ -102,7 +136,7 @@ export default function setupMusicRestRoutes(app, db) {
     res.json(rows);
   });
 
-  // Lista (de 100 första)
+  // Lista en start)
   router.get('/api/music', requireDb, async (req, res) => {
     let limit = Number.parseInt(req.query.limit ?? '100', 10);
     let offset = Number.parseInt(req.query.offset ?? '0', 10);
@@ -111,25 +145,24 @@ export default function setupMusicRestRoutes(app, db) {
     if (limit > 200) limit = 200;
 
     const sql = `
-        SELECT
-          id,
-          meta->>'$.file'             AS fileName,
-          meta->>'$.common.title'     AS title,
-          meta->>'$.common.artist'    AS artist,
-          meta->>'$.common.album'     AS album,
-          JSON_UNQUOTE(JSON_EXTRACT(meta, '$.common.genre[0]')) AS genre,
-          meta->>'$.common.year'      AS year
-        FROM musicJson
-        ORDER BY
-          meta->>'$.common.artist',
-          meta->>'$.common.album',
-          meta->>'$.common.title'
-        LIMIT ${limit} OFFSET ${offset}
-      `;
+      SELECT
+        id,
+        meta->>'$.file'             AS fileName,
+        meta->>'$.common.title'     AS title,
+        meta->>'$.common.artist'    AS artist,
+        meta->>'$.common.album'     AS album,
+        JSON_UNQUOTE(JSON_EXTRACT(meta,'$.common.genre[0]')) AS genre,
+        meta->>'$.common.year'      AS year
+      FROM musicJson
+      ORDER BY
+        meta->>'$.common.artist',
+        meta->>'$.common.album',
+        meta->>'$.common.title'
+      LIMIT ${limit} OFFSET ${offset}
+    `;
     const [rows] = await db.query(sql);
     res.json({ items: rows, limit, offset });
   });
 
-  // mount vào app chính
   app.use(router);
 }

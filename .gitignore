@@ -22,3 +22,5 @@ backend/powerpointBackend/error_logs/*
 .DS_Store
 
 metadata.json
+
+funderingar.md

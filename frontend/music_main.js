@@ -1,5 +1,6 @@
-// Allt som tidigare fanns i <body> i mp3.html flyttas hit in i render()
-
+// Allt som tidigare fanns i body i mp3.html flyttas hit in i render
+// render fungerar bra att hoppa mellan olika sidor, stänger ljudspelare, popups osv
+// är debounce något jag vill ha? varje sök nu ger  resultat och hämtar info 
 export async function render(appEl) {
   appEl.innerHTML = `
     <section>
@@ -46,17 +47,17 @@ export async function render(appEl) {
     </section>
   `;
 
-  // ==== Elementrefs ====
-  const btnTheme = document.getElementById('themeToggle');
-  const qEl = document.getElementById('q');
-  const fieldEl = document.getElementById('field');
-  const rowsEl = document.getElementById('rows');
-  const summaryEl = document.getElementById('summary');
-  const playerEl = document.getElementById('player');
+
+  const btnTheme = document.getElementById('themeToggle'); // ev darkmode framöver, borttaget 
+  const qEl = document.getElementById('q'); //sökrutan
+  const fieldEl = document.getElementById('field'); //dd, valmöjligheter
+  const rowsEl = document.getElementById('rows'); //
+  const summaryEl = document.getElementById('summary'); //det du söker på visas 10 låtar visas..
+  const playerEl = document.getElementById('player'); //Spela upp musik. gömd innan man klickar på knapp med hidden 
 
 
 
-  // 
+  // it agerar som objektet " ta title från objektet it". encodeuri  för fält-sökord uppbyggnaden i api uppbyggnanden
   function rowHtml(it) {
     const file = it.fileName || it.file;
     const url = `/music/${encodeURIComponent(file)}`;
@@ -75,8 +76,8 @@ export async function render(appEl) {
       </tr>
     `;
   }
-
-  function normalize(items) {
+  // Tomma fält ska  visas visuellt--> snyggare med okänd... än tomt enl Thomas ex
+  function unknown(items) {
     for (const it of items) {
       if (!it.title || !String(it.title).trim()) it.title = 'Okänd titel';
       if (!it.artist || !String(it.artist).trim()) it.artist = 'Okänd artist';
@@ -91,17 +92,18 @@ export async function render(appEl) {
     const q = qEl.value.trim();
     const field = fieldEl.value;
 
-    // Bestäm rätt endpoint
+    // q är sökrutan. Annars vilkor för att hämta olika typer av api:er
     let url;
     if (!q) {
-      // list-endpoint returnerar { items, limit, offset }
-      url = `/api/music?limit=100&offset=0`;
+
+      url = `/api/music?limit=10&offset=0`; //10 låtar vi start av sidan 
     } else if (!field || field === 'any') {
       url = `/api/music-search/any/${encodeURIComponent(q)}`;
     } else {
       url = `/api/music-search/${encodeURIComponent(field)}/${encodeURIComponent(q)}`;
     }
 
+    // kollar att allt är ok innan det visas
     const res = await fetch(url);
     if (!res.ok) {
       const text = await res.text();
@@ -111,16 +113,16 @@ export async function render(appEl) {
 
     const data = await res.json();
     const list = Array.isArray(data) ? data : (data.items || []);
-    normalize(list);
+    unknown(list);
 
-    summaryEl.textContent = `Visar ${list.length} låtar`;
+    summaryEl.textContent = `Visar ${list.length} låtar`; //snygg touch för att få en överblick imo
     rowsEl.innerHTML = list.map(rowHtml).join('');
   }
 
 
   // 
-  qEl.addEventListener('input', search);
-  fieldEl.addEventListener('change', search);
+  qEl.addEventListener('input', search); //söker på tangenttryck
+  fieldEl.addEventListener('change', search); // söker på byte av kategori i dropdown
 
   rowsEl.addEventListener('click', async (e) => {
     // Spela
@@ -149,10 +151,10 @@ export async function render(appEl) {
     }
   });
 
-  // Första laddningen
+
   await search();
 }
-
+// clean up för Single page app. avbryter/pausar(?) pågående lyssnare och refreshar när man klickar på olika sidor
 export function cleanup() {
 
 }
