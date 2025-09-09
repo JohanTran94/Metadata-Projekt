@@ -3,8 +3,24 @@ import path from 'path';
 import { parse } from 'csv-parse/sync';
 
 const INPUT_PATH = './warehouse/powerpoint/';
-const CSV_FILE = path.join(INPUT_PATH, '_lcwa_gov_powerpoint_metadata.csv');
+
+// Hämta alla CSV-filer i mappen
+const csvFiles = fs.readdirSync(INPUT_PATH)
+  .filter(f => f.endsWith('.csv'))
+  .map(f => ({
+    name: f,
+    mtime: fs.statSync(path.join(INPUT_PATH, f)).mtime.getTime()
+  }));
+
+if (csvFiles.length === 0) throw new Error('No CSV-file found.');
+
+
+const latestCsv = csvFiles.sort((a, b) => b.mtime - a.mtime)[0].name;
+const CSV_PATH = path.join(INPUT_PATH, latestCsv);
 const OUTPUT_FILE = path.join(INPUT_PATH, 'cleanedPowerpointJson.json');
+
+console.log(`Reading CSV: ${CSV_PATH}`);
+
 
 function toCamelCaseKey(str) {
   return str.replace(/[_-](\w)/g, (_, c) => c.toUpperCase());
@@ -21,8 +37,7 @@ function keysToCamelCase(obj) {
   return obj;
 }
 
-
-const csvBuffer = fs.readFileSync(CSV_FILE);
+const csvBuffer = fs.readFileSync(CSV_PATH);
 const csvContent = csvBuffer.toString('utf16le');
 
 const records = parse(csvContent, {
@@ -46,7 +61,6 @@ const metadataListPowerpoint = records.map(record => {
   }
   usedFileNames.add(fileName);
 
-
   const cleaned = keysToCamelCase({
     original: record.original || null,
     mimetype: (record.mimetype || '').replace(/^application\/+/, '').trim(),
@@ -63,7 +77,6 @@ const metadataListPowerpoint = records.map(record => {
 
   return cleaned;
 });
-
 
 fs.writeFileSync(OUTPUT_FILE, JSON.stringify(metadataListPowerpoint, null, 2), 'utf-8');
 
