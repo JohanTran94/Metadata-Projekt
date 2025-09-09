@@ -4,7 +4,6 @@ import { parse } from 'csv-parse/sync';
 
 const INPUT_PATH = './warehouse/powerpoint/';
 
-// Hämta alla CSV-filer i mappen
 const csvFiles = fs.readdirSync(INPUT_PATH)
   .filter(f => f.endsWith('.csv'))
   .map(f => ({

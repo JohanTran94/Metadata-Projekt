@@ -3,13 +3,13 @@ export default function powerpointRoute(app, db) {
   app.get('/api/ppt-search/:field/:searchValue', async (req, res) => {
 
     const allowedFields = {
-      company: "company",
       creationDate: "creationDate",
       fileName: "fileName",
       fileSize: "fileSize",
       id: "id",
       lastModified: "lastModified",
       mimetype: "mimetype",
+      organisation: "organisation",
       original: "original",
       revisionNumber: "revisionNumber",
       slideCount: "slideCount",
@@ -37,7 +37,7 @@ export default function powerpointRoute(app, db) {
   SELECT id, metadata,
          metadata->>'$.fileName' AS fileName,
          metadata->>'$.title' AS title,
-         metadata->>'$.company' AS company,
+         metadata->>'$.organisation' AS organisation,
          metadata->>'$.creationDate' AS creationDate,
          metadata->>'$.original' AS original
   FROM powerpoint_metadata
