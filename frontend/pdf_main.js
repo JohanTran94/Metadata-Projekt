@@ -2,11 +2,11 @@
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
-      <h2>PDF Sök</h2>
+      <h2>Search PDF-files</h2>
 
       <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
-          Sök på:
+          Search by:
           <select id="pdf-field">
             <option value="FreeText">FreeText</option>
             <option value="Title">Titel</option>
@@ -17,8 +17,8 @@ export function render(appEl) {
             <option value="Pages">Pages</option>
           </select>
         </label>
-        <input id="pdf-q" type="text" placeholder="Sök bland PDF-filer (ex: 'AI', '>10', '5-15')" />
-        <button id="pdf-do">Sök</button>
+        <input id="pdf-q" type="text" placeholder="(ex: 'AI', '>10', '5-15')" />
+        <button id="pdf-do">Search</button>
       </div>
 
       <p id="pdf-count" class="muted" style="margin-top:8px;"></p>
