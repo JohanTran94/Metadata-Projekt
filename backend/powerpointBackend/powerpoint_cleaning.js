@@ -68,7 +68,7 @@ for (let powerpointMetadata of data) {
 
   // write to json file
   fs.writeFileSync(
-    './backend/powerpointBackend/output/cleanedPowerpointJson.json',
+    './warehouse/powerpoint/cleanedPowerpointJson.json',
     JSON
       .stringify(metadataListPowerpoint, null, 2),
     'utf-8'
