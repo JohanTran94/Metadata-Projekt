@@ -1,4 +1,4 @@
-// backend/pdfBackend/pdf-rest-routes.js
+// backend/pdfBackend/pdf_rest_routes.js
 import { Router } from 'express';
 
 export default function setupPdfRestRoutes(app, db) {

@@ -11,11 +11,8 @@ db.js
 warehouse/*
 !warehouse/.gitkeep
 
-backend/powerpointBackend/output/*
-!backend/powerpointBackend/output/.gitkeep
-
-backend/powerpointBackend/error_logs/*
-!backend/powerpointBackend/error_logs/.gitkeep
+backend/pptBackend/ppt_error_logs/*
+!backend/pptBackend/ppt_error_logs/.gitkeep
 
 
 # Ignore specials system files of no use for example .DS_Store on mac
