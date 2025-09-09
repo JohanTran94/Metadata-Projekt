@@ -20,6 +20,3 @@ backend/powerpointBackend/error_logs/*
 
 # Ignore specials system files of no use for example .DS_Store on mac
 .DS_Store
-
-# Ignore specials system files of no use for example .DS_Store on mac
-.DS_Store
