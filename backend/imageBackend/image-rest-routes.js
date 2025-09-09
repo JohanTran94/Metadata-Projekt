@@ -20,7 +20,7 @@ export default function setupImageRestRoutes(app, db) {
 
   router.get('/api/image/metadata', async (_req, res) => {
 
-    const imagesFolder = path.resolve(process.cwd(), 'frontend/warehouse/image');
+    const imagesFolder = path.resolve(process.cwd(), 'warehouse/image');
 
     try {
       const files = fs.readdirSync(imagesFolder)
