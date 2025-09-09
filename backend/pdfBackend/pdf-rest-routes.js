@@ -134,5 +134,7 @@ export default function setupPdfRestRoutes(app, db) {
     }
   });
 
+
+
   app.use(router);
 }
