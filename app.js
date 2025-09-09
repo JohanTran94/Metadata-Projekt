@@ -6,7 +6,7 @@ import dbCredentials from './db.js';
 import setupImageRestRoutes from './backend/imageBackend/image-rest-routes.js';
 import setupMusicRestRoutes from './backend/musicBackend/music-rest-routes.js';
 import setupPdfRestRoutes from './backend/pdfBackend/pdf-rest-routes.js';
-import setupPowerpointRestRoutes from './backend/powerpointBackend/powerpoint-rest-routes.js';
+import setupPowerpointRestRoutes from './backend/powerpointBackend/test_routes.js';
 
 const db = await mysql
   .createConnection(dbCredentials);
