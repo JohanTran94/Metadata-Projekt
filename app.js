@@ -40,7 +40,7 @@ app
   .use('/music', express
     .static(path
       .resolve(process
-        .cwd(), 'warehouse/music/')));
+        .cwd(), 'warehouse/music')));
 
 app
   .use('/pdf', express.static(path

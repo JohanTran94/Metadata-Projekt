@@ -14,6 +14,27 @@ function toNumberOrNull(v) {
   return Number.isNaN(n) ? null : n;
 }
 
+
+function dmsToDecFlexible(v, ref) {
+  if (v == null) return null;
+
+  if (typeof v === 'string') {
+    const parts = v.split(/[;,\s]+/).filter(Boolean).map(Number);
+    if (parts.length >= 3) v = parts.slice(0, 3);
+    else return null;
+  }
+
+  if (Array.isArray(v)) {
+    const [d, m, s] = v.map(Number);
+    if (![d, m, s].every(n => Number.isFinite(n))) return null;
+    const sign = (ref === 'S' || ref === 'W') ? -1 : 1;
+    return sign * (d + m / 60 + s / 3600);
+  }
+
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
 export default function setupImageRestRoutes(app, db) {
   const router = Router();
 
@@ -36,8 +57,11 @@ export default function setupImageRestRoutes(app, db) {
           const make = raw?.Make ?? raw?.make ?? null;
           const model = raw?.Model ?? raw?.model ?? null;
           const createRaw = raw?.CreateDate ?? raw?.DateTimeOriginal ?? raw?.ModifyDate ?? null;
-          const lat = raw?.GPSLatitude ?? raw?.latitude ?? raw?.Latitude ?? null;
-          const lon = raw?.GPSLongitude ?? raw?.longitude ?? raw?.Longitude ?? null;
+          let lat = raw?.latitude ?? raw?.Latitude ?? null;
+          let lon = raw?.longitude ?? raw?.Longitude ?? null;
+
+          if (lat == null) lat = dmsToDecFlexible(raw?.GPSLatitude, raw?.GPSLatitudeRef);
+          if (lon == null) lon = dmsToDecFlexible(raw?.GPSLongitude, raw?.GPSLongitudeRef);
 
           out.push({
             file_name: file,
@@ -46,10 +70,11 @@ export default function setupImageRestRoutes(app, db) {
             mtime_iso: stat.mtime.toISOString(),
             make, model,
             create_date: toIsoOrNull(createRaw),
-            latitude: toNumberOrNull(lat),
-            longitude: toNumberOrNull(lon),
+            latitude: lat,
+            longitude: lon,
             raw
           });
+
         } catch (err) {
           out.push({ file_name: file, file_path: fullPath, error: err.message });
         }

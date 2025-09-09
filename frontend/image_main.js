@@ -24,7 +24,8 @@ export function render(appEl) {
         <thead>
           <tr>
             <th>File Name</th><th>Make</th><th>Model</th><th>Date</th>
-            <th>Width</th><th>Height</th><th>Lat</th><th>Lon</th><th>Actions</th>
+            <th>Width</th><th>Height</th><th>Latitude</th><th>Longitude</th><th>Actions</th>
+
           </tr>
         </thead>
         <tbody id="resultBody"></tbody>
@@ -116,7 +117,7 @@ export function render(appEl) {
         <td>${fmtNum(r.latitude)}</td>
         <td>${fmtNum(r.longitude)}</td>
         <td class="row-actions">
-          ${r.file_name ? `<a href="/files/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>` : ''}
+          ${r.file_name ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>` : ''}
         </td>`;
       tbody.appendChild(tr);
     });
