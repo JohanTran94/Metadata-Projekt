@@ -39,21 +39,23 @@ const errors = [];
 
 // loop through and import data to database
 
-for (let fileMeta of data) {
+for (let i = 0; i < data.length; i++) {
+  const fileMeta = data[i];
   try {
-    let dbImport = await db.execute(
+    await db.execute(
       `INSERT INTO powerpoint_metadata (metadata) VALUES (?)`,
       [JSON.stringify(fileMeta)]
     );
-    //console.log(fileMeta, dbImport);
 
-    // catch and log import errors
+    //counter
+    process.stdout.write(`\rImporterar ${i + 1} av ${data.length} filer...`);
+
   } catch (err) {
     errors.push(`Metadata: ${JSON.stringify(fileMeta)} | Fel: ${err.message}`);
   }
 }
-
-// create error log file
+//new line in terminal when counter is done
+console.log();
 
 if (errors.length > 0) {
   const logContent = [
