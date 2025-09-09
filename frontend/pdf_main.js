@@ -8,6 +8,7 @@ export function render(appEl) {
         <label>
           Sök på:
           <select id="pdf-field">
+            <option value="FreeText">FreeText</option>
             <option value="Title">Titel</option>
             <option value="Author">Author</option>
             <option value="Subject">Subject</option>
