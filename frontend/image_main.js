@@ -116,7 +116,7 @@ export function render(appEl) {
         <td>${fmtNum(r.latitude)}</td>
         <td>${fmtNum(r.longitude)}</td>
         <td class="row-actions">
-          ${r.file_name ? `<a href="/files/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>` : ''}
+          ${r.file_name ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>` : ''}
         </td>`;
       tbody.appendChild(tr);
     });
