@@ -3,12 +3,18 @@ export default function powerpointRoute(app, db) {
   app.get('/api/ppt-search/:field/:searchValue', async (req, res) => {
 
     const allowedFields = {
-      id: "id",
-      fileName: "fileName",
-      title: "title",
-      original: "original",
       company: "company",
-      creationDate: "creationDate"
+      creationDate: "creationDate",
+      fileName: "fileName",
+      fileSize: "fileSize",
+      id: "id",
+      lastModified: "lastModified",
+      mimetype: "mimetype",
+      original: "original",
+      revisionNumber: "revisionNumber",
+      slideCount: "slideCount",
+      title: "title",
+      wordCount: "wordCount"
     };
 
     // get field and searhValue from the request parameters
