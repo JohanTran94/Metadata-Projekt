@@ -20,8 +20,8 @@ export function render(appEl) {
         <button id="pdf-do">Sök</button>
       </div>
 
-      <p id="pdf-count" class="muted" style="margin-top:8px;">0 resultat</p>
-      <section id="pdf-results"></section>
+      <p id="pdf-count" class="muted" style="margin-top:8px;"></p>
+      <section id="pdf-results" style="display:none;"></section>
     </section>
   `;
 
@@ -46,19 +46,23 @@ export function render(appEl) {
     const term = qEl.value.trim();
     if (!term) {
       resultsEl.innerHTML = '';
-      countEl.textContent = '0 resultat';
+      resultsEl.style.display = 'none';
+      countEl.textContent = '';
       return;
     }
-    // call API (khớp backend PDF)
+
     const res = await fetch(`/api/pdf-search/${encodeURIComponent(field)}/${encodeURIComponent(term.toLowerCase())}`);
     if (!res.ok) {
       const t = await res.text();
       resultsEl.innerHTML = `<div class="muted">Fel: ${res.status} ${t.slice(0, 200)}</div>`;
+      resultsEl.style.display = 'block';
       countEl.textContent = '0 resultat';
       return;
     }
+
     const rows = await res.json();
     countEl.textContent = `${rows.length} resultat`;
+    resultsEl.style.display = 'block';
 
     resultsEl.innerHTML = rows.map(r => {
       const filename = r.filename || '';
@@ -75,11 +79,11 @@ export function render(appEl) {
           <p><b>Author:</b> ${highlight(author, term)}</p>
           <p><b>Subject:</b> ${highlight(subject, term)}</p>
           <p><b>Keywords:</b> ${highlight(keywords, term)}</p>
-          <p><b>Antal sidor:</b> ${pages}</p>
+          <p><b>pages:</b> ${pages}</p>
           <p><b>Text:</b> ${highlight(truncate(text), term)}</p>
           <p>
             ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
-            ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Öppna</a>` : ''}
+            ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Open</a>` : ''}
           </p>
           <p><button class="btn-show-all-pdf-metadata" data-id="${r.id}">Show all metadata</button></p>
           <pre class="pdf-meta-block hidden"></pre>
@@ -90,14 +94,22 @@ export function render(appEl) {
 
   // events (scoped)
   doBtn.addEventListener('click', search);
-  qEl.addEventListener('keyup', (e) => { if (e.key === 'Enter') search(); });
   fieldEl.addEventListener('change', search);
 
-  // toggle show-all-metadata
+  // debounce på keyup
+  let debounceTimer;
+  qEl.addEventListener('keyup', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      search();
+    }, 300);
+  });
+
+  // show all metadata
   resultsEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('.btn-show-all-pdf-metadata');
     if (!btn) return;
-    const pre = btn.parentElement.nextElementSibling; // <pre>
+    const pre = btn.parentElement.nextElementSibling;
     if (!pre) return;
 
     if (!pre.classList.contains('hidden')) {
