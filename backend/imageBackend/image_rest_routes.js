@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import exifr from 'exifr';
@@ -15,7 +15,7 @@ function toNumberOrNull(v) {
 }
 
 export default function setupImageRestRoutes(app, db) {
-  const router = Router();
+  const router = express.Router();
 
 
   router.get('/api/image/metadata', async (_req, res) => {

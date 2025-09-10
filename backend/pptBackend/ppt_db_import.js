@@ -18,6 +18,8 @@ export async function importPptMetadata(db) {
     )
   `);
 
+  /*
+  
   await db.execute('DELETE FROM powerpoint_metadata');
 
   const errors = [];
@@ -43,5 +45,6 @@ export async function importPptMetadata(db) {
   } else {
     console.log("PowerPoint metadata import done.");
   }
+  */
 }
 
