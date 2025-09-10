@@ -7,7 +7,7 @@ export function render(appEl) {
         <label>
           Search by:
           <select id="pdf-field">
-            <option value="FreeText">Free Text</option>
+            <option value="Everything">Everything</option>
             <option value="Title">Titel</option>
             <option value="Author">Author</option>
             <option value="Subject">Subject</option>
@@ -68,6 +68,7 @@ export function render(appEl) {
           <p><b>Keywords:</b> ${term ? highlight(keywords, term) : keywords}</p>
           <p><b>pages:</b> ${pages}</p>
           <p><b>Text:</b> ${term ? highlight(truncate(text), term) : truncate(text)}</p>
+          <p><b>File name:</b> ${term ? highlight(filename, term) : filename}</p>
           <p>
             ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
             ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Open</a>` : ''}
