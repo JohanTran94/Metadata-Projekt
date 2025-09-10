@@ -35,13 +35,14 @@ export async function importPptMetadata(db) {
   console.log();
 
   if (errors.length > 0) {
-    const logDir = "./backend/pptBackend/ppt_error_logs";
+    const logDir = './backend/pptBackend/ppt_error_logs';
     if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
-    const logFile = path.join(logDir, "ppt_db_import_errors.log");
+    const logFile = path.join(logDir, 'ppt_db_import_errors.log');
     fs.appendFileSync(logFile, [`--- Error log ${new Date().toISOString()} ---`, ...errors, ""].join("\n"));
     console.error(` - Database import error, see ${logFile} (${errors.length} st).`);
   } else {
-    console.log(" - PowerPoint metadata import done.");
+    console.log(' - PowerPoint metadata import done.');
+    console.log(' - All data loaded. Opening server connection.');
   }
 
 }

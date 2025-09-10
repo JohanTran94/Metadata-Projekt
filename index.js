@@ -22,12 +22,13 @@ async function init() {
   console.log(' - Extracting data from warehouse and loading to database...');
   await importImageMetadata();
   await importMusicMetadata();
+  console.log(' - Ignore PDF-warnings.');
   await importPdfMetadata();
 
   console.log(' - Cleaning PowerPoint metadata...');
   await runPptETL();
   await importPptMetadata(db);
-  console.log(' - All data loaded. Opening server connection.');
+
 
   const app = express();
   app.use(express.json());
