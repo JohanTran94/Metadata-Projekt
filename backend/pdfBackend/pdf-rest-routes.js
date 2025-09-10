@@ -6,7 +6,7 @@ export default function setupPdfRestRoutes(app, db) {
   // /api/pdf-search/:field/:searchValue
   router.get('/api/pdf-search/:field/:searchValue', async (req, res) => {
     const { field, searchValue } = req.params;
-    const allowed = ['Title', 'Author', 'Subject', 'Keywords', 'Pages', 'Text', 'FreeText'];
+    const allowed = ['Title', 'Author', 'Subject', 'Keywords', 'Pages', 'Text', 'FreeText', 'Filename'];
     if (!allowed.includes(field)) {
       return res.json({ error: 'Invalid field name!' });
     }
@@ -18,7 +18,7 @@ export default function setupPdfRestRoutes(app, db) {
       if (field === 'Pages') {
         if (/^\d+$/.test(searchValue)) {
           sql = `
-            SELECT id, filename, numpages, text,
+            SELECT id, filename, numpages,
               info->>'$.Title'   AS title,
               info->>'$.Author'  AS author,
               info->>'$.Subject' AS subject,
@@ -31,7 +31,7 @@ export default function setupPdfRestRoutes(app, db) {
         } else if (/^>(\d+)$/.test(searchValue)) {
           const m = searchValue.match(/^>(\d+)$/);
           sql = `
-            SELECT id, filename, numpages, text,
+            SELECT id, filename, numpages,
               info->>'$.Title'   AS title,
               info->>'$.Author'  AS author,
               info->>'$.Subject' AS subject,
@@ -43,9 +43,9 @@ export default function setupPdfRestRoutes(app, db) {
           params = [parseInt(m[1])];
         } else if (/^(\d+)-(\d+)$/.test(searchValue)) {
           const [min, max] = searchValue.split('-').map(Number);
-          if (min > max) return res.json({ error: 'Smallest value must be smaller then the biggest value.' });
+          if (min > max) return res.json({ error: 'Smallest value must be smaller than the biggest value.' });
           sql = `
-            SELECT id, filename, numpages, text,
+            SELECT id, filename, numpages,
               info->>'$.Title'   AS title,
               info->>'$.Author'  AS author,
               info->>'$.Subject' AS subject,
@@ -56,11 +56,11 @@ export default function setupPdfRestRoutes(app, db) {
           `;
           params = [min, max];
         } else {
-          return res.json({ error: 'Invalid format! Use 12, >10 eller 5-15.' });
+          return res.json({ error: 'Invalid format! Use 12, >10 or 5-15.' });
         }
       } else if (field === 'Text') {
         sql = `
-          SELECT id, filename, numpages, text,
+          SELECT id, filename, numpages,
             info->>'$.Title'   AS title,
             info->>'$.Author'  AS author,
             info->>'$.Subject' AS subject,
@@ -72,7 +72,7 @@ export default function setupPdfRestRoutes(app, db) {
         params = [`%${searchValue}%`];
       } else if (field === 'FreeText') {
         sql = `
-          SELECT id, filename, numpages, text,
+          SELECT id, filename, numpages,
             info->>'$.Title'   AS title,
             info->>'$.Author'  AS author,
             info->>'$.Subject' AS subject,
@@ -87,9 +87,22 @@ export default function setupPdfRestRoutes(app, db) {
              OR LOWER(xmp->>'$.title') LIKE LOWER(?)
         `;
         params = Array(6).fill(`%${searchValue}%`);
-      } else {
+      } else if (field === 'Filename') {
         sql = `
-          SELECT id, filename, numpages, text,
+          SELECT id, filename, numpages,
+            info->>'$.Title'   AS title,
+            info->>'$.Author'  AS author,
+            info->>'$.Subject' AS subject,
+            info->>'$.Keywords' AS keywords,
+            xmp->>'$.title' AS xmp_title
+          FROM pdf_metadata
+          WHERE LOWER(filename) LIKE LOWER(?)
+        `;
+        params = [`%${searchValue}%`];
+      } else {
+        // Title, Author, Subject, Keywords
+        sql = `
+          SELECT id, filename, numpages,
             info->>'$.Title'   AS title,
             info->>'$.Author'  AS author,
             info->>'$.Subject' AS subject,
@@ -113,7 +126,7 @@ export default function setupPdfRestRoutes(app, db) {
   router.get('/api/pdf-default', async (req, res) => {
     try {
       const [rows] = await db.execute(`
-        SELECT id, filename, numpages, text,
+        SELECT id, filename, numpages,
           info->>'$.Title'   AS title,
           info->>'$.Author'  AS author,
           info->>'$.Subject' AS subject,
@@ -133,9 +146,9 @@ export default function setupPdfRestRoutes(app, db) {
   // Optionally with limit, set to 20 if not given or invalid
   router.get('/api/pdf-default/:limit', async (req, res) => {
     try {
-      const limit = parseInt(req.params.limit) || 20;
+      const limit = Math.min(parseInt(req.params.limit) || 20, 100); // max 100
       const [rows] = await db.execute(`
-        SELECT id, filename, numpages, text,
+        SELECT id, filename, numpages,
           info->>'$.Title'   AS title,
           info->>'$.Author'  AS author,
           info->>'$.Subject' AS subject,
