@@ -1,4 +1,3 @@
-// frontend/pdfFrontend/pdf_main.js
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
@@ -42,28 +41,14 @@ export function render(appEl) {
   };
   const escapeReg = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-  async function search() {
-    const field = fieldEl.value;
-    const term = qEl.value.trim();
-    if (!term) {
-      resultsEl.innerHTML = '';
-      resultsEl.style.display = 'none';
-      countEl.textContent = '';
-      return;
-    }
-
-    const res = await fetch(`/api/pdf-search/${encodeURIComponent(field)}/${encodeURIComponent(term.toLowerCase())}`);
-    if (!res.ok) {
-      const t = await res.text();
-      resultsEl.innerHTML = `<div class="muted">Fel: ${res.status} ${t.slice(0, 200)}</div>`;
-      resultsEl.style.display = 'block';
-      countEl.textContent = '0 resultat';
-      return;
-    }
-
-    const rows = await res.json();
+  async function renderResults(rows, term = '') {
     countEl.textContent = `${rows.length} resultat`;
     resultsEl.style.display = 'block';
+
+    if (rows.length === 0) {
+      resultsEl.innerHTML = '<div class="muted">No hits</div>';
+      return;
+    }
 
     resultsEl.innerHTML = rows.map(r => {
       const filename = r.filename || '';
@@ -76,12 +61,12 @@ export function render(appEl) {
 
       return `
         <article>
-          <h3>${highlight(title, term)}</h3>
-          <p><b>Author:</b> ${highlight(author, term)}</p>
-          <p><b>Subject:</b> ${highlight(subject, term)}</p>
-          <p><b>Keywords:</b> ${highlight(keywords, term)}</p>
+          <h3>${term ? highlight(title, term) : title}</h3>
+          <p><b>Author:</b> ${term ? highlight(author, term) : author}</p>
+          <p><b>Subject:</b> ${term ? highlight(subject, term) : subject}</p>
+          <p><b>Keywords:</b> ${term ? highlight(keywords, term) : keywords}</p>
           <p><b>pages:</b> ${pages}</p>
-          <p><b>Text:</b> ${highlight(truncate(text), term)}</p>
+          <p><b>Text:</b> ${term ? highlight(truncate(text), term) : truncate(text)}</p>
           <p>
             ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
             ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Open</a>` : ''}
@@ -93,11 +78,43 @@ export function render(appEl) {
     }).join('');
   }
 
+  async function search() {
+    const field = fieldEl.value;
+    const term = qEl.value.trim();
+    if (!term) {
+      loadDefault();
+      return;
+    }
+
+    const res = await fetch(`/api/pdf-search/${encodeURIComponent(field)}/${encodeURIComponent(term.toLowerCase())}`);
+    if (!res.ok) {
+      const t = await res.text();
+      resultsEl.innerHTML = `<div class="muted">Fel: ${res.status} ${t.slice(0, 200)}</div>`;
+      resultsEl.style.display = 'block';
+      countEl.textContent = '0 result';
+      return;
+    }
+
+    const rows = await res.json();
+    renderResults(rows, term);
+  }
+
+  async function loadDefault() {
+    const res = await fetch(`/api/pdf-default`);
+    if (!res.ok) {
+      resultsEl.innerHTML = `<div class="muted">Can not get PDF list</div>`;
+      resultsEl.style.display = 'block';
+      countEl.textContent = '0 resultat';
+      return;
+    }
+    const rows = await res.json();
+    renderResults(rows);
+  }
+
   // events (scoped)
   doBtn.addEventListener('click', search);
   fieldEl.addEventListener('change', search);
 
-  // debounce på keyup
   let debounceTimer;
   qEl.addEventListener('keyup', () => {
     clearTimeout(debounceTimer);
@@ -132,6 +149,9 @@ export function render(appEl) {
       pre.classList.remove('hidden');
     }
   });
+
+  // kör default direkt vid render
+  loadDefault();
 }
 
 export function cleanup() { /* optional */ }
