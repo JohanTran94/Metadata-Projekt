@@ -6,7 +6,7 @@ export default function setupPdfRestRoutes(app, db) {
   // /api/pdf-search/:field/:searchValue
   router.get('/api/pdf-search/:field/:searchValue', async (req, res) => {
     const { field, searchValue } = req.params;
-    const allowed = ['Title', 'Author', 'Subject', 'Keywords', 'Pages', 'Text', 'FreeText', 'Filename'];
+    const allowed = ['Title', 'Author', 'Subject', 'Keywords', 'Pages', 'Text', 'Everything', 'Filename'];
     if (!allowed.includes(field)) {
       return res.json({ error: 'Invalid field name!' });
     }
@@ -15,12 +15,16 @@ export default function setupPdfRestRoutes(app, db) {
       let sql = '';
       let params = [];
 
+      // Pages-specifik logik
+      const isPageQuery = field === 'Pages' || field === 'Everything';
+      const pageMatch = searchValue.match(/^(\d+)-(\d+)$|^>(\d+)$|^\d+$/);
+
       if (field === 'Pages') {
         if (/^\d+$/.test(searchValue)) {
           sql = `
-            SELECT id, filename, numpages,
-              info->>'$.Title'   AS title,
-              info->>'$.Author'  AS author,
+            SELECT id, filename, numpages, text,
+              info->>'$.Title' AS title,
+              info->>'$.Author' AS author,
               info->>'$.Subject' AS subject,
               info->>'$.Keywords' AS keywords,
               xmp->>'$.title' AS xmp_title
@@ -31,9 +35,9 @@ export default function setupPdfRestRoutes(app, db) {
         } else if (/^>(\d+)$/.test(searchValue)) {
           const m = searchValue.match(/^>(\d+)$/);
           sql = `
-            SELECT id, filename, numpages,
-              info->>'$.Title'   AS title,
-              info->>'$.Author'  AS author,
+            SELECT id, filename, numpages, text,
+              info->>'$.Title' AS title,
+              info->>'$.Author' AS author,
               info->>'$.Subject' AS subject,
               info->>'$.Keywords' AS keywords,
               xmp->>'$.title' AS xmp_title
@@ -45,9 +49,9 @@ export default function setupPdfRestRoutes(app, db) {
           const [min, max] = searchValue.split('-').map(Number);
           if (min > max) return res.json({ error: 'Smallest value must be smaller than the biggest value.' });
           sql = `
-            SELECT id, filename, numpages,
-              info->>'$.Title'   AS title,
-              info->>'$.Author'  AS author,
+            SELECT id, filename, numpages, text,
+              info->>'$.Title' AS title,
+              info->>'$.Author' AS author,
               info->>'$.Subject' AS subject,
               info->>'$.Keywords' AS keywords,
               xmp->>'$.title' AS xmp_title
@@ -58,11 +62,12 @@ export default function setupPdfRestRoutes(app, db) {
         } else {
           return res.json({ error: 'Invalid format! Use 12, >10 or 5-15.' });
         }
+
       } else if (field === 'Text') {
         sql = `
-          SELECT id, filename, numpages,
-            info->>'$.Title'   AS title,
-            info->>'$.Author'  AS author,
+          SELECT id, filename, numpages, text,
+            info->>'$.Title' AS title,
+            info->>'$.Author' AS author,
             info->>'$.Subject' AS subject,
             info->>'$.Keywords' AS keywords,
             xmp->>'$.title' AS xmp_title
@@ -70,11 +75,12 @@ export default function setupPdfRestRoutes(app, db) {
           WHERE LOWER(text) LIKE LOWER(?)
         `;
         params = [`%${searchValue}%`];
-      } else if (field === 'FreeText') {
+
+      } else if (field === 'Everything') {
         sql = `
-          SELECT id, filename, numpages,
-            info->>'$.Title'   AS title,
-            info->>'$.Author'  AS author,
+          SELECT id, filename, numpages, text,
+            info->>'$.Title' AS title,
+            info->>'$.Author' AS author,
             info->>'$.Subject' AS subject,
             info->>'$.Keywords' AS keywords,
             xmp->>'$.title' AS xmp_title
@@ -85,13 +91,30 @@ export default function setupPdfRestRoutes(app, db) {
              OR LOWER(info->>'$.Subject') LIKE LOWER(?)
              OR LOWER(info->>'$.Keywords') LIKE LOWER(?)
              OR LOWER(xmp->>'$.title') LIKE LOWER(?)
+             OR LOWER(filename) LIKE LOWER(?)
         `;
-        params = Array(6).fill(`%${searchValue}%`);
+        params = Array(7).fill(`%${searchValue}%`);
+
+        // Lägg till pages-logik om "Everything" ser ut som en siffra eller range
+        if (pageMatch) {
+          if (/^\d+$/.test(searchValue)) {
+            sql += ' OR numpages = ?';
+            params.push(parseInt(searchValue));
+          } else if (/^>(\d+)$/.test(searchValue)) {
+            sql += ' OR numpages > ?';
+            params.push(parseInt(pageMatch[3]));
+          } else if (/^(\d+)-(\d+)$/.test(searchValue)) {
+            const [min, max] = searchValue.split('-').map(Number);
+            sql += ' OR numpages BETWEEN ? AND ?';
+            params.push(min, max);
+          }
+        }
+
       } else if (field === 'Filename') {
         sql = `
-          SELECT id, filename, numpages,
-            info->>'$.Title'   AS title,
-            info->>'$.Author'  AS author,
+          SELECT id, filename, numpages, text,
+            info->>'$.Title' AS title,
+            info->>'$.Author' AS author,
             info->>'$.Subject' AS subject,
             info->>'$.Keywords' AS keywords,
             xmp->>'$.title' AS xmp_title
@@ -99,12 +122,13 @@ export default function setupPdfRestRoutes(app, db) {
           WHERE LOWER(filename) LIKE LOWER(?)
         `;
         params = [`%${searchValue}%`];
+
       } else {
         // Title, Author, Subject, Keywords
         sql = `
-          SELECT id, filename, numpages,
-            info->>'$.Title'   AS title,
-            info->>'$.Author'  AS author,
+          SELECT id, filename, numpages, text,
+            info->>'$.Title' AS title,
+            info->>'$.Author' AS author,
             info->>'$.Subject' AS subject,
             info->>'$.Keywords' AS keywords,
             xmp->>'$.title' AS xmp_title
@@ -116,19 +140,20 @@ export default function setupPdfRestRoutes(app, db) {
 
       const [rows] = await db.execute(sql, params);
       res.json(rows);
+
     } catch (err) {
       console.error('Fel vid sökning:', err);
       res.status(500).json({ error: 'Serverfel vid sökning' });
     }
   });
 
-  // Default startpage: show the 20 first PDFs
+  // Default startpage: show the first 20 PDFs (with text)
   router.get('/api/pdf-default', async (req, res) => {
     try {
       const [rows] = await db.execute(`
-        SELECT id, filename, numpages,
-          info->>'$.Title'   AS title,
-          info->>'$.Author'  AS author,
+        SELECT id, filename, numpages, text,
+          info->>'$.Title' AS title,
+          info->>'$.Author' AS author,
           info->>'$.Subject' AS subject,
           info->>'$.Keywords' AS keywords,
           xmp->>'$.title' AS xmp_title
@@ -143,14 +168,14 @@ export default function setupPdfRestRoutes(app, db) {
     }
   });
 
-  // Optionally with limit, set to 20 if not given or invalid
+  // Default with optional limit
   router.get('/api/pdf-default/:limit', async (req, res) => {
     try {
-      const limit = Math.min(parseInt(req.params.limit) || 20, 100); // max 100
+      const limit = parseInt(req.params.limit) || 20;
       const [rows] = await db.execute(`
-        SELECT id, filename, numpages,
-          info->>'$.Title'   AS title,
-          info->>'$.Author'  AS author,
+        SELECT id, filename, numpages, text,
+          info->>'$.Title' AS title,
+          info->>'$.Author' AS author,
           info->>'$.Subject' AS subject,
           info->>'$.Keywords' AS keywords,
           xmp->>'$.title' AS xmp_title
@@ -189,7 +214,7 @@ export default function setupPdfRestRoutes(app, db) {
     }
   });
 
-  // Only text
+  // Only text (optional)
   router.get('/api/pdf-text/:id', async (req, res) => {
     try {
       const { id } = req.params;
