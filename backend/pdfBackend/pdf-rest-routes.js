@@ -15,7 +15,7 @@ export default function setupPdfRestRoutes(app, db) {
       let sql = '';
       let params = [];
 
-      // Pages-specifik logik
+      // pages special handling
       const isPageQuery = field === 'Pages' || field === 'Everything';
       const pageMatch = searchValue.match(/^(\d+)-(\d+)$|^>(\d+)$|^\d+$/);
 
@@ -95,7 +95,7 @@ export default function setupPdfRestRoutes(app, db) {
         `;
         params = Array(7).fill(`%${searchValue}%`);
 
-        // Lägg till pages-logik om "Everything" ser ut som en siffra eller range
+        // Add page logic if Everythin looks like a number or range.
         if (pageMatch) {
           if (/^\d+$/.test(searchValue)) {
             sql += ' OR numpages = ?';
@@ -142,8 +142,8 @@ export default function setupPdfRestRoutes(app, db) {
       res.json(rows);
 
     } catch (err) {
-      console.error('Fel vid sökning:', err);
-      res.status(500).json({ error: 'Serverfel vid sökning' });
+      console.error('Error by search:', err);
+      res.status(500).json({ error: 'Server errror' });
     }
   });
 
@@ -163,8 +163,8 @@ export default function setupPdfRestRoutes(app, db) {
       `);
       res.json(rows);
     } catch (err) {
-      console.error('Fel vid hämtning av default-PDFer:', err);
-      res.status(500).json({ error: 'Serverfel vid hämtning' });
+      console.error('Error fetch for default PDFs:', err);
+      res.status(500).json({ error: 'Server fetch error' });
     }
   });
 
@@ -185,8 +185,8 @@ export default function setupPdfRestRoutes(app, db) {
       `, [limit]);
       res.json(rows);
     } catch (err) {
-      console.error('Fel vid hämtning av default-PDFer:', err);
-      res.status(500).json({ error: 'Serverfel vid hämtning' });
+      console.error('Error fetch for default PDFs:', err);
+      res.status(500).json({ error: 'Serverer fetch error' });
     }
   });
 
@@ -195,10 +195,10 @@ export default function setupPdfRestRoutes(app, db) {
     try {
       const { id } = req.params;
       const [rows] = await db.execute(`SELECT * FROM pdf_metadata WHERE id = ?`, [id]);
-      res.json(rows.length ? rows[0] : { error: 'PDF hittades inte' });
+      res.json(rows.length ? rows[0] : { error: 'PDF not found' });
     } catch (err) {
-      console.error('Fel vid hämtning av metadata:', err);
-      res.status(500).json({ error: 'Serverfel vid hämtning' });
+      console.error('Error fetch for metadata:', err);
+      res.status(500).json({ error: 'Server fetch error' });
     }
   });
 
@@ -207,10 +207,10 @@ export default function setupPdfRestRoutes(app, db) {
     try {
       const { id } = req.params;
       const [rows] = await db.execute(`SELECT xmp FROM pdf_metadata WHERE id = ?`, [id]);
-      res.json(rows.length ? (rows[0].xmp || {}) : { error: 'XMP-data saknas' });
+      res.json(rows.length ? (rows[0].xmp || {}) : { error: 'XMP-data missing' });
     } catch (err) {
-      console.error('Fel vid hämtning av XMP:', err);
-      res.status(500).json({ error: 'Serverfel vid hämtning' });
+      console.error('Error fetch for XMP:', err);
+      res.status(500).json({ error: 'Server fetch error' });
     }
   });
 
@@ -219,10 +219,10 @@ export default function setupPdfRestRoutes(app, db) {
     try {
       const { id } = req.params;
       const [rows] = await db.execute(`SELECT text FROM pdf_metadata WHERE id = ?`, [id]);
-      res.json(rows.length ? { text: rows[0].text || '' } : { error: 'Text saknas' });
+      res.json(rows.length ? { text: rows[0].text || '' } : { error: 'Text missing' });
     } catch (err) {
-      console.error('Fel vid hämtning av text:', err);
-      res.status(500).json({ error: 'Serverfel vid hämtning' });
+      console.error('Error fetch for text:', err);
+      res.status(500).json({ error: 'Server fetch error' });
     }
   });
 
