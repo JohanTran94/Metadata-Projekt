@@ -1,4 +1,3 @@
-// backend/pdfBackend/pdf-rest-routes.js
 import { Router } from 'express';
 
 export default function setupPdfRestRoutes(app, db) {
@@ -17,7 +16,6 @@ export default function setupPdfRestRoutes(app, db) {
       let params = [];
 
       if (field === 'Pages') {
-        // 12  |  >10  |  5-15
         if (/^\d+$/.test(searchValue)) {
           sql = `
             SELECT id, filename, numpages, text,
@@ -60,7 +58,6 @@ export default function setupPdfRestRoutes(app, db) {
         } else {
           return res.json({ error: 'Invalid format! Use 12, >10 eller 5-15.' });
         }
-
       } else if (field === 'Text') {
         sql = `
           SELECT id, filename, numpages, text,
@@ -73,9 +70,7 @@ export default function setupPdfRestRoutes(app, db) {
           WHERE LOWER(text) LIKE LOWER(?)
         `;
         params = [`%${searchValue}%`];
-
       } else if (field === 'FreeText') {
-        // search in all text and metadata fields
         sql = `
           SELECT id, filename, numpages, text,
             info->>'$.Title'   AS title,
@@ -92,9 +87,7 @@ export default function setupPdfRestRoutes(app, db) {
              OR LOWER(xmp->>'$.title') LIKE LOWER(?)
         `;
         params = Array(6).fill(`%${searchValue}%`);
-
       } else {
-        // metadata fields in info (Title/Author/Subject/Keywords)
         sql = `
           SELECT id, filename, numpages, text,
             info->>'$.Title'   AS title,
@@ -113,6 +106,49 @@ export default function setupPdfRestRoutes(app, db) {
     } catch (err) {
       console.error('Fel vid sökning:', err);
       res.status(500).json({ error: 'Serverfel vid sökning' });
+    }
+  });
+
+  // Default startpage: show the 20 first PDFs
+  router.get('/api/pdf-default', async (req, res) => {
+    try {
+      const [rows] = await db.execute(`
+        SELECT id, filename, numpages, text,
+          info->>'$.Title'   AS title,
+          info->>'$.Author'  AS author,
+          info->>'$.Subject' AS subject,
+          info->>'$.Keywords' AS keywords,
+          xmp->>'$.title' AS xmp_title
+        FROM pdf_metadata
+        ORDER BY id ASC
+        LIMIT 20
+      `);
+      res.json(rows);
+    } catch (err) {
+      console.error('Fel vid hämtning av default-PDFer:', err);
+      res.status(500).json({ error: 'Serverfel vid hämtning' });
+    }
+  });
+
+  // Optionally with limit, set to 20 if not given or invalid
+  router.get('/api/pdf-default/:limit', async (req, res) => {
+    try {
+      const limit = parseInt(req.params.limit) || 20;
+      const [rows] = await db.execute(`
+        SELECT id, filename, numpages, text,
+          info->>'$.Title'   AS title,
+          info->>'$.Author'  AS author,
+          info->>'$.Subject' AS subject,
+          info->>'$.Keywords' AS keywords,
+          xmp->>'$.title' AS xmp_title
+        FROM pdf_metadata
+        ORDER BY id ASC
+        LIMIT ?
+      `, [limit]);
+      res.json(rows);
+    } catch (err) {
+      console.error('Fel vid hämtning av default-PDFer:', err);
+      res.status(500).json({ error: 'Serverfel vid hämtning' });
     }
   });
 
