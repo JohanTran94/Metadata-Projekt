@@ -7,13 +7,14 @@ export function render(appEl) {
         <label>
           Search by:
           <select id="pdf-field">
-            <option value="FreeText">FreeText</option>
+            <option value="FreeText">Free Text</option>
             <option value="Title">Titel</option>
             <option value="Author">Author</option>
             <option value="Subject">Subject</option>
             <option value="Text">Text</option>
             <option value="Keywords">Keywords</option>
             <option value="Pages">Pages</option>
+            <option value="Filename">File Name</option>
           </select>
         </label>
         <input id="pdf-q" type="text" placeholder="(ex: 'AI', '>10', '5-15')" />
