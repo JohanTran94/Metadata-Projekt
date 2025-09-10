@@ -19,7 +19,7 @@ async function init() {
   const db = await mysql.createConnection(dbCredentials);
   db.config.namedPlaceholders = true;
 
-  console.log('Loading Image metadata to database...');
+  console.log(' - Loading image metadata to database...');
   await importImageMetadata();
   /*
     await importMusicMetadata();
@@ -27,10 +27,10 @@ async function init() {
   */
 
   // ETL + import
-  console.log('Cleaning PowerPoint metadata...');
+  console.log(' - Cleaning PowerPoint metadata...');
   await runPptETL();
 
-  console.log('Loading PowerPoint metadata to database...');
+  console.log(' - Loading PowerPoint metadata to database...');
   await importPptMetadata(db);
 
   // Express-app

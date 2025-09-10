@@ -29,12 +29,12 @@ export async function runPptETL() {
       mtime: fs.statSync(path.join(INPUT_PATH, f)).mtime.getTime()
     }));
 
-  if (csvFiles.length === 0) throw new Error('No CSV-file found.');
+  if (csvFiles.length === 0) throw new Error(' - No CSV-file found.');
 
   const latestCsv = csvFiles.sort((a, b) => b.mtime - a.mtime)[0].name;
   const CSV_PATH = path.join(INPUT_PATH, latestCsv);
 
-  console.log(`Reading CSV: ${CSV_PATH}`);
+  console.log(` - Reading CSV: ${CSV_PATH}`);
 
   const csvBuffer = fs.readFileSync(CSV_PATH);
   const csvContent = csvBuffer.toString('utf16le');
@@ -74,6 +74,6 @@ export async function runPptETL() {
   });
 
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(metadataListPowerpoint, null, 2), 'utf-8');
-  console.log(`Processed ${metadataListPowerpoint.length} records. JSON saved to ${OUTPUT_FILE}`);
+  console.log(` - Processed ${metadataListPowerpoint.length} records. JSON saved to ${OUTPUT_FILE}`);
 }
 

@@ -18,8 +18,6 @@ export async function importPptMetadata(db) {
     )
   `);
 
-  /*
-  
   await db.execute('DELETE FROM powerpoint_metadata');
 
   const errors = [];
@@ -29,9 +27,9 @@ export async function importPptMetadata(db) {
         `INSERT INTO powerpoint_metadata (metadata) VALUES (?)`,
         [JSON.stringify(data[i])]
       );
-      process.stdout.write(`\rImporting ${i + 1} of ${data.length} files...`);
+      process.stdout.write(`\r - Importing ${i + 1} of ${data.length} files...`);
     } catch (err) {
-      errors.push(`Metadata: ${JSON.stringify(data[i])} | Error: ${err.message}`);
+      errors.push(` - Metadata: ${JSON.stringify(data[i])} | Error: ${err.message}`);
     }
   }
   console.log();
@@ -41,10 +39,10 @@ export async function importPptMetadata(db) {
     if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
     const logFile = path.join(logDir, "ppt_db_import_errors.log");
     fs.appendFileSync(logFile, [`--- Error log ${new Date().toISOString()} ---`, ...errors, ""].join("\n"));
-    console.error(`Database import error, see ${logFile} (${errors.length} st).`);
+    console.error(` - Database import error, see ${logFile} (${errors.length} st).`);
   } else {
-    console.log("PowerPoint metadata import done.");
+    console.log(" - PowerPoint metadata import done.");
   }
-  */
+
 }
 
