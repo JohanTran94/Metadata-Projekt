@@ -18,7 +18,6 @@ export function render(appEl) {
           </select>
         </label>
         <input id="pdf-q" type="text" placeholder="(ex: 'AI', '>10', '5-15')" />
-        <button id="pdf-do">Search</button>
       </div>
 
       <p id="pdf-count" class="muted" style="margin-top:8px;"></p>
@@ -28,25 +27,26 @@ export function render(appEl) {
 
   const fieldEl = appEl.querySelector('#pdf-field');
   const qEl = appEl.querySelector('#pdf-q');
-  const doBtn = appEl.querySelector('#pdf-do');
   const countEl = appEl.querySelector('#pdf-count');
   const resultsEl = appEl.querySelector('#pdf-results');
+
+  const escapeReg = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   const highlight = (text, term) => {
     if (!text || !term) return text || '';
     return String(text).replace(new RegExp(`(${escapeReg(term)})`, 'gi'), '<mark>$1</mark>');
   };
+
   const truncate = (text, maxLength = 500) => {
     if (!text) return '';
     return String(text).length > maxLength ? String(text).slice(0, maxLength) + '…' : String(text);
   };
-  const escapeReg = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   async function renderResults(rows, term = '') {
     countEl.textContent = `${rows.length} resultat`;
     resultsEl.style.display = 'block';
 
-    if (rows.length === 0) {
+    if (!rows.length) {
       resultsEl.innerHTML = '<div class="muted">No hits</div>';
       return;
     }
@@ -66,9 +66,9 @@ export function render(appEl) {
           <p><b>Author:</b> ${term ? highlight(author, term) : author}</p>
           <p><b>Subject:</b> ${term ? highlight(subject, term) : subject}</p>
           <p><b>Keywords:</b> ${term ? highlight(keywords, term) : keywords}</p>
-          <p><b>pages:</b> ${pages}</p>
+          <p><b>Pages:</b> ${pages}</p>
           <p><b>Text:</b> ${term ? highlight(truncate(text), term) : truncate(text)}</p>
-          <p><b>File name:</b> ${term ? highlight(filename, term) : filename}</p>
+          <p><b>Filename:</b> ${term ? highlight(filename, term) : filename}</p>
           <p>
             ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
             ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Open</a>` : ''}
@@ -91,7 +91,7 @@ export function render(appEl) {
     const res = await fetch(`/api/pdf-search/${encodeURIComponent(field)}/${encodeURIComponent(term.toLowerCase())}`);
     if (!res.ok) {
       const t = await res.text();
-      resultsEl.innerHTML = `<div class="muted">Fel: ${res.status} ${t.slice(0, 200)}</div>`;
+      resultsEl.innerHTML = `<div class="muted">Error: ${res.status} ${t.slice(0, 200)}</div>`;
       resultsEl.style.display = 'block';
       countEl.textContent = '0 result';
       return;
@@ -104,28 +104,25 @@ export function render(appEl) {
   async function loadDefault() {
     const res = await fetch(`/api/pdf-default`);
     if (!res.ok) {
-      resultsEl.innerHTML = `<div class="muted">Can not get PDF list</div>`;
+      resultsEl.innerHTML = `<div class="muted">Cannot get PDF list</div>`;
       resultsEl.style.display = 'block';
-      countEl.textContent = '0 resultat';
+      countEl.textContent = '0 result';
       return;
     }
     const rows = await res.json();
     renderResults(rows);
   }
 
-  // events (scoped)
-  doBtn.addEventListener('click', search);
-  fieldEl.addEventListener('change', search);
-
+  // Debounced live search
   let debounceTimer;
   qEl.addEventListener('keyup', () => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      search();
-    }, 100);
+    debounceTimer = setTimeout(search, 100);
   });
 
-  // show all metadata
+  fieldEl.addEventListener('change', search);
+
+  // Show all metadata
   resultsEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('.btn-show-all-pdf-metadata');
     if (!btn) return;
@@ -147,12 +144,12 @@ export function render(appEl) {
       pre.classList.remove('hidden');
       btn.textContent = 'Hide metadata';
     } catch {
-      pre.textContent = 'Can not get metadata.';
+      pre.textContent = 'Cannot get metadata.';
       pre.classList.remove('hidden');
     }
   });
 
-  // Run default on start
+  // Load default PDFs on start
   loadDefault();
 }
 
