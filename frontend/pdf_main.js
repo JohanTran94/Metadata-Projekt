@@ -147,12 +147,12 @@ export function render(appEl) {
       pre.classList.remove('hidden');
       btn.textContent = 'Hide metadata';
     } catch {
-      pre.textContent = 'Kunde inte hämta metadata.';
+      pre.textContent = 'Can not get metadata.';
       pre.classList.remove('hidden');
     }
   });
 
-  // kör default direkt vid render
+  // Run default on start
   loadDefault();
 }
 
