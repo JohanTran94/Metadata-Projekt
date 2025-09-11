@@ -44,7 +44,7 @@ async function init() {
   app.use('/pdf', express.static(path.resolve(process.cwd(), 'warehouse/pdf')));
   app.use('/powerpoint', express.static(path.resolve(process.cwd(), 'warehouse/powerpoint')));
 
-  app.listen(3000, () => {
+  app.listen(5173, () => {
     console.log(' - Server listening on http://localhost:5173');
   });
 }

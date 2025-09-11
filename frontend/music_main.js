@@ -3,17 +3,16 @@
 // är debounce något jag vill ha? varje sök nu ger  resultat och hämtar info 
 export async function render(appEl) {
   appEl.innerHTML = `
-    <section>
-      <div class="row" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-        <h2 style="margin:0;">Här kan du söka på massa olika låtar--> Det finns även olika kategorier att filtrera på.</h2>
-        
-      </div>
 
-      <div class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+        
+      
+
+      
         <label>
           Sök i:
           <select id="field">
             <option value="any">Alla sökfält</option>
+            <option value="file">Fil</option>
             <option value="title">Titel</option>
             <option value="artist">Artist</option>
             <option value="album">Album</option>
@@ -22,6 +21,7 @@ export async function render(appEl) {
           </select>
         </label>
         <input id="q" placeholder="Sök..." />
+<button id="btnSearch" type="button">Sök</button>
       </div>
 
       <div id="summary" class="muted" style="margin-top:8px;"></div>
@@ -54,6 +54,7 @@ export async function render(appEl) {
   const rowsEl = document.getElementById('rows'); //
   const summaryEl = document.getElementById('summary'); //det du söker på visas 10 låtar visas..
   const playerEl = document.getElementById('player'); //Spela upp musik. gömd innan man klickar på knapp med hidden 
+  const btnSearch = document.getElementById('btnSearch');
 
 
 
@@ -64,7 +65,7 @@ export async function render(appEl) {
     const idAttr = it.id != null ? `data-id="${String(it.id)}"` : '';
     return `
       <tr ${idAttr}>
-        <td>${file || ''}</td>
+        <td>${it.file || ''}</td>
         <td>${it.title || ''}</td>
         <td>${it.artist || ''}</td>
         <td>${it.album || ''}</td>
@@ -120,9 +121,20 @@ export async function render(appEl) {
   }
 
 
-  // 
-  qEl.addEventListener('input', search); //söker på tangenttryck
-  fieldEl.addEventListener('change', search); // söker på byte av kategori i dropdown
+  // tidigare lösning
+  //qEl.addEventListener('input', search); //söker på tangenttryck
+  //fieldEl.addEventListener('change', search); // söker på byte av kategori i dropdown
+
+  // Kör sök när man klickar på knappen
+  btnSearch.addEventListener('click', search);
+
+  // Kör sök när man trycker Enter i sökrutan
+  qEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      search();
+    }
+  });
 
   rowsEl.addEventListener('click', async (e) => {
     // Spela
