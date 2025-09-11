@@ -45,7 +45,7 @@ async function init() {
   app.use('/powerpoint', express.static(path.resolve(process.cwd(), 'warehouse/powerpoint')));
 
   app.listen(3000, () => {
-    console.log(' - Server listening on http://localhost:3000');
+    console.log(' - Server listening on http://localhost:5173');
   });
 }
 init().catch((err) => {
