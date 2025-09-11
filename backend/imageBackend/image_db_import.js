@@ -4,6 +4,27 @@ import mysql from 'mysql2/promise';
 import exifr from 'exifr';
 import dbCreds from '../../db.js';
 
+function dmsToDecFlexible(v, ref) {
+  if (v == null) return null;
+
+  if (typeof v === 'string') {
+    const parts = v.split(/[;,\s]+/).filter(Boolean).map(Number);
+    if (parts.length >= 3) v = parts.slice(0, 3);
+    else return null;
+  }
+
+  if (Array.isArray(v)) {
+    const [d, m, s] = v.map(Number);
+    if (![d, m, s].every(Number.isFinite)) return null;
+    const sign = (ref === 'S' || ref === 'W') ? -1 : 1;
+    return sign * (d + m / 60 + s / 3600);
+  }
+
+
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
 const IMAGE_DIR = path.resolve(process.cwd(), 'warehouse/image');
 
 function basename(p) { return p ? path.basename(String(p)) : null; }
@@ -48,8 +69,11 @@ export async function importImageMetadata() {
       const make = raw?.Make ?? raw?.make ?? null;
       const model = raw?.Model ?? raw?.model ?? null;
       const createDate = raw?.CreateDate ?? raw?.DateTimeOriginal ?? raw?.ModifyDate ?? null;
-      const latitude = raw?.GPSLatitude ?? raw?.latitude ?? raw?.Latitude ?? null;
-      const longitude = raw?.GPSLongitude ?? raw?.longitude ?? raw?.Longitude ?? null;
+      let latitude = raw?.latitude ?? raw?.Latitude ?? null;
+      let longitude = raw?.longitude ?? raw?.Longitude ?? null;
+
+      if (latitude == null) latitude = dmsToDecFlexible(raw?.GPSLatitude, raw?.GPSLatitudeRef);
+      if (longitude == null) longitude = dmsToDecFlexible(raw?.GPSLongitude, raw?.GPSLongitudeRef);
 
       const meta = {
         file_name: file,
