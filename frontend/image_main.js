@@ -1,20 +1,23 @@
-// frontend/image_main.js
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
       <h2>Bild Sök</h2>
       <form id="searchForm" class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-        <input id="text"  name="text"  placeholder="filnamn/märke/modell" />
-        <input id="make"  name="make"  placeholder="Make (Canon, Sony…)" />
-        <input id="model" name="model" placeholder="Model" />
+        <input id="text"  name="text"  placeholder="Filnamn/Märke/Modell" />
+        <input id="make"  name="make"  placeholder="Märke (SONY, Apple…)" />
+        <input id="model" name="model" placeholder="Modell" />
         <input id="from"  name="from"  type="date" />
         <input id="to"    name="to"    type="date" />
-        <input id="nearLat" name="nearLat" placeholder="Lat" style="width:120px" />
-        <input id="nearLon" name="nearLon" placeholder="Lon" style="width:120px" />
+        <input id="nearLat" name="nearLat" placeholder="Latitude" style="width:120px" />
+        <input id="nearLon" name="nearLon" placeholder="Longitude" style="width:120px" />
         <input id="radius"  name="radius"  placeholder="km"  style="width:90px" />
-        <select id="pageSize" name="pageSize">
-          <option>10</option><option selected>20</option><option>50</option><option>100</option>
+        <select id="pageSize" name="pageSize" title="Antal per sida">
+          <option value="10">10st per sida</option>
+          <option value="20" selected>20st per sida</option>
+          <option value="50">50st per sida</option>
+          <option value="100">100st per sida</option>
         </select>
+
         <button type="submit">Sök</button>
       </form>
 
@@ -23,8 +26,8 @@ export function render(appEl) {
       <table id="resultTable" class="table" hidden>
         <thead>
           <tr>
-            <th>File Name</th><th>Make</th><th>Model</th><th>Date</th>
-            <th>Width</th><th>Height</th><th>Latitude</th><th>Longitude</th><th>Actions</th>
+            <th>Filnamn</th><th>Märke</th><th>Modell</th><th>Datum</th>
+            <th>Bredd</th><th>Höjd</th><th>Latitude</th><th>Longitude</th><th>Visa bild</th>
 
           </tr>
         </thead>
@@ -105,22 +108,37 @@ export function render(appEl) {
   function renderResults(data) {
     const rows = data.results || [];
     tbody.innerHTML = '';
+
+    const mapUrl = (lat, lon) =>
+      `https://maps.google.com/?q=${Number(lat).toFixed(6)},${Number(lon).toFixed(6)}`;
+
     rows.forEach(r => {
+      const hasGps = r.latitude != null && r.longitude != null;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td title="${r.file_path || ''}">${r.file_name || ''}</td>
-        <td>${r.make || ''}</td>
-        <td>${r.model || ''}</td>
-        <td>${fmtDate(r.create_date)}</td>
-        <td>${r.width ?? ''}</td>
-        <td>${r.height ?? ''}</td>
-        <td>${fmtNum(r.latitude)}</td>
-        <td>${fmtNum(r.longitude)}</td>
-        <td class="row-actions">
-          ${r.file_name ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>` : ''}
-        </td>`;
+      <td title="${r.file_path || ''}">${r.file_name || ''}</td>
+      <td>${r.make || ''}</td>
+      <td>${r.model || ''}</td>
+      <td>${fmtDate(r.create_date)}</td>
+      <td>${r.width ?? ''}</td>
+      <td>${r.height ?? ''}</td>
+      <td>${fmtNum(r.latitude)}</td>
+      <td>${fmtNum(r.longitude)}</td>
+      <td class="row-actions">
+        ${r.file_name
+          ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">Visa</a>`
+          : ''
+        }
+        ${hasGps
+          ? ` | <a href="${mapUrl(r.latitude, r.longitude)}" target="_blank" rel="noopener">Karta</a>`
+          : ` | <span class="muted">No GPS</span>`
+        }
+      </td>
+    `;
       tbody.appendChild(tr);
     });
+
     table.hidden = rows.length === 0;
 
     const maxPage = Math.max(1, Math.ceil(state.total / state.pageSize));
@@ -129,6 +147,7 @@ export function render(appEl) {
     pageInfo.textContent = `Page ${state.page} / ${maxPage}`;
   }
 
+
   function fmtNum(n) { return (n === null || n === undefined) ? '' : String(n); }
   function fmtDate(dt) {
     if (!dt) return '';
@@ -136,4 +155,4 @@ export function render(appEl) {
     return isNaN(d.getTime()) ? String(dt) : d.toISOString().slice(0, 19).replace('T', ' ');
   }
 }
-export function cleanup() { /* nếu cần tháo event… */ }
+export function cleanup() { }
