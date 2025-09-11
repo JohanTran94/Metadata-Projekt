@@ -26,7 +26,7 @@ const importMetadata = async () => {
     )
   `);
 
-  // clear existing data before import
+  // clear existing data before import in database
   await db.execute(`TRUNCATE TABLE pdf_metadata`);
   console.log('pdf_metadata table cleared.');
 
