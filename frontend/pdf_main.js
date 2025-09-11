@@ -1,23 +1,23 @@
-// frontend/pdfFrontend/pdf_main.js
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
-      <h2>PDF Sök</h2>
+      <h2>Search PDF-files</h2>
 
       <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
-          Sök på:
+          Search by:
           <select id="pdf-field">
+            <option value="Everything">Everything</option>
             <option value="Title">Titel</option>
             <option value="Author">Author</option>
             <option value="Subject">Subject</option>
             <option value="Text">Text</option>
             <option value="Keywords">Keywords</option>
             <option value="Pages">Pages</option>
+            <option value="Filename">File Name</option>
           </select>
         </label>
-        <input id="pdf-q" type="text" placeholder="Sök bland PDF-filer (ex: 'AI', '>10', '5-15')" />
-        <button id="pdf-do">Sök</button>
+        <input id="pdf-q" type="text" placeholder="(ex: 'AI', '>10', '5-15')" />
       </div>
 
       <p id="pdf-count" class="muted" style="margin-top:8px;"></p>
@@ -27,42 +27,29 @@ export function render(appEl) {
 
   const fieldEl = appEl.querySelector('#pdf-field');
   const qEl = appEl.querySelector('#pdf-q');
-  const doBtn = appEl.querySelector('#pdf-do');
   const countEl = appEl.querySelector('#pdf-count');
   const resultsEl = appEl.querySelector('#pdf-results');
+
+  const escapeReg = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   const highlight = (text, term) => {
     if (!text || !term) return text || '';
     return String(text).replace(new RegExp(`(${escapeReg(term)})`, 'gi'), '<mark>$1</mark>');
   };
+
   const truncate = (text, maxLength = 500) => {
     if (!text) return '';
     return String(text).length > maxLength ? String(text).slice(0, maxLength) + '…' : String(text);
   };
-  const escapeReg = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-  async function search() {
-    const field = fieldEl.value;
-    const term = qEl.value.trim();
-    if (!term) {
-      resultsEl.innerHTML = '';
-      resultsEl.style.display = 'none';
-      countEl.textContent = '';
-      return;
-    }
-
-    const res = await fetch(`/api/pdf-search/${encodeURIComponent(field)}/${encodeURIComponent(term.toLowerCase())}`);
-    if (!res.ok) {
-      const t = await res.text();
-      resultsEl.innerHTML = `<div class="muted">Fel: ${res.status} ${t.slice(0, 200)}</div>`;
-      resultsEl.style.display = 'block';
-      countEl.textContent = '0 resultat';
-      return;
-    }
-
-    const rows = await res.json();
+  async function renderResults(rows, term = '') {
     countEl.textContent = `${rows.length} resultat`;
     resultsEl.style.display = 'block';
+
+    if (!rows.length) {
+      resultsEl.innerHTML = '<div class="muted">No hits</div>';
+      return;
+    }
 
     resultsEl.innerHTML = rows.map(r => {
       const filename = r.filename || '';
@@ -75,12 +62,13 @@ export function render(appEl) {
 
       return `
         <article>
-          <h3>${highlight(title, term)}</h3>
-          <p><b>Author:</b> ${highlight(author, term)}</p>
-          <p><b>Subject:</b> ${highlight(subject, term)}</p>
-          <p><b>Keywords:</b> ${highlight(keywords, term)}</p>
-          <p><b>pages:</b> ${pages}</p>
-          <p><b>Text:</b> ${highlight(truncate(text), term)}</p>
+          <h3>${term ? highlight(title, term) : title}</h3>
+          <p><b>Author:</b> ${term ? highlight(author, term) : author}</p>
+          <p><b>Subject:</b> ${term ? highlight(subject, term) : subject}</p>
+          <p><b>Keywords:</b> ${term ? highlight(keywords, term) : keywords}</p>
+          <p><b>Pages:</b> ${pages}</p>
+          <p><b>Text:</b> ${term ? highlight(truncate(text), term) : truncate(text)}</p>
+          <p><b>Filename:</b> ${term ? highlight(filename, term) : filename}</p>
           <p>
             ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
             ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Open</a>` : ''}
@@ -92,20 +80,49 @@ export function render(appEl) {
     }).join('');
   }
 
-  // events (scoped)
-  doBtn.addEventListener('click', search);
-  fieldEl.addEventListener('change', search);
+  async function search() {
+    const field = fieldEl.value;
+    const term = qEl.value.trim();
+    if (!term) {
+      loadDefault();
+      return;
+    }
 
-  // debounce på keyup
+    const res = await fetch(`/api/pdf-search/${encodeURIComponent(field)}/${encodeURIComponent(term.toLowerCase())}`);
+    if (!res.ok) {
+      const t = await res.text();
+      resultsEl.innerHTML = `<div class="muted">Error: ${res.status} ${t.slice(0, 200)}</div>`;
+      resultsEl.style.display = 'block';
+      countEl.textContent = '0 result';
+      return;
+    }
+
+    const rows = await res.json();
+    renderResults(rows, term);
+  }
+
+  async function loadDefault() {
+    const res = await fetch(`/api/pdf-default`);
+    if (!res.ok) {
+      resultsEl.innerHTML = `<div class="muted">Cannot get PDF list</div>`;
+      resultsEl.style.display = 'block';
+      countEl.textContent = '0 result';
+      return;
+    }
+    const rows = await res.json();
+    renderResults(rows);
+  }
+
+  // Debounced live search
   let debounceTimer;
   qEl.addEventListener('keyup', () => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      search();
-    }, 300);
+    debounceTimer = setTimeout(search, 100);
   });
 
-  // show all metadata
+  fieldEl.addEventListener('change', search);
+
+  // Show all metadata
   resultsEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('.btn-show-all-pdf-metadata');
     if (!btn) return;
@@ -127,10 +144,13 @@ export function render(appEl) {
       pre.classList.remove('hidden');
       btn.textContent = 'Hide metadata';
     } catch {
-      pre.textContent = 'Kunde inte hämta metadata.';
+      pre.textContent = 'Cannot get metadata.';
       pre.classList.remove('hidden');
     }
   });
+
+  // Load default PDFs on start
+  loadDefault();
 }
 
 export function cleanup() { /* optional */ }
