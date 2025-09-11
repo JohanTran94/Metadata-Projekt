@@ -3,7 +3,7 @@ import pdfParse from 'pdf-parse-fork';
 import mysql from 'mysql2/promise';
 import dbConfig from '../../db.js';
 
-const pathToPdfs = './frontend/pdf';
+const pathToPdfs = './warehouse/pdf';
 
 const importMetadata = async () => {
   const db = await mysql.createConnection({
@@ -26,6 +26,10 @@ const importMetadata = async () => {
     )
   `);
 
+  // clear existing data before import
+  await db.execute(`TRUNCATE TABLE pdf_metadata`);
+  console.log('pdf_metadata table cleared.');
+
   const files = fs
     .readdirSync(pathToPdfs)
     .filter(file => file.endsWith('.pdf'));
@@ -34,7 +38,7 @@ const importMetadata = async () => {
     const buffer = fs.readFileSync(`${pathToPdfs}/${file}`);
     const metadata = await pdfParse(buffer);
 
-    // Simplyfy XMP
+    // Simplify XMP
     metadata.xmp = metadata.metadata._metadata;
     delete metadata.metadata;
 
