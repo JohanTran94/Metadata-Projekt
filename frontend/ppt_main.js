@@ -2,24 +2,24 @@
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
-      <h2>Sök PowerPoint</h2>
+      <h2>Search PowerPoint</h2>
  
       <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
           Sök på:
           <select id="ppt-field">
-            <option value="fileName">Filnamn</option>
-            <option value="title">Titel</option>
+            <option value="fileName">File name</option>
+            <option value="title">Title</option>
             <option value="original">URL</option>
-            <option value="company">Organisation</option>
-            <option value="creationDate">Skapad</option>
+            <option value="company">Organization</option>
+            <option value="creationDate">Creation date</option>
           </select>
         </label>
-        <input id="ppt-q" type="text" placeholder="Sök bland PowerPoint-filer" />
-        <button id="ppt-do">Sök</button>
+        <input id="ppt-q" type="text" placeholder="Search PowerPoint files" />
+        <button id="ppt-do">Search</button>
       </div>
  
-      <p id="ppt-count" class="muted" style="margin-top:8px;">0 resultat</p>
+      <p id="ppt-count" class="muted" style="margin-top:8px;">0 result</p>
       <section id="ppt-results"></section>
     </section>
   `;
@@ -35,35 +35,35 @@ export function render(appEl) {
     const term = qEl.value.trim();
     if (!term) {
       resultsEl.innerHTML = '';
-      countEl.textContent = '0 resultat';
+      countEl.textContent = '0 results';
       return;
     }
     const res = await fetch(`/api/ppt-search/${encodeURIComponent(field)}/${encodeURIComponent(term)}`);
     if (!res.ok) {
       resultsEl.innerHTML = `<div class="muted">Fel: ${res.status}</div>`;
-      countEl.textContent = '0 resultat';
+      countEl.textContent = '0 results';
       return;
     }
     const rows = await res.json();
-    countEl.textContent = `${rows.length} resultat`;
+    countEl.textContent = `${rows.length} results`;
 
     resultsEl.innerHTML = rows.map(r => {
       const fileName = r.fileName || '';
-      const title = r.title || 'Okänd';
-      const company = r.company || 'Okänt';
-      const creationDate = r.creationDate || 'Okänt';
+      const title = r.title || 'Unknown';
+      const company = r.company || 'Unknown';
+      const creationDate = r.creationDate || 'Unknown';
       const original = r.original || '';
 
 
-      const localLink = fileName ? `<a href="/ppt/${encodeURIComponent(fileName)}" target="_blank" rel="noopener">Öppna lokalt</a>` : '';
+      const localLink = fileName ? `<a href="/ppt/${encodeURIComponent(fileName)}" target="_blank" rel="noopener">Open local</a>` : '';
 
       return `
         <article data-id="${r.id}">
-          <p><b>Titel:</b> ${title}</p>
-          <p><b>URL:</b> ${original ? `<a href="${original}" target="_blank" rel="noopener">${original}</a>` : 'Okänd'}</p>
-          <p><b>Filnamn:</b> ${fileName || 'Okänt'} ${localLink ? `&nbsp;|&nbsp;${localLink}` : ''}</p>
+          <p><b>Title:</b> ${title}</p>
+          <p><b>URL:</b> ${original ? `<a href="${original}" target="_blank" rel="noopener">${original}</a>` : 'Unknown'}</p>
+          <p><b>File name:</b> ${fileName || 'Unknown'} ${localLink ? `&nbsp;|&nbsp;${localLink}` : ''}</p>
           <p><b>Organisation:</b> ${company}</p>
-          <p><b>Skapad:</b> ${creationDate}</p>
+          <p><b>Creation date:</b> ${creationDate}</p>
           <p><button class="btn-show-all-ppt-metadata">Show all metadata</button></p>
           <pre class="ppt-meta-block hidden"></pre>
         </article>
@@ -94,7 +94,7 @@ export function render(appEl) {
       const res = await fetch(`/api/ppt-all-meta/${encodeURIComponent(id)}`);
       const data = await res.json();
       pre.textContent = JSON.stringify(data, null, 2);
-    } catch { pre.textContent = 'Kunde inte hämta metadata.'; }
+    } catch { pre.textContent = 'Could not find metadata.'; }
     pre.classList.remove('hidden');
     btn.textContent = 'Hide metadata';
   });
