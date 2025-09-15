@@ -19,16 +19,17 @@ async function init() {
   const db = await mysql.createConnection(dbCredentials);
   db.config.namedPlaceholders = true;
 
-  console.log(' - Extracting data from warehouse and loading to database...');
-  await importImageMetadata();
-  await importMusicMetadata();
-  console.log(' - Ignore PDF-warnings.');
-  await importPdfMetadata();
+  if (false) {
+    console.log(' - Extracting data from warehouse and loading to database...');
+    await importImageMetadata();
+    await importMusicMetadata();
+    console.log(' - Ignore PDF-warnings.');
+    await importPdfMetadata();
 
-  console.log(' - Cleaning PowerPoint metadata...');
-  await runPptETL();
-  await importPptMetadata(db);
-
+    console.log(' - Cleaning PowerPoint metadata...');
+    await runPptETL();
+    await importPptMetadata(db);
+  }
 
   const app = express();
   app.use(express.json());
