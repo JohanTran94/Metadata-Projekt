@@ -1,24 +1,24 @@
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
-      <h2>Bild Sök</h2>
+      <h2>Image Search</h2>
       <form id="searchForm" class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-        <input id="text"  name="text"  placeholder="Filnamn/Märke/Modell" />
-        <input id="make"  name="make"  placeholder="Märke (SONY, Apple…)" />
-        <input id="model" name="model" placeholder="Modell" />
+        <input id="text"  name="text"  placeholder="File name / Make / Model" />
+        <input id="make"  name="make"  placeholder="Brand (SONY, Apple…)" />
+        <input id="model" name="model" placeholder="Model" />
         <input id="from"  name="from"  type="date" />
         <input id="to"    name="to"    type="date" />
         <input id="nearLat" name="nearLat" placeholder="Latitude" style="width:120px" />
         <input id="nearLon" name="nearLon" placeholder="Longitude" style="width:120px" />
         <input id="radius"  name="radius"  placeholder="km"  style="width:90px" />
-        <select id="pageSize" name="pageSize" title="Antal per sida">
-          <option value="10">10st per sida</option>
-          <option value="20" selected>20st per sida</option>
-          <option value="50">50st per sida</option>
-          <option value="100">100st per sida</option>
+        <select id="pageSize" name="pageSize" title="Per page">
+          <option value="10">10 per page</option>
+          <option value="20" selected>20 per page</option>
+          <option value="50">50 per page</option>
+          <option value="100">100 per page</option>
         </select>
 
-        <button type="submit">Sök</button>
+        <button type="submit">Search</button>
       </form>
 
       <div id="summary" class="muted" style="margin-top:8px;"></div>
@@ -26,9 +26,8 @@ export function render(appEl) {
       <table id="resultTable" class="table" hidden>
         <thead>
           <tr>
-            <th>Filnamn</th><th>Märke</th><th>Modell</th><th>Datum</th>
-            <th>Bredd</th><th>Höjd</th><th>Latitude</th><th>Longitude</th><th>Visa bild</th>
-
+            <th>File Name</th><th>Make</th><th>Model</th><th>Date</th>
+            <th>Width</th><th>Height</th><th>Latitude</th><th>Longitude</th><th>Actions</th>
           </tr>
         </thead>
         <tbody id="resultBody"></tbody>
@@ -63,7 +62,7 @@ export function render(appEl) {
 
   async function runSearch(keepQuery = false) {
     const params = buildQueryParams(keepQuery);
-    const url = `/api/image/search?${params.toString()}`; // khớp backend ảnh
+    const url = `/api/image/search?${params.toString()}`;
 
     summary.textContent = 'Loading...';
     table.hidden = true;
@@ -117,25 +116,25 @@ export function render(appEl) {
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-      <td title="${r.file_path || ''}">${r.file_name || ''}</td>
-      <td>${r.make || ''}</td>
-      <td>${r.model || ''}</td>
-      <td>${fmtDate(r.create_date)}</td>
-      <td>${r.width ?? ''}</td>
-      <td>${r.height ?? ''}</td>
-      <td>${fmtNum(r.latitude)}</td>
-      <td>${fmtNum(r.longitude)}</td>
-      <td class="row-actions">
-        ${r.file_name
-          ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">Visa</a>`
+        <td title="${r.file_path || ''}">${r.file_name || ''}</td>
+        <td>${r.make || ''}</td>
+        <td>${r.model || ''}</td>
+        <td>${fmtDate(r.create_date)}</td>
+        <td>${r.width ?? ''}</td>
+        <td>${r.height ?? ''}</td>
+        <td>${fmtNum(r.latitude)}</td>
+        <td>${fmtNum(r.longitude)}</td>
+        <td class="row-actions">
+          ${r.file_name
+          ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>`
           : ''
         }
-        ${hasGps
-          ? ` | <a href="${mapUrl(r.latitude, r.longitude)}" target="_blank" rel="noopener">Karta</a>`
+          ${hasGps
+          ? ` | <a href="${mapUrl(r.latitude, r.longitude)}" target="_blank" rel="noopener">Map</a>`
           : ` | <span class="muted">No GPS</span>`
         }
-      </td>
-    `;
+        </td>
+      `;
       tbody.appendChild(tr);
     });
 
@@ -146,7 +145,6 @@ export function render(appEl) {
     pagination.hidden = rows.length === 0;
     pageInfo.textContent = `Page ${state.page} / ${maxPage}`;
   }
-
 
   function fmtNum(n) { return (n === null || n === undefined) ? '' : String(n); }
   function fmtDate(dt) {
