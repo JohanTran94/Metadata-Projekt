@@ -6,7 +6,7 @@ const routes = {
   start: './start_main.js',
   music: './music_main.js',
   pdf: './pdf_main.js',
-  powerpoint: './ppt_main_test.js',
+  powerpoint: './ppt_main.js',
   image: './image_main.js',
 };
 
