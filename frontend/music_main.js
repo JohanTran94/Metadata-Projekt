@@ -9,18 +9,18 @@ export async function render(appEl) {
 
       
         <label>
-          Sök i:
+          Search:
           <select id="field">
-            <option value="any">Alla sökfält</option>
-            <option value="file">Fil</option>
-            <option value="title">Titel</option>
+            <option value="any">All fields</option>
+            <option value="file">File</option>
+            <option value="title">Title</option>
             <option value="artist">Artist</option>
             <option value="album">Album</option>
             <option value="genre">Genre</option>
-            <option value="year">År</option>
+            <option value="year">Year</option>
           </select>
         </label>
-        <input id="q" placeholder="Sök..." />
+        <input id="q" placeholder="Search..." />
 <button id="btnSearch" type="button">Sök</button>
       </div>
 
@@ -31,14 +31,14 @@ export async function render(appEl) {
       <table>
         <thead>
           <tr>
-            <th>Fil</th>
-            <th>Titel</th>
+            <th>File</th>
+            <th>Title</th>
             <th>Artist</th>
             <th>Album</th>
-            <th>År</th>
+            <th>Year</th>
             <th>Genre</th>
-            <th>Ladda ned</th>
-            <th>Spela</th>
+            <th>Download</th>
+            <th>Play</th>
             <th>Metadata</th>
           </tr>
         </thead>
@@ -71,9 +71,9 @@ export async function render(appEl) {
         <td>${it.album || ''}</td>
         <td>${it.year || ''}</td>
         <td>${it.genre || ''}</td>
-        <td><a href="${url}" download>Hämta</a></td>
+        <td><a href="${url}" download>Download</a></td>
         <td><button class="btn-play" data-play="${url}">▶︎</button></td>
-        <td><button class="btn-show-all-music-metadata">Visa metadata</button></td>
+        <td><button class="btn-show-all-music-metadata">Show metadata</button></td>
       </tr>
     `;
   }
