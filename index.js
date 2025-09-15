@@ -31,6 +31,7 @@ async function init() {
     await importPptMetadata(db);
   }
 
+
   const app = express();
   app.use(express.json());
 
@@ -53,4 +54,3 @@ init().catch((err) => {
   console.error(' - Fatal error during initialization:', err);
   process.exit(1);
 });
-
