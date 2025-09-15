@@ -80,11 +80,11 @@ export async function render(appEl) {
   // Tomma fält ska  visas visuellt--> snyggare med okänd... än tomt enl Thomas ex
   function unknown(items) {
     for (const it of items) {
-      if (!it.title || !String(it.title).trim()) it.title = 'Okänd titel';
-      if (!it.artist || !String(it.artist).trim()) it.artist = 'Okänd artist';
-      if (!it.album || !String(it.album).trim()) it.album = 'Okänt album';
-      if (!it.year || !String(it.year).trim()) it.year = 'Okänt år';
-      if (!it.genre || !String(it.genre).trim()) it.genre = 'Okänd genre';
+      if (!it.title || !String(it.title).trim()) it.title = 'Unknown title';
+      if (!it.artist || !String(it.artist).trim()) it.artist = 'Unknown artist';
+      if (!it.album || !String(it.album).trim()) it.album = 'Unknown album';
+      if (!it.year || !String(it.year).trim()) it.year = 'Unknown year';
+      if (!it.genre || !String(it.genre).trim()) it.genre = 'Unknown genre';
     }
     return items;
   }
