@@ -3,6 +3,7 @@
 //
 
 const routes = {
+  start: './start_main.js',
   music: './music_main.js',
   pdf: './pdf_main.js',
   powerpoint: './ppt_main_test.js',
@@ -13,7 +14,7 @@ const routes = {
 let current = { cleanup: null };
 // start med musik då det är min branch & jag inte har någon mockdata för de andra filtyperna
 async function loadRoute() {
-  const hash = (location.hash || '#music').slice(1).toLowerCase();
+  const hash = (location.hash || '#start').slice(1).toLowerCase();
   const path = routes[hash] || routes.music;
 
 
