@@ -4,6 +4,7 @@
 export async function render(appEl) {
   appEl.innerHTML = `
     <section>
+      <h2>Search music</h2>
       <label>
         Search:
         <select id="field">

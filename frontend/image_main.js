@@ -1,7 +1,7 @@
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
-      <h2>Image Search</h2>
+      <h2>Search image</h2>
       <form id="searchForm" class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
         <input id="text"  name="text"  placeholder="File name / Make / Model" />
         <input id="make"  name="make"  placeholder="Brand (SONY, Apple…)" />
