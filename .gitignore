@@ -11,6 +11,15 @@ db.js
 warehouse/*
 !warehouse/.gitkeep
 
+backend/imageBackend/image_error_logs/*
+!backend/imageBackend/image_error_logs/.gitkeep
+
+backend/musicBackend/music_error_logs/*
+!backend/musicBackend/music_error_logs/.gitkeep
+
+backend/pdfBackend/pdf_error_logs/*
+!backend/pdfBackend/pdf_error_logs/.gitkeep
+
 backend/pptBackend/ppt_error_logs/*
 !backend/pptBackend/ppt_error_logs/.gitkeep
 
