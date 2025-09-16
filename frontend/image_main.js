@@ -1,22 +1,55 @@
+// frontend/image_main.js
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
       <h2>Search image</h2>
-      <form id="searchForm" class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-        <input id="text"  name="text"  placeholder="File name / Make / Model" />
-        <input id="make"  name="make"  placeholder="Brand (SONY, Apple…)" />
-        <input id="model" name="model" placeholder="Model" />
-        <input id="from"  name="from"  type="date" />
-        <input id="to"    name="to"    type="date" />
-        <input id="nearLat" name="nearLat" placeholder="Latitude" style="width:120px" />
-        <input id="nearLon" name="nearLon" placeholder="Longitude" style="width:120px" />
-        <input id="radius"  name="radius"  placeholder="km"  style="width:90px" />
-        <select id="pageSize" name="pageSize" title="Per page">
-          <option value="10">10 per page</option>
-          <option value="20" selected>20 per page</option>
-          <option value="50">50 per page</option>
-          <option value="100">100 per page</option>
-        </select>
+
+      <form id="searchForm" class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+        <label>
+          Mode
+          <select id="searchMode" name="mode">
+            <option value="all" selected>All fields</option>
+            <option value="file">File name</option>
+            <option value="make">Make</option>
+            <option value="model">Model</option>
+            <option value="date">Date range</option>
+            <option value="geo">Geo (lat/lon + radius)</option>
+          </select>
+        </label>
+
+        <!-- groups -->
+        <div data-group="all file" class="group">
+          <input id="text"  placeholder="File name / Make / Model" />
+        </div>
+
+        <div data-group="make" class="group hidden">
+          <input id="make"  placeholder="Brand (SONY, Apple…)" />
+        </div>
+
+        <div data-group="model" class="group hidden">
+          <input id="model" placeholder="Model" />
+        </div>
+
+        <div data-group="date" class="group hidden">
+          <input id="from" type="date" />
+          <input id="to"   type="date" />
+        </div>
+
+        <div data-group="geo" class="group hidden">
+          <input id="nearLat" placeholder="Latitude" style="width:120px" />
+          <input id="nearLon" placeholder="Longitude" style="width:120px" />
+          <input id="radius"  placeholder="km"  style="width:90px" />
+        </div>
+
+        <label>
+          Per page
+          <select id="pageSize" title="Per page">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </label>
 
         <button type="submit">Search</button>
       </form>
@@ -41,8 +74,10 @@ export function render(appEl) {
     </section>
   `;
 
+  // state + refs
   const state = { page: 1, total: 0, pageSize: 20, lastQuery: '' };
   const form = appEl.querySelector('#searchForm');
+  const modeEl = appEl.querySelector('#searchMode');
   const table = appEl.querySelector('#resultTable');
   const tbody = appEl.querySelector('#resultBody');
   const summary = appEl.querySelector('#summary');
@@ -50,6 +85,17 @@ export function render(appEl) {
   const pageInfo = appEl.querySelector('#pageInfo');
   const prevBtn = appEl.querySelector('#prevBtn');
   const nextBtn = appEl.querySelector('#nextBtn');
+
+  // show/hide groups by mode
+  function updateGroups() {
+    const mode = modeEl.value;
+    appEl.querySelectorAll('[data-group]').forEach(el => {
+      const groups = (el.getAttribute('data-group') || '').split(/\s+/);
+      el.classList.toggle('hidden', !groups.includes(mode) && !(mode === 'all' && groups.includes('all')));
+    });
+  }
+  modeEl.addEventListener('change', updateGroups);
+  updateGroups();
 
   form.addEventListener('submit', (ev) => { ev.preventDefault(); state.page = 1; runSearch(); });
   prevBtn.addEventListener('click', () => { if (state.page > 1) { state.page--; runSearch(true); } });
@@ -78,27 +124,49 @@ export function render(appEl) {
   }
 
   function buildQueryParams(keepQuery) {
-    const text = appEl.querySelector('#text').value.trim();
-    const make = appEl.querySelector('#make').value.trim();
-    const model = appEl.querySelector('#model').value.trim();
-    const from = appEl.querySelector('#from').value;
-    const to = appEl.querySelector('#to').value;
+    const mode = modeEl.value;
+
+    const text = (appEl.querySelector('#text')?.value || '').trim();
+    const make = (appEl.querySelector('#make')?.value || '').trim();
+    const model = (appEl.querySelector('#model')?.value || '').trim();
+    const from = appEl.querySelector('#from')?.value || '';
+    const to = appEl.querySelector('#to')?.value || '';
+    const nearLat = (appEl.querySelector('#nearLat')?.value || '').trim();
+    const nearLon = (appEl.querySelector('#nearLon')?.value || '').trim();
+    const radius = (appEl.querySelector('#radius')?.value || '').trim();
     const pageSize = appEl.querySelector('#pageSize').value;
-    const nearLat = appEl.querySelector('#nearLat').value.trim();
-    const nearLon = appEl.querySelector('#nearLon').value.trim();
-    const radius = appEl.querySelector('#radius').value.trim();
 
     const params = keepQuery && state.lastQuery ? new URLSearchParams(state.lastQuery) : new URLSearchParams();
-    params.set('type', 'image'); params.set('page', String(state.page)); params.set('pageSize', pageSize || '20');
+    params.set('page', String(state.page));
+    params.set('pageSize', pageSize || '20');
 
-    if (text) params.set('text', text); else params.delete('text');
-    if (make) params.set('make', make); else params.delete('make');
-    if (model) params.set('model', model); else params.delete('model');
-    if (from) params.set('from', from); else params.delete('from');
-    if (to) params.set('to', to); else params.delete('to');
+    // only set params needed by the selected mode
+    if (mode === 'all' || mode === 'file') {
+      if (text) params.set('text', text); else params.delete('text');
+    } else {
+      params.delete('text');
+    }
 
-    if (nearLat && nearLon && radius) { params.set('nearLat', nearLat); params.set('nearLon', nearLon); params.set('radius', radius); }
-    else { params.delete('nearLat'); params.delete('nearLon'); params.delete('radius'); }
+    if (mode === 'make') { if (make) params.set('make', make); else params.delete('make'); }
+    else params.delete('make');
+
+    if (mode === 'model') { if (model) params.set('model', model); else params.delete('model'); }
+    else params.delete('model');
+
+    if (mode === 'date') {
+      if (from) params.set('from', from); else params.delete('from');
+      if (to) params.set('to', to); else params.delete('to');
+    } else { params.delete('from'); params.delete('to'); }
+
+    if (mode === 'geo') {
+      if (nearLat && nearLon && radius) {
+        params.set('nearLat', nearLat);
+        params.set('nearLon', nearLon);
+        params.set('radius', radius);
+      } else {
+        params.delete('nearLat'); params.delete('nearLon'); params.delete('radius');
+      }
+    } else { params.delete('nearLat'); params.delete('nearLon'); params.delete('radius'); }
 
     state.lastQuery = params.toString();
     return params;
@@ -108,12 +176,10 @@ export function render(appEl) {
     const rows = data.results || [];
     tbody.innerHTML = '';
 
-    const mapUrl = (lat, lon) =>
-      `https://maps.google.com/?q=${Number(lat).toFixed(6)},${Number(lon).toFixed(6)}`;
+    const mapUrl = (lat, lon) => `https://maps.google.com/?q=${Number(lat).toFixed(6)},${Number(lon).toFixed(6)}`;
 
     rows.forEach(r => {
       const hasGps = r.latitude != null && r.longitude != null;
-
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td title="${r.file_path || ''}">${r.file_name || ''}</td>
@@ -125,14 +191,8 @@ export function render(appEl) {
         <td>${fmtNum(r.latitude)}</td>
         <td>${fmtNum(r.longitude)}</td>
         <td class="row-actions">
-          ${r.file_name
-          ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>`
-          : ''
-        }
-          ${hasGps
-          ? ` | <a href="${mapUrl(r.latitude, r.longitude)}" target="_blank" rel="noopener">Map</a>`
-          : ` | <span class="muted">No GPS</span>`
-        }
+          ${r.file_name ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>` : ''}
+          ${hasGps ? ` | <a href="${mapUrl(r.latitude, r.longitude)}" target="_blank" rel="noopener">Map</a>` : ` | <span class="muted">No GPS</span>`}
         </td>
       `;
       tbody.appendChild(tr);
