@@ -1,10 +1,10 @@
-
-export async function render(appEl) {
+export function render(appEl) {
   appEl.innerHTML = `
-    <section>
+    <section class="start">
       <h2>Welcome</h2>
-      <p class="muted" style="margin:4px 0 16px">
-        Pick a search engine below to get started.
+      <p class="lead">
+        Explore metadata across four sources. Pick a card below or use the tabs above.
+        You can search by keywords, filter by dates or GPS, and view the raw metadata.
       </p>
 
       <div class="start-grid">
@@ -20,13 +20,24 @@ export async function render(appEl) {
 
         <a href="#powerpoint" class="start-card">
           <h3>PowerPoint</h3>
-          <p>Search PPT/PPTX metadata (title, company, creation date)…</p>
+          <p>Search PPT/PPTX metadata (title, organisation, creation date)…</p>
         </a>
 
         <a href="#image" class="start-card">
           <h3>Image</h3>
-          <p>Search photos by make, model, date, GPS, and dimensions.</p>
+          <p>Search photos by file name, make, model, creation date, GPS.</p>
         </a>
+      </div>
+
+      <div class="tips">
+        <strong>Tips:</strong>
+        <ul>
+          <li>Use the <em>Search by</em> dropdown to switch fields.</li>
+          <li>Click <em>Download or URL</em> to download songs, pdfs or ppts.</li>
+          <li>Click <em>Metadata</em> to view the full raw JSON for any item.</li>
+          <li>Click <em>Play button</em> to play a song.</li>
+          <li>Click <em>Map</em> in results to open the photo location in Google Maps.</li>
+        </ul>
       </div>
     </section>
   `;
