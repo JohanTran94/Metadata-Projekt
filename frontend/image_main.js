@@ -79,6 +79,23 @@ export function render(appEl) {
         <span id="pageInfo" class="muted"></span>
         <button id="nextBtn" type="button">Next</button>
       </div>
+  
+      <div id="metaModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="metaTitle">
+        <div class="modal-backdrop"></div>
+        <div class="modal-dialog" role="document">
+          <div class="modal-header">
+            <h3 id="metaTitle">Image metadata</h3>
+            <button type="button" id="metaClose" class="btn-close" aria-label="Close">×</button>
+          </div>
+          <div class="modal-body">
+            <pre id="metaJson" class="codeblock">{ }</pre>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="metaOk" class="btn">Close</button>
+          </div>
+        </div>
+      </div>
+
     </section>
   `;
 
@@ -93,6 +110,32 @@ export function render(appEl) {
   const pageInfo = appEl.querySelector('#pageInfo');
   const prevBtn = appEl.querySelector('#prevBtn');
   const nextBtn = appEl.querySelector('#nextBtn');
+  const modalEl = appEl.querySelector('#metaModal');
+  const modalJsonEl = appEl.querySelector('#metaJson');
+  const modalCloseBtn = appEl.querySelector('#metaClose');
+  const modalOkBtn = appEl.querySelector('#metaOk');
+  const modalBackdrop = appEl.querySelector('#metaModal .modal-backdrop');
+
+  function openMetaModal(show = true) {
+    modalEl.classList.toggle('hidden', !show);
+    if (show) {
+
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+
+
+  modalCloseBtn.addEventListener('click', () => openMetaModal(false));
+  modalOkBtn.addEventListener('click', () => openMetaModal(false));
+  modalBackdrop.addEventListener('click', () => openMetaModal(false));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modalEl.classList.contains('hidden')) {
+      openMetaModal(false);
+    }
+  });
+
 
 
   function updateGroups() {
@@ -128,6 +171,31 @@ export function render(appEl) {
     const maxPage = Math.max(1, Math.ceil(state.total / state.pageSize));
     if (state.page < maxPage) { state.page++; runSearch(true); }
   });
+
+  tbody.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button.btn-meta');
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    if (!id) {
+      alert('Missing row id.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/image/meta/${encodeURIComponent(id)}`);
+      if (!res.ok) {
+        const text = await res.text();
+        alert(`Failed to fetch metadata (${res.status}): ${text.slice(0, 200)}`);
+        return;
+      }
+      const data = await res.json();
+      alert(JSON.stringify(data, null, 2));
+    } catch (err) {
+      alert('Request error: ' + err.message);
+    }
+  });
+
 
   runSearch();
 
@@ -205,21 +273,23 @@ export function render(appEl) {
 
     rows.forEach(r => {
       const hasGps = r.latitude != null && r.longitude != null;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td title="${r.file_path || ''}">${r.file_name || ''}</td>
-        <td>${r.make || ''}</td>
-        <td>${r.model || ''}</td>
-        <td>${fmtDate(r.create_date)}</td>
-        <td>${r.width ?? ''}</td>
-        <td>${r.height ?? ''}</td>
-        <td>${fmtNum(r.latitude)}</td>
-        <td>${fmtNum(r.longitude)}</td>
-        <td class="row-actions">
-          ${r.file_name ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>` : ''}
-          ${hasGps ? ` | <a href="${mapUrl(r.latitude, r.longitude)}" target="_blank" rel="noopener">Map</a>` : ` | <span class="muted">No GPS</span>`}
-        </td>
-      `;
+      <td title="${r.file_path || ''}">${r.file_name || ''}</td>
+      <td>${r.make || ''}</td>
+      <td>${r.model || ''}</td>
+      <td>${fmtDate(r.create_date)}</td>
+      <td>${r.width ?? ''}</td>
+      <td>${r.height ?? ''}</td>
+      <td>${fmtNum(r.latitude)}</td>
+      <td>${fmtNum(r.longitude)}</td>
+      <td class="row-actions">
+        ${r.file_name ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>` : ''}
+        ${hasGps ? ` | <a href="${mapUrl(r.latitude, r.longitude)}" target="_blank" rel="noopener">Map</a>` : ` | <span class="muted">No GPS</span>`}
+        ${r.id != null ? ` | <button type="button" class="btn-meta" data-id="${r.id}">Metadata</button>` : ''}
+      </td>
+    `;
       tbody.appendChild(tr);
     });
 
@@ -230,6 +300,7 @@ export function render(appEl) {
     pagination.hidden = rows.length === 0;
     pageInfo.textContent = `Page ${state.page} / ${maxPage}`;
   }
+
 
   function fmtNum(n) { return (n === null || n === undefined) ? '' : String(n); }
   function fmtDate(dt) {

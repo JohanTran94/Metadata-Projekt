@@ -285,5 +285,35 @@ export default function setupImageRestRoutes(app, db) {
   });
 
 
+
+  router.get('/api/image/meta/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const [rows] = await db.execute(
+        `SELECT id, file, meta
+       FROM image_metadata
+       WHERE id = ? LIMIT 1`,
+        [id]
+      );
+
+      if (!rows || rows.length === 0) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      const row = rows[0];
+
+      let meta = row.meta;
+      if (typeof meta === 'string') {
+        try { meta = JSON.parse(meta); } catch { }
+      }
+
+      res.json({ id: row.id, file: row.file, meta });
+    } catch (err) {
+      console.error('get meta error:', err);
+      res.status(500).json({ error: 'Failed to fetch metadata', details: err.message });
+    }
+  });
+
   app.use(router);
 }
