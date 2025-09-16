@@ -1,30 +1,56 @@
 // frontend/about_main.js
-export async function render(appEl) {
+export function render(appEl) {
   appEl.innerHTML = `
-    <section>
-      <h2>About Us</h2>
-      <p class="muted" style="margin:4px 0 16px">
-        This project is a student-built metadata search engine for multiple file types.
+    <section class="about">
+      <h2>About us</h2>
+
+      <p>
+        <strong>Sons Of Arholma Search Engine</strong> is a student project built as part of the
+        <em>Metadata</em> course (2025-08-11 → 2025-09-19).
+        The goal was to design a simple metadata search engine that works across
+        different file types: Music (MP3), PDF, PowerPoint, and Image files.
       </p>
 
-      <div class="start-grid">
-        <section class="start-card">
-          <h3>What it does</h3>
-          <p>Search and preview metadata for Music (MP3), PDF, PowerPoint and Image files.</p>
-        </section>
-        <section class="start-card">
-          <h3>How it works</h3>
-          <p>Node.js + Express backend, MySQL JSON storage, and a simple SPA frontend (vanilla JS modules).</p>
-        </section>
-        <section class="start-card">
-          <h3>Team</h3>
-          <p>Four teammates, each responsible for one media type. Integrated into a single SPA.</p>
-        </section>
-        <section class="start-card">
-          <h3>Try it</h3>
-          <p>Use the tabs above or the Start page cards to jump to each search engine.</p>
-        </section>
-      </div>
+      <p>
+        The application provides a clean web interface where users can search, filter,
+        and preview metadata stored in a local database. Each media type has its own
+        dedicated search engine, but everything is integrated into a Single-Page Application (SPA).
+      </p>
+
+      <h3>Tech stack</h3>
+      <ul>
+        <li><strong>Backend:</strong> Node.js + Express</li>
+        <li><strong>Database:</strong> MySQL (worked with via DBeaver)</li>
+        <li><strong>Frontend:</strong> Vanilla JavaScript modules (SPA), HTML, CSS</li>
+        <li><strong>Libraries:</strong> exifr (images), pdf-parse-fork (PDFs),
+            and custom extractors for MP3 and PowerPoint</li>
+      </ul>
+
+      <h3>Team</h3>
+      <ul class="team-list">
+        <li>
+          <strong>Thomas Rosén</strong> — PowerPoint module ·
+          <a href="https://github.com/thomasavguld" target="_blank" rel="noopener">github.com/thomasavguld</a>
+        </li>
+        <li>
+          <strong>Jonas Larsson</strong> — PDF module ·
+          <a href="https://github.com/JonasLarsson-coder" target="_blank" rel="noopener">github.com/JonasLarsson-coder</a>
+        </li>
+        <li>
+          <strong>Max Nilsson</strong> — Music module ·
+          <a href="https://github.com/MaxNilssons" target="_blank" rel="noopener">github.com/MaxNilssons</a>
+        </li>
+        <li>
+          <strong>Johan Tran</strong> — Image module ·
+          <a href="https://github.com/JohanTran94" target="_blank" rel="noopener">github.com/JohanTran94</a>
+        </li>
+      </ul>
+
+      <h3>Try it</h3>
+      <p>
+        Use the tabs above (Start, Music, PDF, PowerPoint, Image) to explore each search engine.
+        Each engine has its own filters and returns results in a table format.
+      </p>
     </section>
   `;
 }
