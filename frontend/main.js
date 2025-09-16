@@ -8,6 +8,7 @@ const routes = {
   pdf: './pdf_main.js',
   powerpoint: './ppt_main.js',
   image: './image_main.js',
+  about: './about_main.js',
 };
 
 

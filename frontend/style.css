@@ -114,3 +114,135 @@ td {
   background: #e9f0ff;
   border-color: #cfe0ff;
 }
+
+/* ==== HEADER ==== */
+.site-header {
+  background: #1e293b;
+  /* navy dark background */
+  color: white;
+  padding: 1rem;
+  text-align: center;
+}
+
+.site-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.tabs {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.tabs a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.tabs a:hover {
+  text-decoration: underline;
+}
+
+/* ==== FOOTER ==== */
+.site-footer {
+  background: #0f172a;
+  color: #cbd5e1;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.footer-links a {
+  color: #cbd5e1;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: white;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-header {
+  flex: 0 0 auto;
+}
+
+#app.container,
+main#app {
+  flex: 1 0 auto;
+}
+
+.site-footer {
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+
+
+.site-header {
+  background: #121a2b;
+  color: #fff;
+}
+
+.tabs {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tabs a {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .28);
+  background: rgba(255, 255, 255, .10);
+
+  color: #fff;
+
+  text-decoration: none;
+  font-weight: 600;
+  backdrop-filter: saturate(120%);
+  transition: background .12s ease, color .12s ease, border-color .12s ease, transform .06s ease;
+}
+
+.tabs a:hover {
+  background: rgba(255, 255, 255, .18);
+  border-color: rgba(255, 255, 255, .35);
+  transform: translateY(-1px);
+}
+
+
+.tabs a.active {
+  background: #ffffff;
+  color: #0b1220;
+  border-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+}
+
+.site-header {
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
