@@ -166,12 +166,34 @@ export default function setupImageRestRoutes(app, db) {
 
       const cond = [];
       const whereParams = {};
-      if (text) { cond.push(`(file LIKE :text OR make LIKE :text OR model LIKE :text)`); whereParams.text = likeText; }
-      if (make) { cond.push(`make = :make`); whereParams.make = make; }
-      if (model) { cond.push(`model = :model`); whereParams.model = model; }
-      if (from) { cond.push(`create_date IS NOT NULL AND create_date >= :from`); whereParams.from = from; }
-      if (to) { cond.push(`create_date IS NOT NULL AND create_date <= :to`); whereParams.to = to; }
+
+      if (text) {
+        cond.push(`(
+    LOWER(file)  LIKE LOWER(:text) OR
+    LOWER(make)  LIKE LOWER(:text) OR
+    LOWER(model) LIKE LOWER(:text)
+  )`);
+        whereParams.text = `%${text}%`;
+      }
+      if (make) {
+        cond.push(`LOWER(make) LIKE LOWER(:make)`);
+        whereParams.make = `%${make}%`;
+      }
+      if (model) {
+        cond.push(`LOWER(model) LIKE LOWER(:model)`);
+        whereParams.model = `%${model}%`;
+      }
+      if (from) {
+        cond.push(`create_date IS NOT NULL AND create_date >= :from`);
+        whereParams.from = from;
+      }
+      if (to) {
+        cond.push(`create_date IS NOT NULL AND create_date <= :to`);
+        whereParams.to = to;
+      }
       const WHERE = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
+
+
 
       const relevanceParams = {
         textExact: text || '',

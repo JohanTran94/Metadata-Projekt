@@ -246,3 +246,15 @@ main#app {
 .site-header {
   border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
+
+.inline-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 10px;
+}
+
+.inline-label>span {
+  font-weight: 600;
+  color: #111827;
+}

@@ -1,4 +1,3 @@
-// frontend/image_main.js
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
@@ -6,13 +5,13 @@ export function render(appEl) {
 
       <form id="searchForm" class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
-          Mode
+          Search by
           <select id="searchMode" name="mode">
             <option value="all" selected>All fields</option>
             <option value="file">File name</option>
             <option value="make">Make</option>
             <option value="model">Model</option>
-            <option value="date">Date range</option>
+            <option value="date">Creation Date</option>
             <option value="geo">Geo (lat/lon + radius)</option>
           </select>
         </label>
@@ -23,7 +22,7 @@ export function render(appEl) {
         </div>
 
         <div data-group="make" class="group hidden">
-          <input id="make"  placeholder="Brand (SONY, Apple…)" />
+          <input id="make"  placeholder="Sony, Samsung, Nikon…" />
         </div>
 
         <div data-group="model" class="group hidden">
@@ -31,15 +30,24 @@ export function render(appEl) {
         </div>
 
         <div data-group="date" class="group hidden">
-          <input id="from" type="date" />
-          <input id="to"   type="date" />
+          <label class="inline-label">
+            <span>From</span>
+            <input id="from" type="date" placeholder="yyyy-mm-dd" />
+          </label>
+
+          <label class="inline-label">
+            <span>To</span>
+            <input id="to" type="date" placeholder="yyyy-mm-dd" />
+          </label>
         </div>
+
 
         <div data-group="geo" class="group hidden">
           <input id="nearLat" placeholder="Latitude" style="width:120px" />
           <input id="nearLon" placeholder="Longitude" style="width:120px" />
           <input id="radius"  placeholder="km"  style="width:90px" />
         </div>
+
 
         <label>
           Per page
@@ -86,14 +94,31 @@ export function render(appEl) {
   const prevBtn = appEl.querySelector('#prevBtn');
   const nextBtn = appEl.querySelector('#nextBtn');
 
-  // show/hide groups by mode
+
   function updateGroups() {
     const mode = modeEl.value;
+
+
     appEl.querySelectorAll('[data-group]').forEach(el => {
       const groups = (el.getAttribute('data-group') || '').split(/\s+/);
-      el.classList.toggle('hidden', !groups.includes(mode) && !(mode === 'all' && groups.includes('all')));
+      el.classList.toggle(
+        'hidden',
+        !groups.includes(mode) && !(mode === 'all' && groups.includes('all'))
+      );
     });
+
+
+    const textEl = appEl.querySelector('#text');
+    if (textEl) {
+      textEl.placeholder =
+        (mode === 'file')
+          ? 'File name'
+          : (mode === 'all')
+            ? 'File name / Make / Model'
+            : 'Search...';
+    }
   }
+
   modeEl.addEventListener('change', updateGroups);
   updateGroups();
 
