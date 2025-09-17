@@ -48,7 +48,8 @@ export default function setupMusicRestRoutes(app, db) {
     // Alla fält, med okänd på urprungligen tomma fält i db 
     if (field === 'any') {
       const raw = String(searchValue ?? '').trim();
-      const asksUnknown = norm(raw).startsWith('okä'); // kan hanter okänd (genre,artist...)
+      const asksUnknown = raw === 'unknown' || raw === 'Unknown';
+      // kan hanter okänd (genre,artist...)
 
       if (asksUnknown) {
         const sql = `
