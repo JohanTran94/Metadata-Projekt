@@ -32,7 +32,7 @@ export async function render(appEl) {
       </div>
 
       <input id="q" placeholder="Search..." />
-      <button id="btnSearch" type="button">Sök</button>
+      <button id="btnSearch" type="button">Search</button>
 
       <div id="summary" class="muted" style="margin-top:8px;"></div>
 
