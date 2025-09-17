@@ -15,7 +15,7 @@ body {
 
 body {
   font: 16px/1.4 system-ui, Arial, sans-serif;
-  color: #111;
+  color:  #cbd5e1;;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -30,54 +30,62 @@ body {
 }
 
 /* ==== HEADER ==== */
+
 .site-header {
   flex: 0 0 auto;
-  background: rgba(18, 26, 43, 0.8);
+  background: rgba(1, 11, 33, 0.75);
   backdrop-filter: blur(6px);
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, .08);
-  padding: 1rem;
+  color: hsl(0, 100%, 1%);
+  min-height: 175px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;  /* rubrik upptill, länkar nedtill */
   text-align: center;
 }
 
-.site-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
+.header-tabs {
+  width: 100%;
+  background: rgba(0, 7, 21, 0.65);
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 2px; 
+  margin-top: auto; /* trycker ner remsan mot headerns botten */
 }
 
 .tabs {
-  margin-top: 8px;
   display: flex;
-  justify-content: center;
-  gap: 10px;
+  gap: 1rem;
   flex-wrap: wrap;
+  justify-content: flex-start; /* vänsterjustera länkarna */
+  
+  max-width: 1100px;  /* samma som content-bg */
+  width: 100%;
+  padding: 0 var(--gap); /* samma horisontella padding som content-box */
+  box-sizing: border-box;
 }
 
 .tabs a {
-  display: inline-block;
-  padding: 8px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, .28);
-  background: rgba(255, 255, 255, .10);
-  color: #fff;
+  color: #cbd5e1;
   text-decoration: none;
-  font-weight: 600;
-  backdrop-filter: saturate(120%);
-  transition: background .12s ease, color .12s ease, border-color .12s ease, transform .06s ease;
+  font-size: 1rem;
+  padding: 8px 14px;
+  transition: color .12s ease;
 }
 
 .tabs a:hover {
-  background: rgba(255, 255, 255, .18);
-  border-color: rgba(255, 255, 255, .35);
-  transform: translateY(-1px);
+  background: rgba(246, 233, 212, 0.9);
+  color: #0b1220;
+  font-weight: 600;
+  /*background: rgba(212, 222, 246, 0.75);*/
 }
 
 .tabs a.active {
-  background: #ffffff;
-  color: #0b1220;
-  border-color: #ffffff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+  color: #fff;
+  text-decoration: underline;
 }
+
+
 
 /* ==== MAIN ==== */
 
@@ -87,16 +95,16 @@ body {
   display: flex;
   justify-content: center;
   /* centrera horisontellt */
-  align-items: flex-start;
+  align-items: stretch;
   /* start från toppen */
-  padding: var(--gap);
+  padding: 0;
 
 }
 
 .content-bg {
-  background: rgba(255, 255, 255, 0.95);
-  /* nästan vit */
-  border-radius: 12px;
+  background: rgba(1, 11, 33, 0.75);
+  backdrop-filter: blur(6px);
+  border-radius: 0;
   padding: 24px;
   width: 100%;
   max-width: 1100px;
@@ -104,13 +112,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--gap);
+  flex: 1
 }
 
 /* ==== FOOTER ==== */
 .site-footer {
   flex: 0 0 auto;
   margin-top: auto;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(1, 11, 33, 0.75);
   backdrop-filter: blur(6px);
   color: #cbd5e1;
   padding: 1rem;
@@ -134,7 +143,7 @@ body {
 }
 
 .footer-links a:hover {
-  color: white;
+  color: rgba(246, 233, 212);
 }
 
 /* Start page grid */
@@ -146,17 +155,20 @@ body {
 
 .start-card {
   display: block;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #eee;
+  color: #0b1220;
+  background: rgba(212, 222, 246, 0.9);
+  border: 1px solid #1f1a3a;
   border-radius: 12px;
   padding: 16px;
   text-decoration: none;
-  color: inherit;
+
   transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease;
 }
 
 .start-card:hover {
   transform: translateY(-2px);
+  color: #0b1220;
+  background: rgba(246, 233, 212, 0.9);
   border-color: #ddd;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .06);
+  box-shadow: 0 4px 14px rgba(246, 233, 212, 0.6);
 }
