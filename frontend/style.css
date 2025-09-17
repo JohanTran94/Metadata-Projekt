@@ -301,3 +301,12 @@ main#app {
 .home-link:hover {
   text-decoration: underline;
 }
+
+h4 {
+  font-size: 1rem;
+  font-weight: normal;
+  color: #555;
+  margin: 4px 0 16px;
+  line-height: 1.5;
+  max-width: 700px;
+}
