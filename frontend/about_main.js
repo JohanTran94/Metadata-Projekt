@@ -20,28 +20,28 @@ export function render(appEl) {
       <h3>Tech stack</h3>
       <ul>
         <li><strong>Backend:</strong> Node.js + Express</li>
-        <li><strong>Database:</strong> MySQL (worked with via DBeaver)</li>
+        <li><strong>Database:</strong> MySQL (worked with via DBeaver and Sequel Ace)</li>
         <li><strong>Frontend:</strong> Vanilla JavaScript modules (SPA), HTML, CSS</li>
         <li><strong>Libraries:</strong> exifr (images), pdf-parse-fork (PDFs),
-            and custom extractors for MP3 and PowerPoint</li>
+            music-metadata (Music) and custom extractors for (PowerPoint)</li>
       </ul>
 
       <h3>Team</h3>
       <ul class="team-list">
         <li>
-          <strong>Thomas Rosén</strong> — PowerPoint module ·
+          <strong>Thomas Rosén</strong>: PowerPoint module ·
           <a href="https://github.com/thomasavguld" target="_blank" rel="noopener">github.com/thomasavguld</a>
         </li>
         <li>
-          <strong>Jonas Larsson</strong> — PDF module ·
+          <strong>Jonas Larsson</strong>: PDF module ·
           <a href="https://github.com/JonasLarsson-coder" target="_blank" rel="noopener">github.com/JonasLarsson-coder</a>
         </li>
         <li>
-          <strong>Max Nilsson</strong> — Music module ·
+          <strong>Max Nilsson</strong>: Music module ·
           <a href="https://github.com/MaxNilssons" target="_blank" rel="noopener">github.com/MaxNilssons</a>
         </li>
         <li>
-          <strong>Johan Tran</strong> — Image module ·
+          <strong>Johan Tran</strong>: Image module ·
           <a href="https://github.com/JohanTran94" target="_blank" rel="noopener">github.com/JohanTran94</a>
         </li>
       </ul>
@@ -49,7 +49,7 @@ export function render(appEl) {
       <h3>Try it</h3>
       <p>
         Use the tabs above (Start, Music, PDF, PowerPoint, Image) to explore each search engine.
-        Each engine has its own filters and returns results in a table format.
+        Each engine has its own filters and presents results in a format suited for that file type.
       </p>
     </section>
   `;

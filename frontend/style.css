@@ -292,3 +292,12 @@ main#app {
 .team-list a {
   text-decoration: underline;
 }
+
+.home-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-link:hover {
+  text-decoration: underline;
+}
