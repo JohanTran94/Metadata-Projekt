@@ -15,7 +15,7 @@ body {
 
 body {
   font: 16px/1.4 system-ui, Arial, sans-serif;
-  color:  #cbd5e1;;
+  color: #cbd5e1;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -23,34 +23,53 @@ body {
   /* Bakgrund */
   background: url("/img/background1920.jpg") no-repeat center center fixed;
   background-size: cover;
-  background-image: image-set(url("/img/background800.webp") type("image/webp") 1x,
-      url("/img/background1280.webp") type("image/webp") 2x,
-      url("/img/background1920.webp") type("image/webp") 3x,
-      url("/img/background1920.jpg") type("image/jpeg") 1x);
+  background-image: image-set(
+    url("/img/background800.webp") type("image/webp") 1x,
+    url("/img/background1280.webp") type("image/webp") 2x,
+    url("/img/background1920.webp") type("image/webp") 3x,
+    url("/img/background1920.jpg") type("image/jpeg") 1x
+  );
 }
 
 /* ==== HEADER ==== */
-
 .site-header {
   flex: 0 0 auto;
   background: rgba(1, 11, 33, 0.75);
   backdrop-filter: blur(6px);
-  color: hsl(0, 100%, 1%);
-  min-height: 175px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;  /* rubrik upptill, länkar nedtill */
-  text-align: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;       /* vertikal centrering av logon */
+  justify-content: flex-start; /* logon till vänster */
+  max-width: 1100px;          /* matchar content-box */
+  width: 100%;
+  padding: 16px var(--gap);
+  z-index: 10;                /* säkerställer att logon ligger över bakgrund, inte bakom andra element */
+}
+
+.site-logo {
+  display: inline-block;   /* låter länken anpassa sig till bilden */
+  padding: 0;
+}
+
+.site-logo img {
+  display: block;
+  max-height: 80px;        /* begränsar logons höjd */
+  width: auto;             /* behåller proportioner */
 }
 
 .header-tabs {
+  display: flex;
   width: 100%;
   background: rgba(0, 7, 21, 0.65);
   display: flex;
-  justify-content: center;
-  box-sizing: border-box;
-  padding: 2px; 
-  margin-top: auto; /* trycker ner remsan mot headerns botten */
+  justify-content: center; /* tabbarna centreras inom remsan */
+  padding: 2px;
 }
 
 .tabs {
@@ -58,10 +77,9 @@ body {
   gap: 1rem;
   flex-wrap: wrap;
   justify-content: flex-start; /* vänsterjustera länkarna */
-  
-  max-width: 1100px;  /* samma som content-bg */
+  max-width: 1100px;           /* samma som content-box */
   width: 100%;
-  padding: 0 var(--gap); /* samma horisontella padding som content-box */
+  padding: 0 var(--gap);
   box-sizing: border-box;
 }
 
@@ -70,14 +88,14 @@ body {
   text-decoration: none;
   font-size: 1rem;
   padding: 8px 14px;
-  transition: color .12s ease;
+  transition: color 0.12s ease;
 }
 
 .tabs a:hover {
   background: rgba(246, 233, 212, 0.9);
   color: #0b1220;
   font-weight: 600;
-  /*background: rgba(212, 222, 246, 0.75);*/
+  text-decoration: underline;
 }
 
 .tabs a.active {
@@ -86,19 +104,14 @@ body {
 }
 
 
-
 /* ==== MAIN ==== */
-
 /* Håll main#app flexibelt */
 #app.container {
   flex: 1 0 auto;
   display: flex;
-  justify-content: center;
-  /* centrera horisontellt */
-  align-items: stretch;
-  /* start från toppen */
+  justify-content: center; /* centrera horisontellt */
+  align-items: stretch; /* start från toppen */
   padding: 0;
-
 }
 
 .content-bg {
@@ -112,7 +125,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--gap);
-  flex: 1
+  flex: 1;
 }
 
 /* ==== FOOTER ==== */
@@ -161,14 +174,16 @@ body {
   border-radius: 12px;
   padding: 16px;
   text-decoration: none;
-
   transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease;
 }
 
 .start-card:hover {
   transform: translateY(-2px);
-  color: #0b1220;
   background: rgba(246, 233, 212, 0.9);
   border-color: #ddd;
   box-shadow: 0 4px 14px rgba(246, 233, 212, 0.6);
+}
+
+.start-card:hover .card-title {
+  text-decoration: underline; /* endast rubriken */
 }

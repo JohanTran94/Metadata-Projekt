@@ -1,33 +1,32 @@
 export function render(appEl) {
   appEl.innerHTML = `
     <section class="start">
-      <h1>Meta data search</h1>
-      <h2>Explore metadata across four sources</h2>
+      <h2>Explore meta data across four sources</h2>
       <p class="lead">
         <b>
-        Search by keywords, - or depending on category - filter by varibles such as dates or GPS coordinates. You can also view the raw metadata.
+        Search by keywords, - or depending on category - filter by varibles such as dates or GPS coordinates. You can also view the raw meta data.
         </b>
         <br>
       </p>
 
       <div class="start-grid">
         <a href="#music" class="start-card">
-          <h3>Music</h3>
+          <h3 class="card-title">Music</h3>
           <p>Search MP3 metadata (title, artist, album, year, genre)…</p>
         </a>
 
         <a href="#pdf" class="start-card">
-          <h3>PDF</h3>
+          <h3 class="card-title">PDF</h3>
           <p>Search PDFs by title, author, keywords, and more.</p>
         </a>
 
         <a href="#powerpoint" class="start-card">
-          <h3>PowerPoint</h3>
+        <h3 class="card-title">PowerPoint</h3>
           <p>Search PPT/PPTX metadata (title, organisation, creation date)…</p>
         </a>
 
         <a href="#image" class="start-card">
-          <h3>Image</h3>
+        <h3 class="card-title">Image</h3>
           <p>Search photos by file name, make, model, creation date, GPS.</p>
         </a>
       </div>
