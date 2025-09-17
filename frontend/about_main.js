@@ -23,7 +23,7 @@ export function render(appEl) {
         <li><strong>Database:</strong> MySQL (worked with via DBeaver and Sequel Ace)</li>
         <li><strong>Frontend:</strong> Vanilla JavaScript modules (SPA), HTML, CSS</li>
         <li><strong>Libraries:</strong> exifr (images), pdf-parse-fork (PDFs),
-            music-metadata (Music) and custom extractors for (PowerPoint)</li>
+            music-metadata (Music) and csv-parse (PowerPoint)</li>
       </ul>
 
       <h3>Team</h3>
