@@ -3,12 +3,12 @@
 //
 
 const routes = {
-  start: './start_main.js',
-  music: './music_main.js',
-  pdf: './pdf_main.js',
-  powerpoint: './ppt_main.js',
-  image: './image_main.js',
-  about: './about_main.js',
+  start: '/start_main.js',
+  music: '/music_main.js',
+  pdf: '/pdf_main.js',
+  powerpoint: '/ppt_main.js',
+  image: '/image_main.js',
+  about: '/about_main.js',
 };
 
 
@@ -24,7 +24,7 @@ async function loadRoute() {
   }
 
   const mod = await import(path);
-  const appEl = document.getElementById('app');
+  const appEl = document.querySelector('#app .content-bg');
   appEl.innerHTML = '';
 
   if (typeof mod.render === 'function') {
