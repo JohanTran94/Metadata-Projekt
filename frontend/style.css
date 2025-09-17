@@ -75,3 +75,42 @@ td {
 .hidden {
   display: none !important;
 }
+
+/* Start page grid */
+.start-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--gap);
+}
+
+.start-card {
+  display: block;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease;
+}
+
+.start-card:hover {
+  transform: translateY(-2px);
+  border-color: #ddd;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .06);
+}
+
+.start-card h3 {
+  margin: 0 0 6px;
+}
+
+.start-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* (optional) active tab highlight */
+.tabs a.active {
+  background: #e9f0ff;
+  border-color: #cfe0ff;
+}
