@@ -1,13 +1,16 @@
 export function render(appEl) {
   appEl.innerHTML = `
     <section id="image-page">
-    <h1>Image search</h1>
+   
     <h2>
-    Find photos by metadata. 
+    Image search
+   
     </h2>
-    <h3>  
-      Search by camera make and model, file name, date, coordinates or other parameters.
-    </h3>  
+    <h3>
+    Find photos by metadata.
+    </h3> 
+      Search by camera make and model, file name, date, coordinates or other parameters. View beautiful photos and see where in the world they are taken. 
+     <p>
       To view more detailed information about a specific document, press <b>show all metadata.
       <br>
       <br>

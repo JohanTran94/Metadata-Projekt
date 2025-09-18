@@ -1,13 +1,15 @@
 export function render(appEl) {
   appEl.innerHTML = `
-    <section class="start">
-      <h2>Explore meta data across four sources</h2>
-      <p class="lead">
-        <b>
-        Search by keywords, - or depending on category - filter by varibles such as dates or GPS coordinates. You can also view the raw meta data.
-        </b>
-        <br>
-      </p>
+      <section class="start">
+    <h2>
+    Explore metadata across four sources 
+    </h2>
+    <h3>  
+    Search a plethora of variables and parameters depending on filetype.
+    </h3>  
+      To view more detailed information about a specific document, you can see the raw metadata.
+      <br>
+      <br>
 
       <div class="start-grid">
         <a href="#music" class="start-card">

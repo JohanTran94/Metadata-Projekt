@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 :root {
   --gap: 16px;
   --muted: #666;
@@ -6,6 +13,41 @@
 * {
   box-sizing: border-box;
 }
+
+/* === Google Fonts ===
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+*/
+
+/* --- Grundinställningar --- */
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+/* Rubriker */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Noto Sans', sans-serif;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Specifika rubriker på about-page */
+.about-page h1, .about-page h2, .about-page h3 {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+/* Länkar */
+a, .about-page a, .tabs a, .content-bg table a {
+  font-family: 'Open Sans', sans-serif;
+}
+
+/* Viktigare brödtext */
+.about-page em, .important {
+  font-weight: 600;
+}
+
 
 html,
 body {
@@ -44,22 +86,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  /* logon till vänster */
-  max-width: 1100px;
+  max-width: 1200px;    /* Samma som content-box */
+  margin: 0 auto;        /* Centrerar headern */
   width: 100%;
   padding: 16px var(--gap);
   z-index: 10;
 }
 
-.site-logo {
-  display: inline-block;
-  padding: 0;
-}
 
 .site-logo img {
   display: block;
-  max-height: 80px;
+  max-height: 125px;     /* Höjd justeras efter behov */
   width: auto;
+  padding-left: 32px;          /* Behåller proportioner */
 }
 
 .header-tabs {
@@ -821,4 +860,75 @@ body {
   cursor: pointer;
   color: #e2e8f0;
   padding: 4px 8px;
+}
+
+.about-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  color: #cbd5e1;
+  line-height: 1.5;
+
+  background: rgba(1, 11, 33, 0.75);
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  padding: 4px 24px 24px 24px; /* top, right, bottom, left */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  max-width: 1100px;
+  width: 100%;
+  margin: 24px auto;
+}
+
+.about-header a {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+
+.about-page h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  color: #e2e8f0;
+}
+
+.about-page h2 {
+  font-size: 1.4rem;
+  margin-bottom: 16px;
+  color: #94a3b8;
+}
+
+.about-page h3 {
+  font-size: 1.1rem;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: #cbd5e1;
+}
+
+.about-page p {
+  margin-bottom: 12px;
+}
+
+.about-page ul {
+  margin: 8px 0 12px 20px;
+  padding: 0;
+}
+
+.about-page ul li {
+  margin-bottom: 6px;
+}
+
+.about-page a {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.about-page a:hover {
+  text-decoration: underline;
+}
+
+.team-list li,
+.advisor li {
+  margin-bottom: 8px;
 }

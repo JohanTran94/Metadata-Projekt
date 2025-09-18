@@ -1,13 +1,15 @@
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
-      <h1>PDF search</h1>
       <h2>
-      Find PDF documents by metadata. 
+      PDF search
       </h2>
-      <h3>  
-        Search by title, author, subject, keywords, text content or other parameters.
+      <h3> 
+      Find PDF documents by metadata.  
+        
       </h3>  
+      Search by title, author, subject, keywords, text content or other parameters. Read intriguing documents from all over the globe. 
+      <p>
         To view more detailed information about a specific document, press <b>show all metadata.
         <br>
         <br>

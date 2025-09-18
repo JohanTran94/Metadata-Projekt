@@ -1,13 +1,14 @@
 export function render(appEl) {
   appEl.innerHTML = `
   <section>
-  <h1>PowerPoint search</h1>
   <h2>
-  Find PowerPoint documents by metadata. 
+  PowerPoint search
   </h2>
-  <h3>  
-    Search by title, file name, subject, organization, date or other parameters.
+  <h3> 
+  Find PowerPoint documents by metadata.   
   </h3>  
+  Search by title, file name, subject, organization, date or other parameters. Watch or download fascinating slides form the world's most exciting organizations. 
+  <p>
     To view more detailed information about a specific document, press <b>show all metadata.
     <br>
     <br>

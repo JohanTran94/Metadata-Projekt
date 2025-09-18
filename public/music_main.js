@@ -1,13 +1,14 @@
 export async function render(appEl) {
   appEl.innerHTML = `
   <section>
-  <h1>Music search</h1>
   <h2>
-  Find music files by metadata. 
+  Music search
   </h2>
   <h3>  
-    Search by title, artist, album, year or other parameters.
-  </h3>  
+  Find music files by metadata. 
+  </h3>
+  Search by title, artist, album, year or other parameters, as well as listen to and download your favourite songs.
+  <p>
     To view more detailed information about a specific track, press <b>show all metadata.
     <br>
     <br>
