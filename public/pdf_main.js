@@ -14,7 +14,7 @@ export function render(appEl) {
             <option value="Text">Text</option>
             <option value="Keywords">Keywords</option>
             <option value="Pages">Pages</option>
-            <option value="File name">File Name</option>
+            <option value="Filename">File Name</option>
           </select>
         </label>
         <input id="pdf-q" type="text" placeholder="(ex: 'AI', '>10', '5-15')" />
@@ -43,14 +43,14 @@ export function render(appEl) {
   };
 
   async function renderResults(rows, term = '') {
-    countEl.textContent = `${rows.length} results`;
+    countEl.textContent = `${rows.length} resultat`;
     resultsEl.style.display = 'block';
 
     if (!rows.length) {
       resultsEl.innerHTML = '<div class="muted">No hits</div>';
       return;
     }
-
+    //Unknown, None, No title, Not specified
     resultsEl.innerHTML = rows.map(r => {
       const filename = r.filename || '';
       const title = r.title || r.xmp_title || 'No title';
@@ -60,19 +60,20 @@ export function render(appEl) {
       const pages = r.numpages ?? 'Unknown';
       const text = r.text || '';
 
+      // Highlight search term in results, and button for show/hide all metadata
       return `
-        <article>
+        <article class="pdf-result">
           <h3>${term ? highlight(title, term) : title}</h3>
           <p><b>Author:</b> ${term ? highlight(author, term) : author}</p>
           <p><b>Subject:</b> ${term ? highlight(subject, term) : subject}</p>
           <p><b>Keywords:</b> ${term ? highlight(keywords, term) : keywords}</p>
           <p><b>Pages:</b> ${pages}</p>
           <p><b>Text:</b> ${term ? highlight(truncate(text), term) : truncate(text)}</p>
-          <p><b>File name:</b> ${term ? highlight(filename, term) : filename}</p>
+          <p><b>Filename:</b> ${term ? highlight(filename, term) : filename}</p>
           <p>
             ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
             ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Open</a>` : ''}
-          </p>
+          </p>          
           <p><button class="btn-show-all-pdf-metadata" data-id="${r.id}">Show all metadata</button></p>
           <pre class="pdf-meta-block hidden"></pre>
         </article>
