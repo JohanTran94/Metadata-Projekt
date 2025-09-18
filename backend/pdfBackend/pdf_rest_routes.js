@@ -159,7 +159,7 @@ export default function setupPdfRestRoutes(app, db) {
           xmp->>'$.title' AS xmp_title
         FROM pdf_metadata
         ORDER BY id ASC
-        LIMIT 20
+        LIMIT 10
       `);
       res.json(rows);
     } catch (err) {
