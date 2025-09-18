@@ -86,7 +86,7 @@ export function render(appEl) {
           <p>
             <b>File name:</b> ${r.fileName || 'Unknown'}
             ${r.fileName
-              ? ` — <a href="/ppt/${encodeURIComponent(r.fileName)}" target="_blank">Open</a> | 
+              ? ` <a href="/ppt/${encodeURIComponent(r.fileName)}" target="_blank">Open</a> | 
                  <a href="/ppt/${encodeURIComponent(r.fileName)}?download=1">Download</a>
                  ${sizeStr ? ` (${sizeStr})` : ''}`
               : ''}

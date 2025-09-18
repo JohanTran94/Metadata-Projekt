@@ -35,24 +35,30 @@ async function init() {
   const app = express();
   app.use(express.json());
 
-  // Lägg till pptFolder
   const pptFolder = path.resolve(process.cwd(), 'warehouse/ppt');
 
-  // PPT-filroute med inline / download
   app.get('/ppt/:fileName', (req, res) => {
     const { fileName } = req.params;
-    const { download } = req.query; // ?download=1 för nedladdning
+    const { download } = req.query; 
     const filePath = path.join(pptFolder, fileName);
-
+  
     if (!fs.existsSync(filePath)) return res.status(404).send('File not found');
-
-    if (download) {
-      res.download(filePath); // Content-Disposition: attachment
-    } else {
-      res.setHeader('Content-Disposition', 'inline'); // försök öppna i browser
-      res.sendFile(filePath);
+  
+    const ext = path.extname(fileName).substring(1).toLowerCase();
+    const mimeTypes = {
+      ppt: 'application/vnd.ms-powerpoint',
+      pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    };
+  
+    if (mimeTypes[ext]) {
+      res.type(mimeTypes[ext]);
     }
+    
+    res.setHeader('Content-Disposition', download ? 'attachment' : 'inline');
+  
+    res.sendFile(filePath);
   });
+  
 
   setupImageRestRoutes(app, db);
   setupMusicRestRoutes(app, db);
