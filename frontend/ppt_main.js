@@ -47,16 +47,37 @@ export function render(appEl) {
   let lastTotal = 0;
 
   function renderRows(rows) {
-    resultsEl.innerHTML = rows.map(r => `
-      <article data-id="${r.id}">
-        <p><b>Title:</b> ${r.title || 'Unknown'}</p>
-        <p><b>URL:</b> ${r.original ? `<a href="${r.original}" target="_blank">${r.original}</a>` : 'Unknown'}</p>
-        <p><b>File name:</b> ${r.fileName || 'Unknown'}</p>
-        <p><b>Organization:</b> ${r.organisation || 'Unknown'}</p>
-        <p><b>Creation date:</b> ${r.creationDate || 'Unknown'}</p>
-      </article>
-    `).join('');
+    resultsEl.innerHTML = rows.map(r => {
+      const sizeStr = r.fileSize
+        ? r.fileSize < 1024
+          ? `${r.fileSize} B`
+          : r.fileSize < 1024 * 1024
+            ? `${(r.fileSize / 1024).toFixed(1)} KB`
+            : `${(r.fileSize / (1024 * 1024)).toFixed(1)} MB`
+        : '';
+  
+      return `
+        <article data-id="${r.id}">
+          <p><b>Title:</b> ${r.title || 'Unknown'}</p>
+          <p><b>URL:</b> ${r.original ? `<a href="${r.original}" target="_blank">${r.original}</a>` : 'Unknown'}</p>
+          <p>
+            <b>File name:</b> ${r.fileName || 'Unknown'}
+            ${r.fileName
+              ? ` <a href="/ppt/${encodeURIComponent(r.fileName)}" target="_blank">Open</a> | 
+                 <a href="/ppt/${encodeURIComponent(r.fileName)}?download=1">Download</a>
+                 ${sizeStr ? ` (${sizeStr})` : ''}`
+              : ''}
+          </p>
+          <p><b>Organization:</b> ${r.organisation || 'Unknown'}</p>
+          <p><b>Creation date:</b> ${r.creationDate || 'Unknown'}</p>
+        </article>
+      `;
+    }).join('');
   }
+  
+  
+  
+  
 
   function updateCount(rowsLength, total) {
     if (rowsLength === 0) {
