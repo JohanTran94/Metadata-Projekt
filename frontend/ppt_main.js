@@ -16,8 +16,8 @@ export function render(appEl) {
         </label>
         <input id="ppt-q" type="text" placeholder="Search" />
         <label id="date-range" style="display:none;">
-          From: <input id="date-from" type="date" />
-          To: <input id="date-to" type="date" />
+        From: <input id="date-from" type="date" maxlength="10" />
+        To: <input id="date-to" type="date" maxlength="10" />        
         </label>
         <label>
   Results per page:
@@ -144,6 +144,12 @@ document.querySelectorAll('.show-meta-btn').forEach(btn => {
     const end = offset + rowsLength;
     countEl.textContent = `Showing ${start} - ${end} of ${total} results`;
   }
+
+  function validateDateInput(dateStr) {
+    // Kontrollera format YYYY-MM-DD och max 4 siffror på år
+    return /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+  }
+  
   async function search(newOffset = 0) {
     const field = fieldEl.value;
     let term = qEl.value.trim();
@@ -158,10 +164,17 @@ document.querySelectorAll('.show-meta-btn').forEach(btn => {
     const dateFrom = showDate ? dateFromEl.value : '';
     const dateTo = showDate ? dateToEl.value : '';
   
-    // Kontrollera att båda datum är angivna om creationDate
-    if (field === 'creationDate') {
+    // Kontrollera att båda datum är angivna och giltiga om creationDate
+    if (showDate) {
       if (!dateFrom || !dateTo) {
         countEl.textContent = 'Specify both From and To dates';
+        resultsEl.innerHTML = '';
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }
+      if (!validateDateInput(dateFrom) || !validateDateInput(dateTo)) {
+        countEl.textContent = 'Invalid date format (YYYY-MM-DD)';
         resultsEl.innerHTML = '';
         prevBtn.disabled = true;
         nextBtn.disabled = true;
@@ -174,7 +187,7 @@ document.querySelectorAll('.show-meta-btn').forEach(btn => {
     if (dateTo) params.append('dateTo', dateTo);
   
     let url;
-    if (field === 'creationDate' || term) {
+    if (showDate || term) {
       url = `/api/ppt-search/${encodeURIComponent(field)}/${encodeURIComponent(term || '-')}` +
             `?${params.toString()}`;
     } else {
@@ -202,6 +215,7 @@ document.querySelectorAll('.show-meta-btn').forEach(btn => {
       nextBtn.disabled = true;
     }
   }
+  
   
   // Enter-event för både fritext och datumfält
   qEl.addEventListener('keydown', (e) => {
