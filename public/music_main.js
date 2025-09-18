@@ -8,15 +8,15 @@ export async function render(appEl) {
  <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
           Search:
-          <select id="field">
-            <option value="any">All fields</option>
-            <option value="file">File</option>
-            <option value="title">Title</option>
-            <option value="artist">Artist</option>
-            <option value="album">Album</option>
-            <option value="genre">Genre</option>
-            <option value="year">Year</option>
-          </select>
+         <select id="field">
+  <option value="any">All fields</option>
+  <option value="title">Title</option>
+  <option value="artist">Artist</option>
+  <option value="album">Album</option>
+  <option value="genre">Genre</option>
+  <option value="year">Year</option>
+</select>
+
         </label>
 
         <div id="yearControls" class="hidden" style="gap:8px; align-items:center; margin-left:8px;">
@@ -41,19 +41,19 @@ export async function render(appEl) {
       <audio id="player" class="hidden" style="width:100%; max-width:560px"></audio>
 
       <table>
-        <thead>
-          <tr>
-            <th>File</th>
-            <th>Title</th>
-            <th>Artist</th>
-            <th>Album</th>
-            <th>Year</th>
-            <th>Genre</th>
-            <th>Download</th>
-            <th>Play</th>
-            <th>Metadata</th>
-          </tr>
-        </thead>
+  <thead>
+  <tr>
+    <th>Title</th>
+    <th>Artist</th>
+    <th>Album</th>
+    <th>Year</th>
+    <th>Genre</th>
+    <th>Download</th>
+    <th>Play</th>
+    <th>Metadata</th>
+  </tr>
+</thead>
+
         <tbody id="rows"></tbody>
       </table>
     </section>
@@ -82,19 +82,19 @@ export async function render(appEl) {
     const url = `/music/${encodeURIComponent(file)}`;
     const idAttr = it.id != null ? `data-id="${String(it.id)}"` : '';
     return `
-      <tr ${idAttr}>
-        <td>${it.file || ''}</td>
-        <td>${it.title || ''}</td>
-        <td>${it.artist || ''}</td>
-        <td>${it.album || ''}</td>
-        <td>${it.year || ''}</td>
-        <td>${it.genre || ''}</td>
-        <td><a href="${url}" download>Download</a></td>
-        <td><button class="btn-play" data-play="${url}">▶︎</button></td>
-        <td><button class="btn-show-all-music-metadata">Show metadata</button></td>
-      </tr>
-    `;
+    <tr ${idAttr}>
+      <td>${it.title || ''}</td>
+      <td>${it.artist || ''}</td>
+      <td>${it.album || ''}</td>
+      <td>${it.year || ''}</td>
+      <td>${it.genre || ''}</td>
+      <td><a href="${url}" download>Download</a></td>
+      <td><button class="btn-play" data-play="${url}">▶︎</button></td>
+      <td><button class="btn-show-all-music-metadata">Show metadata</button></td>
+    </tr>
+  `;
   }
+
 
   function unknown(items) {
     for (const it of items) {
