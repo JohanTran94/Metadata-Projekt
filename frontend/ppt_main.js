@@ -65,6 +65,16 @@ export function render(appEl) {
   const countEl = appEl.querySelector('#ppt-count');
   const resultsEl = appEl.querySelector('#ppt-results');
 
+  // Lyssna på fältval
+fieldEl.addEventListener('change', () => {
+  const showDate = fieldEl.value === 'creationDate';
+  // Visa/dölj datumfält
+  document.querySelector('#date-range').style.display = showDate ? 'inline-flex' : 'none';
+  // Visa/dölj fritextfält
+  qEl.style.display = showDate ? 'none' : 'inline-block';
+});
+
+
   let offset = 0;
   let lastResultCount = 0;
   let lastTotal = 0;
@@ -134,35 +144,43 @@ document.querySelectorAll('.show-meta-btn').forEach(btn => {
     const end = offset + rowsLength;
     countEl.textContent = `Showing ${start} - ${end} of ${total} results`;
   }
-
   async function search(newOffset = 0) {
     const field = fieldEl.value;
     let term = qEl.value.trim();
-    const limit = Number(limitEl.value) || 100;
+    const limit = Number(limitEl.value) || 10;
     offset = newOffset;
-
-    // visa/dölj inputs beroende på field
+  
+    // Visa/dölj inputs beroende på valt fält
     const showDate = field === 'creationDate';
     document.querySelector('#date-range').style.display = showDate ? 'inline-flex' : 'none';
     qEl.style.display = showDate ? 'none' : 'inline-block';
-
+  
     const dateFrom = showDate ? dateFromEl.value : '';
     const dateTo = showDate ? dateToEl.value : '';
-
-    // placeholder för fritext om bara datum används
-    if (field === 'creationDate' && !term) term = '-';
-
+  
+    // Kontrollera att båda datum är angivna om creationDate
+    if (field === 'creationDate') {
+      if (!dateFrom || !dateTo) {
+        countEl.textContent = 'Specify both From and To dates';
+        resultsEl.innerHTML = '';
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }
+    }
+  
     const params = new URLSearchParams({ limit, offset });
     if (dateFrom) params.append('dateFrom', dateFrom);
     if (dateTo) params.append('dateTo', dateTo);
-
+  
     let url;
     if (field === 'creationDate' || term) {
-      url = `/api/ppt-search/${encodeURIComponent(field)}/${encodeURIComponent(term)}?${params.toString()}`;
+      url = `/api/ppt-search/${encodeURIComponent(field)}/${encodeURIComponent(term || '-')}` +
+            `?${params.toString()}`;
     } else {
       url = `/api/ppt?${params.toString()}`;
     }
-
+  
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -170,10 +188,10 @@ document.querySelectorAll('.show-meta-btn').forEach(btn => {
       const rows = data.items || [];
       lastResultCount = rows.length;
       lastTotal = data.total ?? rows.length;
-
+  
       renderRows(rows);
       updateCount(rows.length, lastTotal);
-
+  
       prevBtn.disabled = offset === 0;
       nextBtn.disabled = offset + lastResultCount >= lastTotal;
     } catch (err) {
@@ -184,6 +202,18 @@ document.querySelectorAll('.show-meta-btn').forEach(btn => {
       nextBtn.disabled = true;
     }
   }
+  
+  // Enter-event för både fritext och datumfält
+  qEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      search(0);
+    }
+  });
+  dateFromEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') search(0); });
+  dateToEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') search(0); });
+  doBtn.addEventListener('click', () => search(0));
+  
 
   // initial laddning: slumpmässiga resultat
   fetch('/api/ppt?limit=10')
@@ -205,24 +235,29 @@ document.querySelectorAll('.show-meta-btn').forEach(btn => {
   doBtn.addEventListener('click', () => search(0));
   prevBtn.addEventListener('click', () => search(Math.max(0, offset - Number(limitEl.value || 10))));
   nextBtn.addEventListener('click', () => search(offset + Number(limitEl.value || 10)));
-qEl.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault(); 
-    search(0);
-  }
-});
+  qEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && fieldEl.value !== 'creationDate') {
+      e.preventDefault();
+      search(0);
+    }
+  });
+
+  [dateFromEl, dateToEl].forEach(el => {
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        search(0);
+      }
+    });
+  });
+  
 limitEl.addEventListener('change', () => {
-  // Beräkna ny offset baserat på nuvarande position
-  const oldLimit = Number(limitEl.dataset.oldValue || 10); // lagra tidigare value
+  const oldLimit = Number(limitEl.dataset.oldValue || 10); 
   const newLimit = Number(limitEl.value);
-
-  // behåll ungefär samma “sida” efter ändring
   offset = Math.floor(offset / oldLimit) * newLimit;
-  limitEl.dataset.oldValue = newLimit; // uppdatera gamla värdet
-
+  limitEl.dataset.oldValue = newLimit; 
   search(offset);
 });
-
 
 }
 

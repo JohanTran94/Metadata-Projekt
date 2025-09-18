@@ -59,10 +59,11 @@ export default function setupPptRestRoutes(app, db) {
     let { field, searchValue } = req.params;
     const { dateFrom, dateTo } = req.query;
   
+    // Om searchValue är tomt eller '-' → behandla som tom sträng
     if (!searchValue || searchValue === '-' || searchValue.trim() === '') searchValue = '';
   
-    let limit = Math.max(1, Math.min(500, Number(req.query.limit) || 100));
-    let offset = Math.max(0, Number(req.query.offset) || 0);
+    const limit = Math.max(1, Math.min(500, Number(req.query.limit) || 100));
+    const offset = Math.max(0, Number(req.query.offset) || 0);
   
     try {
       const conditions = [];
@@ -80,20 +81,17 @@ export default function setupPptRestRoutes(app, db) {
         if (!allowedFields[field]) return res.status(400).json({ error: "Invalid field name" });
   
         if (field === 'creationDate') {
-          // ignorera searchValue, endast datumintervall används
+          // Kontrollera att båda datum är angivna
+          if (!dateFrom || !dateTo) {
+            return res.status(400).json({ error: 'Specify both dateFrom and dateTo' });
+          }
+          conditions.push("DATE(JSON_UNQUOTE(metadata->>'$.creationDate')) >= ?");
+          conditions.push("DATE(JSON_UNQUOTE(metadata->>'$.creationDate')) <= ?");
+          params.push(dateFrom, dateTo);
         } else if (searchValue) {
           conditions.push(`LOWER(metadata->>'$.${field}') LIKE LOWER(?)`);
           params.push(`%${searchValue}%`);
         }
-      }
-  
-      if (dateFrom) {
-        conditions.push("DATE(JSON_UNQUOTE(metadata->>'$.creationDate')) >= ?");
-        params.push(dateFrom);
-      }
-      if (dateTo) {
-        conditions.push("DATE(JSON_UNQUOTE(metadata->>'$.creationDate')) <= ?");
-        params.push(dateTo);
       }
   
       const whereClause = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
@@ -117,7 +115,6 @@ export default function setupPptRestRoutes(app, db) {
       const countSql = `SELECT COUNT(*) AS total FROM powerpoint_metadata ${whereClause}`;
       const [[{ total }]] = await db.execute(countSql, params);
   
-      // konvertera fileSize till number
       const normalizedRows = rows.map(r => ({
         ...r,
         fileSize: r.fileSize ? Number(r.fileSize) : 0
@@ -129,7 +126,7 @@ export default function setupPptRestRoutes(app, db) {
       res.status(500).json({ error: "Database query failed" });
     }
   });
-
+  
   router.get('/api/ppt/:id/metadata', requireDb, async (req, res) => {
     const { id } = req.params;
   
