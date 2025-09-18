@@ -62,7 +62,7 @@ export function render(appEl) {
 
       // Highlight search term in results, and button for show/hide all metadata
       return `
-        <article>
+        <article class="pdf-result">
           <h3>${term ? highlight(title, term) : title}</h3>
           <p><b>Author:</b> ${term ? highlight(author, term) : author}</p>
           <p><b>Subject:</b> ${term ? highlight(subject, term) : subject}</p>
