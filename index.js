@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import express from 'express';
 import mysql from 'mysql2/promise';
 import dbCredentials from './db.js';
@@ -32,7 +33,6 @@ async function init() {
     await importPptMetadata(db);
   }
 
-
   const app = express();
   app.use(express.json());
 
@@ -43,6 +43,30 @@ async function init() {
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
   });
+  const pptFolder = path.resolve(process.cwd(), 'warehouse/ppt');
+
+  app.get('/ppt/:fileName', (req, res) => {
+    const { fileName } = req.params;
+    const { download } = req.query; 
+    const filePath = path.join(pptFolder, fileName);
+  
+    if (!fs.existsSync(filePath)) return res.status(404).send('File not found');
+  
+    const ext = path.extname(fileName).substring(1).toLowerCase();
+    const mimeTypes = {
+      ppt: 'application/vnd.ms-powerpoint',
+      pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    };
+  
+    if (mimeTypes[ext]) {
+      res.type(mimeTypes[ext]);
+    }
+
+    res.setHeader('Content-Disposition', download ? 'attachment' : 'inline');
+  
+    res.sendFile(filePath);
+  });
+  
 
   setupImageRestRoutes(app, db);
   setupMusicRestRoutes(app, db);
@@ -53,12 +77,12 @@ async function init() {
   app.use('/image', express.static(path.resolve(process.cwd(), 'warehouse/image')));
   app.use('/music', express.static(path.resolve(process.cwd(), 'warehouse/music/')));
   app.use('/pdf', express.static(path.resolve(process.cwd(), 'warehouse/pdf')));
-  app.use('/powerpoint', express.static(path.resolve(process.cwd(), 'warehouse/powerpoint')));
 
-  app.listen(5173, () => {
-    console.log(' - Server listening on http://localhost:5173');
+  app.listen(3000, () => {
+    console.log(' - Server listening on http://localhost:3000');
   });
 }
+
 init().catch((err) => {
   console.error(' - Fatal error during initialization:', err);
   process.exit(1);
