@@ -513,3 +513,35 @@ body {
 .controls .btn:hover {
   background: rgba(255, 255, 255, 0.14);
 }
+
+
+/* ==== Dark dropdown (shared for all pages) ==== */
+.controls select {
+  /* make it stylable across browsers */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  padding: 8px 36px 8px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  outline: none;
+  color-scheme: dark;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23cbd5e1' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px 8px;
+}
+
+.controls select:focus {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.controls select option,
+.controls select optgroup {
+  background-color: rgba(1, 11, 33, 0.98);
+  color: #e2e8f0;
+}
