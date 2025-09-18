@@ -1,10 +1,11 @@
 export function render(appEl) {
   appEl.innerHTML = `
     <section class="about-header">
-      <h1>Sons of Arholma Search Engine</h1>
-      <h2>A student project on metadata.</h2>
+     
+      <h2>Sons of Arholma Search Engine</h2>
+      <h3>A student project on metadata.</h3>
       
-        The <strong>Sons Of Arholma Search Engine</strong> is a student project built as part of the
+        The <strong>Sons Of Arholma Search Engine</strong> is a student project built for the
         <em>Metadata</em> course (2025-08-11 → 2025-09-19) at <a href="https://www.tucsweden.se/" target="_blank" rel="noopener">TUC Yrkeshögskola</a> in Stockholm, Sweden.
       
     </section>
