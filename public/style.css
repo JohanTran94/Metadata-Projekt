@@ -550,16 +550,15 @@ body {
 /* -----PDF result styling------ */
 .pdf-result {
   border: 1px solid rgba(255, 255, 255, 0.2);
-  /* thinn white frame */
-  padding: 12px;
-  margin-bottom: 16px;
-  border-radius: 6px;
-  background-color: rgba(255, 255, 255, 0.08);
-  /* transparent  */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s ease;
-  color: #fff;
-
+  background-color: transparent;
+  /* helt genomskinlig */
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+  overflow-x: auto;
+  backdrop-filter: blur(4px);
+  /* frostad effekt om bakgrunden är ljus */
 }
 
 .pdf-result:hover {
@@ -630,4 +629,60 @@ body {
 .content-bg audio::-webkit-media-controls-panel {
   background: #4f5d75 !important;
   box-shadow: #6f6c82 !important;
+}
+
+
+/* ==== Music page specific ==== */
+.music-results-wrapper {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: transparent;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+  overflow-x: auto;
+  backdrop-filter: blur(4px);
+
+}
+
+.music-results-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+}
+
+.music-results-wrapper th,
+.music-results-wrapper td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.music-results-wrapper th {
+  background-color: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
+.content-bg tbody tr:nth-child(even),
+#image-page .music-results-wrapper tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+
+.content-bg tbody tr:hover,
+#image-page .music-results-wrapper tbody tr:hover {
+  background: rgba(246, 233, 212, 0.08);
+}
+
+.content-bg td:first-child,
+#image-page .music-results-wrapper td:first-child {
+  overflow-wrap: anywhere;
+}
+
+#image-page .music-results-wrapper tbody tr:nth-child(even) td {
+  background-color: rgba(255, 255, 255, 0.025);
+}
+
+#image-page .music-results-wrapper tbody tr:hover td {
+  background-color: rgba(246, 233, 212, 0.08);
 }

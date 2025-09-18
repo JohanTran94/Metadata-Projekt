@@ -68,21 +68,25 @@ export function render(appEl) {
 
       <div id="summary" class="muted" style="margin-top:8px;"></div>
 
-      <table id="resultTable" class="table" hidden>
-        <thead>
-          <tr>
-            <th>File Name</th><th>Make</th><th>Model</th><th>Date</th>
-            <th>Width</th><th>Height</th><th>Latitude</th><th>Longitude</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="resultBody"></tbody>
-      </table>
 
-      <div class="controls" id="pagination" hidden>
-        <button id="prevBtn" type="button">Prev</button>
-        <span id="pageInfo" class="muted"></span>
-        <button id="nextBtn" type="button">Next</button>
+      <div class="music-results-wrapper" id="imageResults" hidden>
+        <table id="resultTable">
+          <thead>
+            <tr>
+              <th>File Name</th><th>Make</th><th>Model</th><th>Date</th>
+              <th>Width</th><th>Height</th><th>Latitude</th><th>Longitude</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+
+        <div class="controls" id="pagination">
+          <button id="prevBtn" type="button">Prev</button>
+          <span id="pageInfo" class="muted"></span>
+          <button id="nextBtn" type="button">Next</button>
+        </div>
       </div>
+
   
       <div id="metaModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="metaTitle">
         <div class="modal-backdrop"></div>
@@ -100,7 +104,7 @@ export function render(appEl) {
         </div>
       </div>
 
-    </section id="image-page">
+    </section>
   `;
 
   // state + refs
@@ -119,6 +123,7 @@ export function render(appEl) {
   const modalCloseBtn = appEl.querySelector('#metaClose');
   const modalOkBtn = appEl.querySelector('#metaOk');
   const modalBackdrop = appEl.querySelector('#metaModal .modal-backdrop');
+  const resultsWrap = appEl.querySelector('#imageResults');
 
   function openMetaModal(show = true) {
     modalEl.classList.toggle('hidden', !show);
@@ -303,6 +308,7 @@ export function render(appEl) {
     summary.textContent = `Total: ${state.total} | Page ${state.page} of ${maxPage}`;
     pagination.hidden = rows.length === 0;
     pageInfo.textContent = `Page ${state.page} / ${maxPage}`;
+    resultsWrap.hidden = rows.length === 0;
   }
 
 

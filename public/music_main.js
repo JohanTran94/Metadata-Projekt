@@ -4,19 +4,20 @@ export async function render(appEl) {
       <h2>Search music</h2>
       <h4>
         This search engine lets you find songs by the most common fields.<br />
-        You can also press "Show Metadata" to view more detailed information about a specific track. </h4>
- <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+        You can also press "Show Metadata" to view more detailed information about a specific track.
+      </h4>
+
+      <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
           Search:
-         <select id="field">
-  <option value="any">All fields</option>
-  <option value="title">Title</option>
-  <option value="artist">Artist</option>
-  <option value="album">Album</option>
-  <option value="genre">Genre</option>
-  <option value="year">Year</option>
-</select>
-
+          <select id="field">
+            <option value="any">All fields</option>
+            <option value="title">Title</option>
+            <option value="artist">Artist</option>
+            <option value="album">Album</option>
+            <option value="genre">Genre</option>
+            <option value="year">Year</option>
+          </select>
         </label>
 
         <div id="yearControls" class="hidden" style="gap:8px; align-items:center; margin-left:8px;">
@@ -31,48 +32,43 @@ export async function render(appEl) {
           </label>
         </div>
 
-        
         <input id="q" placeholder="Search..." autocomplete="off" />
         <button id="btnSearch" type="button">Search</button>
       </div>
 
       <div id="summary" class="muted" style="margin-top:8px;"></div>
-
       <audio id="player" class="hidden" style="width:100%; max-width:560px"></audio>
 
-      <table>
-  <thead>
-  <tr>
-    <th>Title</th>
-    <th>Artist</th>
-    <th>Album</th>
-    <th>Year</th>
-    <th>Genre</th>
-    <th>Download</th>
-    <th>Play</th>
-    <th>Metadata</th>
-  </tr>
-</thead>
-
-        <tbody id="rows"></tbody>
-      </table>
+      <div class="music-results-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Artist</th>
+              <th>Album</th>
+              <th>Year</th>
+              <th>Genre</th>
+              <th>Download</th>
+              <th>Play</th>
+              <th>Metadata</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
     </section>
   `;
 
-  // Referenser
   const qEl = document.getElementById('q');
   const fieldEl = document.getElementById('field');
   const rowsEl = document.getElementById('rows');
   const summaryEl = document.getElementById('summary');
   const playerEl = document.getElementById('player');
   const btnSearch = document.getElementById('btnSearch');
-
-  // referenser för årskontroller
   const yearControlsEl = document.getElementById('yearControls');
   const yearModeEl = document.getElementById('yearMode');
   const yearInclusiveEl = document.getElementById('yearInclusive');
   const yearInclusiveWrap = document.getElementById('yearInclusiveWrap');
-
 
   fieldEl.value = 'any';
   qEl.value = '';
@@ -82,29 +78,17 @@ export async function render(appEl) {
     const url = `/music/${encodeURIComponent(file)}`;
     const idAttr = it.id != null ? `data-id="${String(it.id)}"` : '';
     return `
-    <tr ${idAttr}>
-      <td>${it.title || ''}</td>
-      <td>${it.artist || ''}</td>
-      <td>${it.album || ''}</td>
-      <td>${it.year || ''}</td>
-      <td>${it.genre || ''}</td>
-      <td><a href="${url}" download>Download</a></td>
-      <td><button class="btn-play" data-play="${url}">▶︎</button></td>
-      <td><button class="btn-show-all-music-metadata">Show metadata</button></td>
-    </tr>
-  `;
-  }
-
-
-  function unknown(items) {
-    for (const it of items) {
-      if (!it.title || !String(it.title).trim()) it.title = 'Unknown title';
-      if (!it.artist || !String(it.artist).trim()) it.artist = 'Unknown artist';
-      if (!it.album || !String(it.album).trim()) it.album = 'Unknown album';
-      if (!it.year || !String(it.year).trim()) it.year = 'Unknown year';
-      if (!it.genre || !String(it.genre).trim()) it.genre = 'Unknown genre';
-    }
-    return items;
+      <tr ${idAttr}>
+        <td>${it.title || 'Unknown title'}</td>
+        <td>${it.artist || 'Unknown artist'}</td>
+        <td>${it.album || 'Unknown album'}</td>
+        <td>${it.year || 'Unknown year'}</td>
+        <td>${it.genre || 'Unknown genre'}</td>
+        <td><a href="${url}" download>Download</a></td>
+        <td><button class="btn-play" data-play="${url}">▶︎</button></td>
+        <td><button class="btn-show-all-music-metadata">Show metadata</button></td>
+      </tr>
+    `;
   }
 
   function updateYearUi() {
@@ -126,19 +110,14 @@ export async function render(appEl) {
 
     let url;
     if (!q) {
-      // säkerställ 10 vid tom sök
       url = `/api/music?limit=10&offset=0`;
     } else if (!field || field === 'any') {
       url = `/api/music-search/any/${encodeURIComponent(q)}`;
     } else if (field === 'year') {
       const mode = yearModeEl.value;
       const inclusive = !!yearInclusiveEl.checked;
-
-      let op;
-      if (mode === 'before') op = inclusive ? '<=' : '<';
-      else if (mode === 'after') op = inclusive ? '>=' : '>';
-      else op = '='; // in
-
+      const op = mode === 'before' ? (inclusive ? '<=' : '<') :
+        mode === 'after' ? (inclusive ? '>=' : '>') : '=';
       const composed = `${op}${q.replace(/\s+/g, '')}`;
       url = `/api/music-search/year/${encodeURIComponent(composed)}`;
     } else {
@@ -153,15 +132,11 @@ export async function render(appEl) {
 
     const data = await res.json();
     const list = Array.isArray(data) ? data : (data.items || []);
-    unknown(list);
-
     summaryEl.textContent = `Showing ${list.length} songs`;
     rowsEl.innerHTML = list.map(rowHtml).join('');
   }
 
-
   async function loadInitial() {
-
     const res = await fetch('/api/music-search/any/%25');
     if (!res.ok) {
       const text = await res.text();
@@ -169,25 +144,11 @@ export async function render(appEl) {
     }
     const data = await res.json();
     const all = Array.isArray(data) ? data : (data.items || []);
-
-    // Blandning --> Kul med 10 nya varje gång
-    function shuffle(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
-
-
-    const list = shuffle(all).slice(0, 10);
-
-    unknown(list);
+    const list = all.sort(() => Math.random() - 0.5).slice(0, 10);
     summaryEl.textContent = `Showing ${list.length} random songs`;
     rowsEl.innerHTML = list.map(rowHtml).join('');
   }
 
-  // Triggers
   btnSearch.addEventListener('click', search);
   qEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
@@ -201,19 +162,17 @@ export async function render(appEl) {
     if (playBtn) {
       const src = playBtn.getAttribute('data-play');
       playerEl.src = src;
-      playerEl.classList.remove('hidden');
       playerEl.setAttribute('controls', '');
       playerEl.classList.remove('hidden');
-      await playerEl.play();
-
       try { await playerEl.play(); } catch { }
       return;
     }
+
     const metaBtn = e.target.closest('.btn-show-all-music-metadata');
     if (metaBtn) {
       const tr = metaBtn.closest('tr');
       const id = tr?.getAttribute('data-id');
-      if (!id) { alert('Ingen ID kopplad till raden.'); return; }
+      if (!id) return alert('Ingen ID kopplad till raden.');
       try {
         const res = await fetch(`/api/music-all-meta/${encodeURIComponent(id)}`);
         const data = await res.json();
@@ -223,7 +182,6 @@ export async function render(appEl) {
       }
     }
   });
-
 
   await loadInitial();
 }
