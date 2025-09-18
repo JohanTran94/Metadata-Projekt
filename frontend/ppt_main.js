@@ -19,16 +19,7 @@ export function render(appEl) {
           From: <input id="date-from" type="date" />
           To: <input id="date-to" type="date" />
         </label>
-        <label>
-          Order by:
-          <select id="ppt-sort">
-            <option value="title">Title</option>
-            <option value="fileName">File name</option>
-            <option value="organisation">Organization</option>
-            <option value="creationDate">Creation date</option>
-          </select>
-        </label>
-        <input id="ppt-limit" type="number" placeholder="Limit" style="width:100px;" value="100" />
+        <input id="ppt-limit" type="number" placeholder="Limit" style="width:100px;" value="10" />
         <button id="ppt-do">Search</button>
       </div>
       <p id="ppt-count" class="muted" style="margin-top:8px;">0 results</p>
@@ -44,7 +35,6 @@ export function render(appEl) {
   const qEl = appEl.querySelector('#ppt-q');
   const dateFromEl = appEl.querySelector('#date-from');
   const dateToEl = appEl.querySelector('#date-to');
-  const sortEl = appEl.querySelector('#ppt-sort');
   const limitEl = appEl.querySelector('#ppt-limit');
   const doBtn = appEl.querySelector('#ppt-do');
   const prevBtn = appEl.querySelector('#ppt-prev');
@@ -54,85 +44,71 @@ export function render(appEl) {
 
   let offset = 0;
   let lastResultCount = 0;
-  let isRandom = true;
+  let lastTotal = 0;
 
   function renderRows(rows) {
-    resultsEl.innerHTML = rows.map(r => {
-      const fileName = r.fileName || '';
-      const title = r.title || 'Unknown';
-      const company = r.organisation || 'Unknown';
-      const creationDate = r.creationDate || 'Unknown';
-      const original = r.original || '';
-      const openLink = fileName
-        ? `<a href="/ppt/${encodeURIComponent(fileName)}" target="_blank" rel="noopener">Open</a>`
-        : '';
-      const downloadLink = fileName
-        ? `<a href="/ppt/${encodeURIComponent(fileName)}?download=1" target="_blank" rel="noopener">Download</a>`
-        : '';
-      const fileLinks = [openLink, downloadLink].filter(Boolean).join(' | ');
-
-      return `
-        <article data-id="${r.id}">
-          <p><b>Title:</b> ${title}</p>
-          <p><b>URL:</b> ${original ? `<a href="${original}" target="_blank" rel="noopener">${original}</a>` : 'Unknown'}</p>
-          <p><b>File name:</b> ${fileName || 'Unknown'} ${fileLinks}</p>
-          <p><b>Organisation:</b> ${company}</p>
-          <p><b>Creation date:</b> ${creationDate}</p>
-          <p><button class="btn-show-all-ppt-metadata">Show all metadata</button></p>
-          <pre class="ppt-meta-block hidden"></pre>
-        </article>
-      `;
-    }).join('');
+    resultsEl.innerHTML = rows.map(r => `
+      <article data-id="${r.id}">
+        <p><b>Title:</b> ${r.title || 'Unknown'}</p>
+        <p><b>URL:</b> ${r.original ? `<a href="${r.original}" target="_blank">${r.original}</a>` : 'Unknown'}</p>
+        <p><b>File name:</b> ${r.fileName || 'Unknown'}</p>
+        <p><b>Organization:</b> ${r.organisation || 'Unknown'}</p>
+        <p><b>Creation date:</b> ${r.creationDate || 'Unknown'}</p>
+      </article>
+    `).join('');
   }
 
   function updateCount(rowsLength, total) {
+    if (rowsLength === 0) {
+      countEl.textContent = `0 results`;
+      return;
+    }
     const start = offset + 1;
     const end = offset + rowsLength;
     countEl.textContent = `Showing ${start} - ${end} of ${total} results`;
   }
 
-  // --- Search function with corrected date handling ---
   async function search(newOffset = 0) {
-    isRandom = false;
     const field = fieldEl.value;
     let term = qEl.value.trim();
-    if (field === 'creationDate' && !term) term = ' ';
-    const sortField = sortEl.value;
     const limit = Number(limitEl.value) || 100;
-    const dateFrom = dateFromEl.value;
-    const dateTo = dateToEl.value;
     offset = newOffset;
 
+    // visa/dölj inputs beroende på field
+    const showDate = field === 'creationDate';
+    document.querySelector('#date-range').style.display = showDate ? 'inline-flex' : 'none';
+    qEl.style.display = showDate ? 'none' : 'inline-block';
+
+    const dateFrom = showDate ? dateFromEl.value : '';
+    const dateTo = showDate ? dateToEl.value : '';
+
+    // placeholder för fritext om bara datum används
+    if (field === 'creationDate' && !term) term = '-';
+
+    const params = new URLSearchParams({ limit, offset });
+    if (dateFrom) params.append('dateFrom', dateFrom);
+    if (dateTo) params.append('dateTo', dateTo);
+
     let url;
-
-    // --- Handle creationDate search with or without term ---
-    if (field === 'creationDate' && !term && (dateFrom || dateTo)) {
-      // Empty search term but date range is set → don't add %20
-      url = `/api/ppt-search/${encodeURIComponent(field)}/?limit=${limit}&offset=${offset}&sortField=${encodeURIComponent(sortField)}`;
-    } else if (term || field === 'creationDate') {
-      // Normal search with term or field is creationDate
-      url = `/api/ppt-search/${encodeURIComponent(field)}/${encodeURIComponent(term)}?limit=${limit}&offset=${offset}&sortField=${encodeURIComponent(sortField)}`;
+    if (field === 'creationDate' || term) {
+      url = `/api/ppt-search/${encodeURIComponent(field)}/${encodeURIComponent(term)}?${params.toString()}`;
     } else {
-      // No search term → fetch standard/slump
-      url = `/api/ppt?limit=${limit}&offset=${offset}&sortField=${encodeURIComponent(sortField)}`;
+      url = `/api/ppt?${params.toString()}`;
     }
-
-    console.log("Fetching URL:", url, "dateFrom:", dateFrom, "dateTo:", dateTo);
 
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Error: ${res.status}`);
-
       const data = await res.json();
       const rows = data.items || [];
-      const total = data.total ?? rows.length;
-
       lastResultCount = rows.length;
+      lastTotal = data.total ?? rows.length;
+
       renderRows(rows);
-      updateCount(rows.length, total);
+      updateCount(rows.length, lastTotal);
 
       prevBtn.disabled = offset === 0;
-      nextBtn.disabled = offset + lastResultCount >= total;
+      nextBtn.disabled = offset + lastResultCount >= lastTotal;
     } catch (err) {
       console.error(err);
       resultsEl.innerHTML = `<div class="muted">${err.message}</div>`;
@@ -142,63 +118,26 @@ export function render(appEl) {
     }
   }
 
-  // --- Event listeners ---
-  doBtn.addEventListener('click', () => search(0));
-  qEl.addEventListener('keyup', e => { if (e.key === 'Enter') search(0); });
-  fieldEl.addEventListener('change', () => {
-    const showDate = fieldEl.value === 'creationDate';
-    document.querySelector('#date-range').style.display = showDate ? 'inline-flex' : 'none';
-    search(0);
-  });
-  sortEl.addEventListener('change', () => search(0));
-  limitEl.addEventListener('change', () => search(0));
-  dateFromEl.addEventListener('change', () => search(0));
-  dateToEl.addEventListener('change', () => search(0));
-
-  prevBtn.addEventListener('click', () => search(Math.max(0, offset - Number(limitEl.value))));
-  nextBtn.addEventListener('click', () => search(offset + Number(limitEl.value)));
-
-  resultsEl.addEventListener('click', async (e) => {
-    const btn = e.target.closest('.btn-show-all-ppt-metadata');
-    if (!btn) return;
-
-    const article = btn.closest('article');
-    const pre = article.querySelector('.ppt-meta-block');
-    const id = article.getAttribute('data-id');
-
-    if (!pre.classList.contains('hidden')) {
-      pre.textContent = '';
-      pre.classList.add('hidden');
-      btn.textContent = 'Show all metadata';
-      return;
-    }
-    try {
-      const res = await fetch(`/api/ppt/${encodeURIComponent(id)}`);
-      const data = await res.json();
-      pre.textContent = JSON.stringify(data, null, 2);
-    } catch {
-      pre.textContent = 'Could not find meta data.';
-    }
-    pre.classList.remove('hidden');
-    btn.textContent = 'Hide metadata';
-  });
-
-  // --- Initial load: 10 random ---
-  limitEl.value = 10;
-  fetch(`/api/ppt?limit=10`)
+  // initial laddning: slumpmässiga resultat
+  fetch('/api/ppt?limit=10')
     .then(res => res.json())
     .then(data => {
-      const rows = data.items || [];
-      const total = data.total ?? rows.length;
-      isRandom = true;
-      offset = 0;
-      lastResultCount = rows.length;
-      renderRows(rows);
-      updateCount(rows.length, total);
-
+      renderRows(data.items || []);
+      lastResultCount = data.items?.length || 0;
+      lastTotal = data.total || 0;
+      updateCount(lastResultCount, lastTotal);
       prevBtn.disabled = true;
-      nextBtn.disabled = true; // no pagination for random
+      nextBtn.disabled = true;
+    })
+    .catch(err => {
+      console.error(err);
+      resultsEl.innerHTML = `<div class="muted">${err.message}</div>`;
     });
+
+  // event listeners
+  doBtn.addEventListener('click', () => search(0));
+  prevBtn.addEventListener('click', () => search(Math.max(0, offset - Number(limitEl.value || 10))));
+  nextBtn.addEventListener('click', () => search(offset + Number(limitEl.value || 10)));
 }
 
 export function cleanup() { }
