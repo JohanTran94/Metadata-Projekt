@@ -3,6 +3,13 @@
   --muted: #666;
 }
 
+#metadata-modal-content {
+  white-space: pre-wrap; /* bryt rader vid behov */
+  word-wrap: break-word; /* bryt ord som är för långa */
+  overflow: auto;
+  max-height: 400px;
+}
+
 * {
   box-sizing: border-box;
 }

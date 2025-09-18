@@ -37,6 +37,21 @@ export function render(appEl) {
       </div>
       <section id="ppt-results"></section>
     </section>
+    <div id="metadata-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+     background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
+  <div style="background:white; padding:20px; border-radius:8px; max-width:600px; width:90%; position:relative;">
+    <h3 id="metadata-modal-title">Metadata</h3>
+    <pre id="metadata-modal-content" style="
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow:auto;
+  max-height:400px;
+"></pre>
+
+    <button id="metadata-modal-close" style="position:absolute; top:10px; right:10px;">X</button>
+  </div>
+</div>
+
   `;
 
   const fieldEl = appEl.querySelector('#ppt-field');
@@ -82,21 +97,31 @@ export function render(appEl) {
         </article>
       `;
     }).join('');
-  
-    // Lägg till eventlistener för alla nya knappar
-    document.querySelectorAll('.show-meta-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        try {
-          const res = await fetch(`/api/ppt/${id}/metadata`);
-          if (!res.ok) throw new Error(`Error: ${res.status}`);
-          const metadata = await res.json();
-          alert(JSON.stringify(metadata, null, 2)); // enkel popup, kan bytas mot modal
-        } catch (err) {
-          alert(`Failed to fetch metadata: ${err.message}`);
-        }
-      });
-    });
+
+    const modal = document.getElementById('metadata-modal');
+const modalTitle = document.getElementById('metadata-modal-title');
+const modalContent = document.getElementById('metadata-modal-content');
+const modalClose = document.getElementById('metadata-modal-close');
+
+modalClose.addEventListener('click', () => modal.style.display = 'none');
+
+document.querySelectorAll('.show-meta-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.dataset.id;
+    try {
+      const res = await fetch(`/api/ppt/${id}/metadata`);
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+      const metadata = await res.json();
+
+      modalTitle.textContent = `Metadata for ID ${id}`;
+      modalContent.textContent = JSON.stringify(metadata, null, 2);
+      modal.style.display = 'flex'; 
+    } catch (err) {
+      console.error(`Failed to fetch metadata: ${err.message}`);
+    }
+  });
+});
+
   }
   
 
