@@ -14,7 +14,7 @@ export function render(appEl) {
             <option value="Text">Text</option>
             <option value="Keywords">Keywords</option>
             <option value="Pages">Pages</option>
-            <option value="Filename">File Name</option>
+            <option value="File name">File Name</option>
           </select>
         </label>
         <input id="pdf-q" type="text" placeholder="(ex: 'AI', '>10', '5-15')" />
@@ -43,7 +43,7 @@ export function render(appEl) {
   };
 
   async function renderResults(rows, term = '') {
-    countEl.textContent = `${rows.length} resultat`;
+    countEl.textContent = `${rows.length} results`;
     resultsEl.style.display = 'block';
 
     if (!rows.length) {
@@ -69,7 +69,7 @@ export function render(appEl) {
           <p><b>Keywords:</b> ${term ? highlight(keywords, term) : keywords}</p>
           <p><b>Pages:</b> ${pages}</p>
           <p><b>Text:</b> ${term ? highlight(truncate(text), term) : truncate(text)}</p>
-          <p><b>Filename:</b> ${term ? highlight(filename, term) : filename}</p>
+          <p><b>File name:</b> ${term ? highlight(filename, term) : filename}</p>
           <p>
             ${filename ? `<a href="/pdf/${encodeURIComponent(filename)}" download>Download PDF</a>` : ''}
             ${filename ? `&nbsp;|&nbsp;<a href="/pdf/${encodeURIComponent(filename)}" target="_blank" rel="noopener">Open</a>` : ''}
