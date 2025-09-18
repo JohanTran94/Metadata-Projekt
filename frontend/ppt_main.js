@@ -14,12 +14,20 @@ export function render(appEl) {
             <option value="any">All fields</option>
           </select>
         </label>
-        <input id="ppt-q" type="text" placeholder="Search PowerPoint meta data" />
+        <input id="ppt-q" type="text" placeholder="Search" />
         <label id="date-range" style="display:none;">
           From: <input id="date-from" type="date" />
           To: <input id="date-to" type="date" />
         </label>
-        <input id="ppt-limit" type="number" placeholder="Limit" style="width:100px;" value="10" />
+        <label>
+  Results per page:
+  <select id="ppt-limit">
+    <option value="10">10</option>
+    <option value="25">25</option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+  </select>
+</label>
         <button id="ppt-do">Search</button>
       </div>
       <p id="ppt-count" class="muted" style="margin-top:8px;">0 results</p>
@@ -74,10 +82,6 @@ export function render(appEl) {
       `;
     }).join('');
   }
-  
-  
-  
-  
 
   function updateCount(rowsLength, total) {
     if (rowsLength === 0) {
@@ -92,7 +96,7 @@ export function render(appEl) {
   async function search(newOffset = 0) {
     const field = fieldEl.value;
     let term = qEl.value.trim();
-    const limit = Number(limitEl.value) || 100;
+    const limit = Number(limitEl.value) || 10;
     offset = newOffset;
 
     // visa/dölj inputs beroende på field
@@ -159,6 +163,12 @@ export function render(appEl) {
   doBtn.addEventListener('click', () => search(0));
   prevBtn.addEventListener('click', () => search(Math.max(0, offset - Number(limitEl.value || 10))));
   nextBtn.addEventListener('click', () => search(offset + Number(limitEl.value || 10)));
+  qEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); 
+      search(0);           
+    }
+  });
 }
 
 export function cleanup() { }
