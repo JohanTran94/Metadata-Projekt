@@ -53,7 +53,7 @@ async function init() {
     if (mimeTypes[ext]) {
       res.type(mimeTypes[ext]);
     }
-    
+
     res.setHeader('Content-Disposition', download ? 'attachment' : 'inline');
   
     res.sendFile(filePath);
@@ -69,7 +69,6 @@ async function init() {
   app.use('/image', express.static(path.resolve(process.cwd(), 'warehouse/image')));
   app.use('/music', express.static(path.resolve(process.cwd(), 'warehouse/music/')));
   app.use('/pdf', express.static(path.resolve(process.cwd(), 'warehouse/pdf')));
-  // app.use('/ppt', express.static(...)); // tas bort, använder egen route
 
   app.listen(3000, () => {
     console.log(' - Server listening on http://localhost:3000');

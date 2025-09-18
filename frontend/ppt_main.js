@@ -205,6 +205,25 @@ document.querySelectorAll('.show-meta-btn').forEach(btn => {
   doBtn.addEventListener('click', () => search(0));
   prevBtn.addEventListener('click', () => search(Math.max(0, offset - Number(limitEl.value || 10))));
   nextBtn.addEventListener('click', () => search(offset + Number(limitEl.value || 10)));
+qEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault(); 
+    search(0);
+  }
+});
+limitEl.addEventListener('change', () => {
+  // Beräkna ny offset baserat på nuvarande position
+  const oldLimit = Number(limitEl.dataset.oldValue || 10); // lagra tidigare value
+  const newLimit = Number(limitEl.value);
+
+  // behåll ungefär samma “sida” efter ändring
+  offset = Math.floor(offset / oldLimit) * newLimit;
+  limitEl.dataset.oldValue = newLimit; // uppdatera gamla värdet
+
+  search(offset);
+});
+
+
 }
 
 export function cleanup() { }
