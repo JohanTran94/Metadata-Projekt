@@ -57,13 +57,21 @@ export function render(appEl) {
       const company = r.organisation || 'Unknown';
       const creationDate = r.creationDate || 'Unknown';
       const original = r.original || '';
-      const localLink = fileName ? `<a href="warehouse/ppt/${encodeURIComponent(fileName)}" target="_blank" rel="noopener">Open local</a>` : '';
+      const openLink = fileName
+        ? `<a href="/ppt/${encodeURIComponent(fileName)}" target="_blank" rel="noopener">Open</a>`
+        : '';
+      const downloadLink = fileName
+        ? `<a href="/ppt/${encodeURIComponent(fileName)}?download=1" target="_blank" rel="noopener">Download</a>`
+        : '';
+      const fileLinks = [openLink, downloadLink].filter(Boolean).join(' | ');
+
+
 
       return `
         <article data-id="${r.id}">
           <p><b>Title:</b> ${title}</p>
           <p><b>URL:</b> ${original ? `<a href="${original}" target="_blank" rel="noopener">${original}</a>` : 'Unknown'}</p>
-          <p><b>File name:</b> ${fileName || 'Unknown'} ${localLink ? `&nbsp;|&nbsp;${localLink}` : ''}</p>
+          <p><b>File name:</b> ${fileName || 'Unknown'} ${fileLinks}</p>
           <p><b>Organisation:</b> ${company}</p>
           <p><b>Creation date:</b> ${creationDate}</p>
           <p><button class="btn-show-all-ppt-metadata">Show all metadata</button></p>
