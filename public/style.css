@@ -631,3 +631,36 @@ body {
   background: #4f5d75 !important;
   box-shadow: #6f6c82 !important;
 }
+
+
+/* ==== Music page specific ==== */
+.music-results-wrapper {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: transparent;
+  /* helt genomskinlig */
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+  overflow-x: auto;
+  backdrop-filter: blur(4px);
+  /* frostad effekt om bakgrunden är ljus */
+}
+
+.music-results-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+}
+
+.music-results-wrapper th,
+.music-results-wrapper td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.music-results-wrapper th {
+  background-color: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
