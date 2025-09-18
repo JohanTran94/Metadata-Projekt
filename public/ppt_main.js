@@ -1,7 +1,16 @@
 export function render(appEl) {
   appEl.innerHTML = `
-    <section>
-      <h2>Search PowerPoint</h2>
+  <section>
+  <h1>PowerPoint search</h1>
+  <h2>
+  Find PowerPoint documents by metadata. 
+  </h2>
+  <h3>  
+    Search by title, file name, subject, organization, date or other parameters.
+  </h3>  
+    To view more detailed information about a specific document, press <b>show all metadata.
+    <br>
+    <br>
       <div class="controls">
         <label>
           Search:
@@ -14,7 +23,7 @@ export function render(appEl) {
             <option value="any">All fields</option>
           </select>
         </label>
-        <input id="ppt-q" type="text" placeholder="Search" />
+        <input id="ppt-q" type="text" placeholder="Search..." />
         <label id="date-range" style="display:none;">
           From: <input id="date-from" type="date" maxlength="10" />
           To: <input id="date-to" type="date" maxlength="10" />        

@@ -1,20 +1,25 @@
 // frontend/about_main.js
 export function render(appEl) {
   appEl.innerHTML = `
-    <section class="about">
-      <h2>About us</h2>
+  <section>
+  <h1>Sons of Arholma</h1>
+  <h2>
+  A student project on metadata. 
+  </h2>
 
       <p>
         <strong>Sons Of Arholma Search Engine</strong> is a student project built as part of the
-        <em>Metadata</em> course (2025-08-11 → 2025-09-19).
-        The goal was to design a simple metadata search engine that works across
-        different file types: Music (MP3), PDF, PowerPoint, and Image files.
+        <em>Metadata</em> course (2025-08-11 → 2025-09-19) at TUC Yrkeshögskola in Stockholm, Sweden.
+      </p>
+      
+      <p>
+        Our ambition was to build an application that provides a clean web interface where users can search, filter,
+        and preview metadata from a variety of file types. Each media type has its own
+        dedicated search engine, all integrated into a Single-Page Application (SPA).
       </p>
 
       <p>
-        The application provides a clean web interface where users can search, filter,
-        and preview metadata stored in a local database. Each media type has its own
-        dedicated search engine, but everything is integrated into a Single-Page Application (SPA).
+        Feel free to explore the <b>Sons of Arholma Search Engine.</b>
       </p>
 
       <h3>Tech stack</h3>
@@ -43,6 +48,14 @@ export function render(appEl) {
         <li>
           <strong>Johan Tran</strong>: Image module ·
           <a href="https://github.com/JohanTran94" target="_blank" rel="noopener">github.com/JohanTran94</a>
+        </li>
+      </ul>
+
+      <h3>Advisor</h3>
+      <ul class="advisor">
+        <li>
+          <strong>Thomas Frank</strong> · Nodehill · 
+          <a href="https://nodehill.com" target="_blank" rel="noopener">https://nodehill.com</a>
         </li>
       </ul>
 
