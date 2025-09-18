@@ -23,12 +23,10 @@ body {
   /* Bakgrund */
   background: url("/img/background1920.jpg") no-repeat center center fixed;
   background-size: cover;
-  background-image: image-set(
-    url("/img/background800.webp") type("image/webp") 1x,
-    url("/img/background1280.webp") type("image/webp") 2x,
-    url("/img/background1920.webp") type("image/webp") 3x,
-    url("/img/background1920.jpg") type("image/jpeg") 1x
-  );
+  background-image: image-set(url("/img/background800.webp") type("image/webp") 1x,
+      url("/img/background1280.webp") type("image/webp") 2x,
+      url("/img/background1920.webp") type("image/webp") 3x,
+      url("/img/background1920.jpg") type("image/jpeg") 1x);
 }
 
 /* ==== HEADER ==== */
@@ -44,23 +42,30 @@ body {
 
 .header-top {
   display: flex;
-  align-items: center;       /* vertikal centrering av logon */
-  justify-content: flex-start; /* logon till vänster */
-  max-width: 1100px;          /* matchar content-box */
+  align-items: center;
+  /* vertikal centrering av logon */
+  justify-content: flex-start;
+  /* logon till vänster */
+  max-width: 1100px;
+  /* matchar content-box */
   width: 100%;
   padding: 16px var(--gap);
-  z-index: 10;                /* säkerställer att logon ligger över bakgrund, inte bakom andra element */
+  z-index: 10;
+  /* säkerställer att logon ligger över bakgrund, inte bakom andra element */
 }
 
 .site-logo {
-  display: inline-block;   /* låter länken anpassa sig till bilden */
+  display: inline-block;
+  /* låter länken anpassa sig till bilden */
   padding: 0;
 }
 
 .site-logo img {
   display: block;
-  max-height: 80px;        /* begränsar logons höjd */
-  width: auto;             /* behåller proportioner */
+  max-height: 80px;
+  /* begränsar logons höjd */
+  width: auto;
+  /* behåller proportioner */
 }
 
 .header-tabs {
@@ -68,7 +73,8 @@ body {
   width: 100%;
   background: rgba(0, 7, 21, 0.65);
   display: flex;
-  justify-content: center; /* tabbarna centreras inom remsan */
+  justify-content: center;
+  /* tabbarna centreras inom remsan */
   padding: 2px;
 }
 
@@ -76,8 +82,10 @@ body {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  justify-content: flex-start; /* vänsterjustera länkarna */
-  max-width: 1100px;           /* samma som content-box */
+  justify-content: flex-start;
+  /* vänsterjustera länkarna */
+  max-width: 1100px;
+  /* samma som content-box */
   width: 100%;
   padding: 0 var(--gap);
   box-sizing: border-box;
@@ -109,8 +117,10 @@ body {
 #app.container {
   flex: 1 0 auto;
   display: flex;
-  justify-content: center; /* centrera horisontellt */
-  align-items: stretch; /* start från toppen */
+  justify-content: center;
+  /* centrera horisontellt */
+  align-items: stretch;
+  /* start från toppen */
   padding: 0;
 }
 
@@ -185,5 +195,49 @@ body {
 }
 
 .start-card:hover .card-title {
-  text-decoration: underline; /* endast rubriken */
+  text-decoration: underline;
+  /* endast rubriken */
+}
+
+
+/* PDF result styling */
+.pdf-result {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* thinn white frame */
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.08);
+  /* transparent  */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+  color: #fff;
+
+}
+
+.pdf-result:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.12);
+  /* highlight result */
+}
+
+#pdf-field,
+#pdf-q {
+  background-color: rgba(255, 255, 255, 0.08);
+  /* slightly transparant */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* thinn white frame */
+  color: #fff;
+  /* white text */
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 1rem;
+  backdrop-filter: blur(4px);
+  /* frosty glass effect */
+}
+
+#pdf-field::placeholder,
+#pdf-q::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  /* lighter placeholder */
 }
