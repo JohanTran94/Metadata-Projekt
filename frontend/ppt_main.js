@@ -71,17 +71,34 @@ export function render(appEl) {
           <p>
             <b>File name:</b> ${r.fileName || 'Unknown'}
             ${r.fileName
-              ? ` <a href="/ppt/${encodeURIComponent(r.fileName)}" target="_blank">Open</a> | 
+              ? ` — <a href="/ppt/${encodeURIComponent(r.fileName)}" target="_blank">Open</a> | 
                  <a href="/ppt/${encodeURIComponent(r.fileName)}?download=1">Download</a>
                  ${sizeStr ? ` (${sizeStr})` : ''}`
               : ''}
           </p>
           <p><b>Organization:</b> ${r.organisation || 'Unknown'}</p>
           <p><b>Creation date:</b> ${r.creationDate || 'Unknown'}</p>
+          <button class="show-meta-btn" data-id="${r.id}">Show Metadata</button>
         </article>
       `;
     }).join('');
+  
+    // Lägg till eventlistener för alla nya knappar
+    document.querySelectorAll('.show-meta-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        try {
+          const res = await fetch(`/api/ppt/${id}/metadata`);
+          if (!res.ok) throw new Error(`Error: ${res.status}`);
+          const metadata = await res.json();
+          alert(JSON.stringify(metadata, null, 2)); // enkel popup, kan bytas mot modal
+        } catch (err) {
+          alert(`Failed to fetch metadata: ${err.message}`);
+        }
+      });
+    });
   }
+  
 
   function updateCount(rowsLength, total) {
     if (rowsLength === 0) {
@@ -96,7 +113,7 @@ export function render(appEl) {
   async function search(newOffset = 0) {
     const field = fieldEl.value;
     let term = qEl.value.trim();
-    const limit = Number(limitEl.value) || 10;
+    const limit = Number(limitEl.value) || 100;
     offset = newOffset;
 
     // visa/dölj inputs beroende på field
@@ -163,12 +180,6 @@ export function render(appEl) {
   doBtn.addEventListener('click', () => search(0));
   prevBtn.addEventListener('click', () => search(Math.max(0, offset - Number(limitEl.value || 10))));
   nextBtn.addEventListener('click', () => search(offset + Number(limitEl.value || 10)));
-  qEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault(); 
-      search(0);           
-    }
-  });
 }
 
 export function cleanup() { }

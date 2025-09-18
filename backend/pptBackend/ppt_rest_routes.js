@@ -129,7 +129,23 @@ export default function setupPptRestRoutes(app, db) {
       res.status(500).json({ error: "Database query failed" });
     }
   });
+
+  router.get('/api/ppt/:id/metadata', requireDb, async (req, res) => {
+    const { id } = req.params;
   
+    try {
+      const sql = `SELECT metadata FROM powerpoint_metadata WHERE id = ?`;
+      const [rows] = await db.execute(sql, [id]);
+  
+      if (!rows.length) return res.status(404).json({ error: "Not found" });
+  
+      // Skicka metadata direkt utan JSON.parse
+      res.json(rows[0].metadata);
+    } catch (err) {
+      console.error("Database error in /api/ppt/:id/metadata:", err);
+      res.status(500).json({ error: "Database query failed" });
+    }
+  });
 
   app.use(router);
 }
