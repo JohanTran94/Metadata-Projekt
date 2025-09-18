@@ -70,8 +70,11 @@ export async function importMusicMetadata() {
   await db.end();
 }
 
-if (import.meta.url === `file://${process.cwd()}/music_db_import.js`) {
-  importMusicMetadata().catch(e => {
+const isDirectRun = process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  importMusicMetadata().catch((e) => {
     console.error(' - Unexpected error:', e);
     process.exit(1);
   });

@@ -3,6 +3,8 @@ import path from 'path';
 import mysql from 'mysql2/promise';
 import exifr from 'exifr';
 import dbCreds from '../../db.js';
+import { pathToFileURL } from 'url';
+
 
 function dmsToDecFlexible(v, ref) {
   if (v == null) return null;
@@ -30,8 +32,8 @@ const IMAGE_DIR = path.resolve(process.cwd(), 'warehouse/image');
 function basename(p) { return p ? path.basename(String(p)) : null; }
 
 export async function importImageMetadata() {
-  const db = await mysql.createConnection(dbCreds);
-  db.config.namedPlaceholders = true;
+  const db = await mysql.createConnection({ ...dbCreds, namedPlaceholders: true });
+
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS image_metadata (
@@ -111,7 +113,7 @@ export async function importImageMetadata() {
   await db.end();
 }
 
-if (import.meta.url === `file://${process.cwd()}/image_db_import.js`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   importImageMetadata().catch(e => {
     console.error(' - Unexpected error:', e);
     process.exit(1);

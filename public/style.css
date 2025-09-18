@@ -1,0 +1,688 @@
+:root {
+  --gap: 16px;
+  --muted: #666;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font: 16px/1.4 system-ui, Arial, sans-serif;
+  color: #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  /* Bakgrund */
+  background: url("/img/background1920.jpg") no-repeat center center fixed;
+  background-size: cover;
+  background-image: image-set(url("/img/background800.webp") type("image/webp") 1x,
+      url("/img/background1280.webp") type("image/webp") 2x,
+      url("/img/background1920.webp") type("image/webp") 3x,
+      url("/img/background1920.jpg") type("image/jpeg") 1x);
+}
+
+/* ==== HEADER ==== */
+.site-header {
+  flex: 0 0 auto;
+  background: rgba(1, 11, 33, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  /* logon till vänster */
+  max-width: 1100px;
+  width: 100%;
+  padding: 16px var(--gap);
+  z-index: 10;
+}
+
+.site-logo {
+  display: inline-block;
+  padding: 0;
+}
+
+.site-logo img {
+  display: block;
+  max-height: 80px;
+  width: auto;
+}
+
+.header-tabs {
+  display: flex;
+  width: 100%;
+  background: rgba(0, 7, 21, 0.65);
+  justify-content: center;
+  padding: 2px;
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  max-width: 1100px;
+  width: 100%;
+  padding: 0 var(--gap);
+  box-sizing: border-box;
+}
+
+.tabs a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 8px 14px;
+  transition: color 0.12s ease;
+}
+
+.tabs a:hover {
+  background: rgba(246, 233, 212, 0.9);
+  color: #0b1220;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.tabs a.active {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* ==== MAIN ==== */
+#app.container {
+  flex: 1 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
+}
+
+.content-bg {
+  background: rgba(1, 11, 33, 0.75);
+  backdrop-filter: blur(6px);
+  border-radius: 0;
+  padding: 24px;
+  width: 100%;
+  max-width: 1100px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  flex: 1;
+}
+
+/* ==== FOOTER ==== */
+.site-footer {
+  flex: 0 0 auto;
+  margin-top: auto;
+  background: rgba(1, 11, 33, 0.75);
+  backdrop-filter: blur(6px);
+  color: #cbd5e1;
+  padding: 1rem;
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.footer-links a {
+  color: #cbd5e1;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: rgba(246, 233, 212);
+}
+
+/* Start page grid */
+.start-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--gap);
+}
+
+.start-card {
+  display: block;
+  color: #0b1220;
+  background: rgba(212, 222, 246, 0.9);
+  border: 1px solid #1f1a3a;
+  border-radius: 12px;
+  padding: 16px;
+  text-decoration: none;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease;
+}
+
+.start-card:hover {
+  transform: translateY(-2px);
+  background: rgba(246, 233, 212, 0.9);
+  border-color: #ddd;
+  box-shadow: 0 4px 14px rgba(246, 233, 212, 0.6);
+}
+
+.start-card:hover .card-title {
+  text-decoration: underline;
+}
+
+#image-page {
+  color: #e2e8f0;
+}
+
+#image-page h2 {
+  margin: 0 0 8px;
+  color: #e2e8f0;
+}
+
+#image-page h4 {
+  margin: 4px 0 16px;
+  line-height: 1.5;
+  max-width: 700px;
+  color: #cbd5e1;
+}
+
+/* Labels “Search by”, “Per page”, … */
+#image-page label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+/* Controls layout */
+#image-page .controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+#image-page .group {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#image-page #pagination.controls {
+  margin-top: 8px;
+  gap: 12px;
+}
+
+#image-page input,
+#image-page select {
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  outline: none;
+}
+
+#image-page input::placeholder {
+  color: #94a3b8;
+}
+
+#image-page input:focus,
+#image-page select:focus {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+#image-page .btn,
+#image-page button {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#image-page .btn:hover,
+#image-page button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Summary text */
+#image-page .muted {
+  color: #94a3b8;
+}
+
+/* Links (View | Map | Download…) */
+#image-page a {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+#image-page a:hover {
+  text-decoration: underline;
+}
+
+#image-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  background: transparent;
+  color: #e2e8f0;
+}
+
+#image-page th,
+#image-page td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: left;
+}
+
+#image-page th {
+  background: transparent;
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+#image-page td.row-actions {
+  white-space: nowrap;
+}
+
+#image-page td.row-actions a,
+#image-page td.row-actions button {
+  margin-right: 6px;
+}
+
+/* Visibility helper */
+#image-page .hidden {
+  display: none !important;
+}
+
+#image-page .modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+#image-page .modal.hidden {
+  display: none !important;
+}
+
+#image-page .modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .5);
+}
+
+#image-page .modal-dialog {
+  position: relative;
+  z-index: 1001;
+  width: min(800px, 92vw);
+  max-height: 86vh;
+  margin: 8vh auto 0;
+  background: rgba(1, 11, 33, 0.9);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#image-page .modal-header,
+#image-page .modal-footer {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+#image-page .modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 0;
+}
+
+#image-page .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#image-page .modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #e2e8f0;
+}
+
+#image-page .btn-close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #e2e8f0;
+}
+
+#image-page .modal-body {
+  padding: 12px 16px;
+  overflow: auto;
+}
+
+#image-page pre.codeblock {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+
+/* === Läsbarare tabell, minimal påverkan === */
+.content-bg table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  table-layout: auto;
+  /* behåll nuvarande breddfördelning */
+}
+
+.content-bg thead th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #e5edf7;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  font-variant-numeric: tabular-nums;
+  /* snyggare årtal */
+}
+
+.content-bg tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: middle;
+}
+
+.content-bg tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.025);
+  /* diskret zebra */
+}
+
+.content-bg tbody tr:hover {
+  background: rgba(246, 233, 212, 0.08);
+  /* mild hover */
+}
+
+/* Långa filnamn får brytas snyggt utan att bredda kolumnen */
+.content-bg td:first-child {
+  overflow-wrap: anywhere;
+}
+
+/* Centrera år-kolumnen (6:e kolumnen på din bild) */
+.content-bg table td:nth-child(6),
+.content-bg table th:nth-child(6) {
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Länkar i tabellen: lite tydligare men fortfarande diskreta */
+.content-bg table a {
+  color: #bcd7ff;
+  text-decoration: underline;
+}
+
+.content-bg table a:hover {
+  color: #fff;
+}
+
+/* Knapparna “Play”/“Show metadata”: små, runda, låg kontrast */
+.content-bg table button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.content-bg table button:hover {
+  background: rgba(246, 233, 212, 0.20);
+  border-color: rgba(246, 233, 212, 0.55);
+  color: #0b1220;
+}
+
+/* ==== Shared search controls skin (all pages) ==== */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.controls input,
+.controls select {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  outline: none;
+}
+
+.controls input::placeholder {
+  color: #94a3b8;
+}
+
+.controls button,
+.controls .btn {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.controls button:hover,
+.controls .btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+
+/* ==== Dark dropdown (shared for all pages) ==== */
+.controls select {
+  /* make it stylable across browsers */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  padding: 8px 36px 8px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  outline: none;
+  color-scheme: dark;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23cbd5e1' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px 8px;
+}
+
+.controls select:focus {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.controls select option,
+.controls select optgroup {
+  background-color: rgba(1, 11, 33, 0.98);
+  color: #e2e8f0;
+}
+
+/* -----PDF result styling------ */
+.pdf-result {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: transparent;
+  /* helt genomskinlig */
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+  overflow-x: auto;
+  backdrop-filter: blur(4px);
+  /* frostad effekt om bakgrunden är ljus */
+}
+
+.pdf-result:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.12);
+  /* highlight result */
+}
+
+
+#pdf-field::placeholder,
+#pdf-q::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  /* lighter placeholder */
+}
+
+.pdf-meta-block {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  /* wordwrap */
+  word-break: break-word;
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  margin-top: 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.content-bg table a,
+.content-bg table a:visited,
+.pdf-result a,
+.pdf-result a:visited {
+  color: #bcd7ff;
+  text-decoration: underline;
+}
+
+.content-bg table a:hover,
+.pdf-result a:hover {
+  color: #fff;
+}
+
+.pdf-result button,
+.pdf-result .btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.pdf-result button:hover,
+.pdf-result .btn:hover {
+  background: rgba(246, 233, 212, 0.20);
+  border-color: rgba(246, 233, 212, 0.55);
+  color: #0b1220;
+}
+
+.content-bg audio {
+  width: 100%;
+  background: transparent;
+}
+
+
+.content-bg audio::-webkit-media-controls-enclosure,
+.content-bg audio::-webkit-media-controls-panel {
+  background: #4f5d75 !important;
+  box-shadow: #6f6c82 !important;
+}
+
+
+/* ==== Music page specific ==== */
+.music-results-wrapper {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: transparent;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+  overflow-x: auto;
+  backdrop-filter: blur(4px);
+
+}
+
+.music-results-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+}
+
+.music-results-wrapper th,
+.music-results-wrapper td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.music-results-wrapper th {
+  background-color: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
+.content-bg tbody tr:nth-child(even),
+#image-page .music-results-wrapper tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+
+.content-bg tbody tr:hover,
+#image-page .music-results-wrapper tbody tr:hover {
+  background: rgba(246, 233, 212, 0.08);
+}
+
+.content-bg td:first-child,
+#image-page .music-results-wrapper td:first-child {
+  overflow-wrap: anywhere;
+}
+
+#image-page .music-results-wrapper tbody tr:nth-child(even) td {
+  background-color: rgba(255, 255, 255, 0.025);
+}
+
+#image-page .music-results-wrapper tbody tr:hover td {
+  background-color: rgba(246, 233, 212, 0.08);
+}

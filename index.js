@@ -2,6 +2,7 @@ import path from 'path';
 import express from 'express';
 import mysql from 'mysql2/promise';
 import dbCredentials from './db.js';
+import { fileURLToPath } from 'url';
 
 import setupImageRestRoutes from './backend/imageBackend/image_rest_routes.js';
 import setupMusicRestRoutes from './backend/musicBackend/music_rest_routes.js';
@@ -34,6 +35,14 @@ async function init() {
 
   const app = express();
   app.use(express.json());
+
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
+  app.use(express.static(path.join(__dirname, 'public')));
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
 
   setupImageRestRoutes(app, db);
   setupMusicRestRoutes(app, db);
