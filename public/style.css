@@ -200,7 +200,7 @@ body {
 }
 
 
-/* PDF result styling */
+/* -----PDF result styling------ */
 .pdf-result {
   border: 1px solid rgba(255, 255, 255, 0.2);
   /* thinn white frame */
@@ -240,4 +240,19 @@ body {
 #pdf-q::placeholder {
   color: rgba(255, 255, 255, 0.5);
   /* lighter placeholder */
+}
+
+.pdf-meta-block {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  /* wordwrap */
+  word-break: break-word;
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  margin-top: 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 0.85rem;
 }
