@@ -404,11 +404,78 @@ body {
   padding: 12px;
 }
 
-h4 {
-  font-size: 1rem;
-  font-weight: normal;
-  color: #555;
-  margin: 4px 0 16px;
+
+
+/* === Läsbarare tabell, minimal påverkan === */
+.content-bg table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
   line-height: 1.5;
-  max-width: 700px;
+  table-layout: auto;
+  /* behåll nuvarande breddfördelning */
+}
+
+.content-bg thead th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #e5edf7;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  font-variant-numeric: tabular-nums;
+  /* snyggare årtal */
+}
+
+.content-bg tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: middle;
+}
+
+.content-bg tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.025);
+  /* diskret zebra */
+}
+
+.content-bg tbody tr:hover {
+  background: rgba(246, 233, 212, 0.08);
+  /* mild hover */
+}
+
+/* Långa filnamn får brytas snyggt utan att bredda kolumnen */
+.content-bg td:first-child {
+  overflow-wrap: anywhere;
+}
+
+/* Centrera år-kolumnen (6:e kolumnen på din bild) */
+.content-bg table td:nth-child(6),
+.content-bg table th:nth-child(6) {
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Länkar i tabellen: lite tydligare men fortfarande diskreta */
+.content-bg table a {
+  color: #bcd7ff;
+  text-decoration: underline;
+}
+
+.content-bg table a:hover {
+  color: #fff;
+}
+
+/* Knapparna “Play”/“Show metadata”: små, runda, låg kontrast */
+.content-bg table button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 6px 10px border-radius: 10px;
+  cursor: pointer;
+}
+
+.content-bg table button:hover {
+  background: rgba(246, 233, 212, 0.20);
+  border-color: rgba(246, 233, 212, 0.55);
+  color: #0b1220;
 }
