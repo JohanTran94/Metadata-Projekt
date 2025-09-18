@@ -184,12 +184,10 @@ body {
   text-decoration: underline;
 }
 
-/* ==== Image page (theme-aligned, no white panels) ==== */
 #image-page {
   color: #e2e8f0;
 }
 
-/* chữ sáng như trang khác */
 #image-page h2 {
   margin: 0 0 8px;
   color: #e2e8f0;
@@ -230,12 +228,10 @@ body {
   gap: 12px;
 }
 
-/* Inputs & selects – khớp theme tối */
 #image-page input,
 #image-page select {
   padding: 8px 10px;
   background: rgba(255, 255, 255, 0.08);
-  /* như các trang khác */
   color: #e2e8f0;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 8px;
@@ -251,7 +247,6 @@ body {
   border-color: rgba(255, 255, 255, 0.45);
 }
 
-/* Nút Search/Metadata/Play… thống nhất */
 #image-page .btn,
 #image-page button {
   padding: 8px 12px;
@@ -282,13 +277,11 @@ body {
   text-decoration: underline;
 }
 
-/* Table – bỏ nền trắng, viền nhẹ như trang Music/PDF */
 #image-page table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 16px;
   background: transparent;
-  /* <— quan trọng */
   color: #e2e8f0;
 }
 
@@ -301,7 +294,6 @@ body {
 
 #image-page th {
   background: transparent;
-  /* không panel trắng */
   color: #e2e8f0;
   font-weight: 700;
 }
@@ -320,7 +312,6 @@ body {
   display: none !important;
 }
 
-/* Modal – theo theme tối, không panel trắng */
 #image-page .modal {
   position: fixed;
   inset: 0;
@@ -344,7 +335,6 @@ body {
   max-height: 86vh;
   margin: 8vh auto 0;
   background: rgba(1, 11, 33, 0.9);
-  /* tối, đồng bộ */
   color: #e2e8f0;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 12px;
@@ -478,4 +468,49 @@ body {
   background: rgba(246, 233, 212, 0.20);
   border-color: rgba(246, 233, 212, 0.55);
   color: #0b1220;
+}
+
+/* ==== Shared search controls skin (all pages) ==== */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.controls input,
+.controls select {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  outline: none;
+}
+
+.controls input::placeholder {
+  color: #94a3b8;
+}
+
+.controls button,
+.controls .btn {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.controls button:hover,
+.controls .btn:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
