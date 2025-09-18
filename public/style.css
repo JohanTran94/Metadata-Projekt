@@ -23,12 +23,10 @@ body {
   /* Bakgrund */
   background: url("/img/background1920.jpg") no-repeat center center fixed;
   background-size: cover;
-  background-image: image-set(
-    url("/img/background800.webp") type("image/webp") 1x,
-    url("/img/background1280.webp") type("image/webp") 2x,
-    url("/img/background1920.webp") type("image/webp") 3x,
-    url("/img/background1920.jpg") type("image/jpeg") 1x
-  );
+  background-image: image-set(url("/img/background800.webp") type("image/webp") 1x,
+      url("/img/background1280.webp") type("image/webp") 2x,
+      url("/img/background1920.webp") type("image/webp") 3x,
+      url("/img/background1920.jpg") type("image/jpeg") 1x);
 }
 
 /* ==== HEADER ==== */
@@ -44,31 +42,31 @@ body {
 
 .header-top {
   display: flex;
-  align-items: center;       /* vertikal centrering av logon */
-  justify-content: flex-start; /* logon till vänster */
-  max-width: 1100px;          /* matchar content-box */
+  align-items: center;
+  justify-content: flex-start;
+  /* logon till vänster */
+  max-width: 1100px;
   width: 100%;
   padding: 16px var(--gap);
-  z-index: 10;                /* säkerställer att logon ligger över bakgrund, inte bakom andra element */
+  z-index: 10;
 }
 
 .site-logo {
-  display: inline-block;   /* låter länken anpassa sig till bilden */
+  display: inline-block;
   padding: 0;
 }
 
 .site-logo img {
   display: block;
-  max-height: 80px;        /* begränsar logons höjd */
-  width: auto;             /* behåller proportioner */
+  max-height: 80px;
+  width: auto;
 }
 
 .header-tabs {
   display: flex;
   width: 100%;
   background: rgba(0, 7, 21, 0.65);
-  display: flex;
-  justify-content: center; /* tabbarna centreras inom remsan */
+  justify-content: center;
   padding: 2px;
 }
 
@@ -76,8 +74,8 @@ body {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  justify-content: flex-start; /* vänsterjustera länkarna */
-  max-width: 1100px;           /* samma som content-box */
+  justify-content: flex-start;
+  max-width: 1100px;
   width: 100%;
   padding: 0 var(--gap);
   box-sizing: border-box;
@@ -103,14 +101,12 @@ body {
   text-decoration: underline;
 }
 
-
 /* ==== MAIN ==== */
-/* Håll main#app flexibelt */
 #app.container {
   flex: 1 0 auto;
   display: flex;
-  justify-content: center; /* centrera horisontellt */
-  align-items: stretch; /* start från toppen */
+  justify-content: center;
+  align-items: stretch;
   padding: 0;
 }
 
@@ -185,5 +181,234 @@ body {
 }
 
 .start-card:hover .card-title {
-  text-decoration: underline; /* endast rubriken */
+  text-decoration: underline;
+}
+
+/* ==== Image page (theme-aligned, no white panels) ==== */
+#image-page {
+  color: #e2e8f0;
+}
+
+/* chữ sáng như trang khác */
+#image-page h2 {
+  margin: 0 0 8px;
+  color: #e2e8f0;
+}
+
+#image-page h4 {
+  margin: 4px 0 16px;
+  line-height: 1.5;
+  max-width: 700px;
+  color: #cbd5e1;
+}
+
+/* Labels “Search by”, “Per page”, … */
+#image-page label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+/* Controls layout */
+#image-page .controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+#image-page .group {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#image-page #pagination.controls {
+  margin-top: 8px;
+  gap: 12px;
+}
+
+/* Inputs & selects – khớp theme tối */
+#image-page input,
+#image-page select {
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  /* như các trang khác */
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  outline: none;
+}
+
+#image-page input::placeholder {
+  color: #94a3b8;
+}
+
+#image-page input:focus,
+#image-page select:focus {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* Nút Search/Metadata/Play… thống nhất */
+#image-page .btn,
+#image-page button {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#image-page .btn:hover,
+#image-page button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Summary text */
+#image-page .muted {
+  color: #94a3b8;
+}
+
+/* Links (View | Map | Download…) */
+#image-page a {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+#image-page a:hover {
+  text-decoration: underline;
+}
+
+/* Table – bỏ nền trắng, viền nhẹ như trang Music/PDF */
+#image-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  background: transparent;
+  /* <— quan trọng */
+  color: #e2e8f0;
+}
+
+#image-page th,
+#image-page td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: left;
+}
+
+#image-page th {
+  background: transparent;
+  /* không panel trắng */
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+#image-page td.row-actions {
+  white-space: nowrap;
+}
+
+#image-page td.row-actions a,
+#image-page td.row-actions button {
+  margin-right: 6px;
+}
+
+/* Visibility helper */
+#image-page .hidden {
+  display: none !important;
+}
+
+/* Modal – theo theme tối, không panel trắng */
+#image-page .modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+#image-page .modal.hidden {
+  display: none !important;
+}
+
+#image-page .modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .5);
+}
+
+#image-page .modal-dialog {
+  position: relative;
+  z-index: 1001;
+  width: min(800px, 92vw);
+  max-height: 86vh;
+  margin: 8vh auto 0;
+  background: rgba(1, 11, 33, 0.9);
+  /* tối, đồng bộ */
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#image-page .modal-header,
+#image-page .modal-footer {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+#image-page .modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 0;
+}
+
+#image-page .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#image-page .modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #e2e8f0;
+}
+
+#image-page .btn-close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #e2e8f0;
+}
+
+#image-page .modal-body {
+  padding: 12px 16px;
+  overflow: auto;
+}
+
+#image-page pre.codeblock {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+h4 {
+  font-size: 1rem;
+  font-weight: normal;
+  color: #555;
+  margin: 4px 0 16px;
+  line-height: 1.5;
+  max-width: 700px;
 }

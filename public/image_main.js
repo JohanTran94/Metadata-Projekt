@@ -1,7 +1,11 @@
 export function render(appEl) {
   appEl.innerHTML = `
-    <section>
+    <section id="image-page">
       <h2>Search image</h2>
+      <h4>Use this search engine to explore image metadata stored in the database.
+      You can search by file name, camera make or model, date range,
+      or even by geographic location (latitude/longitude with radius).
+      </h4>
 
       <form id="searchForm" class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
@@ -52,8 +56,8 @@ export function render(appEl) {
         <label>
           Per page
           <select id="pageSize" title="Per page">
-            <option value="10">10</option>
-            <option value="20" selected>20</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
             <option value="50">50</option>
             <option value="100">100</option>
           </select>
@@ -96,7 +100,7 @@ export function render(appEl) {
         </div>
       </div>
 
-    </section>
+    </section id="image-page">
   `;
 
   // state + refs
