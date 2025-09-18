@@ -2,6 +2,10 @@ export function render(appEl) {
   appEl.innerHTML = `
     <section>
       <h2>Search PDF-files</h2>
+      <h4>
+        This search engine lets you find PDF documents by common fields like title, author, subject, keywords and text content.<br />
+        You can also press "Show all metadata" to view more detailed information about a specific document.
+      </h4>
 
       <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
