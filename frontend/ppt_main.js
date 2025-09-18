@@ -10,7 +10,7 @@ export function render(appEl) {
             <option value="title">Title</option>
             <option value="original">URL</option>
             <option value="organisation">Organization</option>
-            <option value="creationDate">Creation date</option>
+            <option value="creationDate">Date created</option>
             <option value="any">All fields</option>
           </select>
         </label>
@@ -102,7 +102,7 @@ fieldEl.addEventListener('change', () => {
               : ''}
           </p>
           <p><b>Organization:</b> ${r.organisation || 'Unknown'}</p>
-          <p><b>Creation date:</b> ${r.creationDate || 'Unknown'}</p>
+          <p><b>Date created:</b> ${r.creationDate || 'Unknown'}</p>
           <button class="show-meta-btn" data-id="${r.id}">Show Metadata</button>
         </article>
       `;
