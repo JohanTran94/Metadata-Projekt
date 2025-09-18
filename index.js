@@ -21,7 +21,7 @@ async function init() {
   const db = await mysql.createConnection(dbCredentials);
   db.config.namedPlaceholders = true;
 
-  if (true) {
+  if (false) {
     console.log(' - Extracting data from warehouse and loading to database...');
     await importImageMetadata();
     await importMusicMetadata();
