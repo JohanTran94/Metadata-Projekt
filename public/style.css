@@ -550,16 +550,15 @@ body {
 /* -----PDF result styling------ */
 .pdf-result {
   border: 1px solid rgba(255, 255, 255, 0.2);
-  /* thinn white frame */
-  padding: 12px;
-  margin-bottom: 16px;
-  border-radius: 6px;
-  background-color: rgba(255, 255, 255, 0.08);
-  /* transparent  */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s ease;
-  color: #fff;
-
+  background-color: transparent;
+  /* helt genomskinlig */
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+  overflow-x: auto;
+  backdrop-filter: blur(4px);
+  /* frostad effekt om bakgrunden är ljus */
 }
 
 .pdf-result:hover {
