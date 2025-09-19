@@ -16,6 +16,7 @@ export function render(appEl) {
     and preview metadata from a variety of file types. Each media type has its own
     dedicated search engine, all integrated into a Single-Page Application (SPA).
     <P>
+    Collaborating on this project gave the team opportunity to explore a variety of technologies, architectural ideas and ways of working together. Integrating a cloud based mySQL-database, with a (for us) extensive backend, as well as building a web interface that makes sense for the user.
     
 
  
@@ -60,4 +61,4 @@ export function render(appEl) {
     </section>
   `;
 }
-export function cleanup() {}
+export function cleanup() { }
