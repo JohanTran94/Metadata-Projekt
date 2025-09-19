@@ -1,11 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 import mysql from 'mysql2/promise';
-import exifr from 'exifr';
+import exifr from 'exifr';                  // Library to extract EXIF, GPS, and XMP metadata from images
 import dbCreds from '../../db.js';
 import { pathToFileURL } from 'url';
 
-
+/**
+ * Convert GPS coordinates in DMS (Degrees, Minutes, Seconds) or other formats to decimal.
+ * Handles:
+ *   - String input: "59; 20; 30" or "59 20 30"
+ *   - Array input: [deg, min, sec]
+ *   - Direct number
+ * Applies negative sign if ref is 'S' or 'W'.
+ */
 function dmsToDecFlexible(v, ref) {
   if (v == null) return null;
 
@@ -22,19 +29,31 @@ function dmsToDecFlexible(v, ref) {
     return sign * (d + m / 60 + s / 3600);
   }
 
-
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 }
 
+// Path to the image warehouse
 const IMAGE_DIR = path.resolve(process.cwd(), 'warehouse/image');
 
+// Utility: safely get basename from a path
 function basename(p) { return p ? path.basename(String(p)) : null; }
 
+/**
+ * Import image metadata into MySQL.
+ * Steps:
+ *   1. Connect to DB and ensure `image_metadata` table exists.
+ *   2. Delete old records (fresh import).
+ *   3. Loop through supported image files.
+ *   4. Extract EXIF/XMP/GPS metadata with exifr.
+ *   5. Normalize values (make, model, creation date, lat/lon).
+ *   6. Insert into DB as JSON.
+ *   7. Log errors if any occur.
+ */
 export async function importImageMetadata() {
   const db = await mysql.createConnection({ ...dbCreds, namedPlaceholders: true });
 
-
+  // Ensure the table exists with required columns
   await db.execute(`
     CREATE TABLE IF NOT EXISTS image_metadata (
       id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -47,9 +66,12 @@ export async function importImageMetadata() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
 
+  // Clear old records
   await db.execute('DELETE FROM image_metadata');
 
+  // Select only supported image formats
   const files = fs.readdirSync(IMAGE_DIR).filter(f => /\.(jpe?g|tiff?|png|heic)$/i.test(f));
+
   const sql = `
     INSERT INTO image_metadata (file, meta)
     VALUES (:file, CAST(:meta AS JSON))
@@ -59,6 +81,8 @@ export async function importImageMetadata() {
   `;
 
   const errors = [];
+
+  // Process each image
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     try {
@@ -66,17 +90,24 @@ export async function importImageMetadata() {
       const stat = fs.statSync(fullPath);
       if (!stat.isFile()) continue;
 
-      const raw = await exifr.parse(fullPath, { tiff: true, ifd0: true, exif: true, gps: true, interop: true, xmp: true });
+      // Extract metadata with exifr (TIFF, IFD0, EXIF, GPS, Interop, XMP)
+      const raw = await exifr.parse(fullPath, {
+        tiff: true, ifd0: true, exif: true, gps: true, interop: true, xmp: true
+      });
 
+      // Normalize important fields
       const make = raw?.Make ?? raw?.make ?? null;
       const model = raw?.Model ?? raw?.model ?? null;
       const createDate = raw?.CreateDate ?? raw?.DateTimeOriginal ?? raw?.ModifyDate ?? null;
+
       let latitude = raw?.latitude ?? raw?.Latitude ?? null;
       let longitude = raw?.longitude ?? raw?.Longitude ?? null;
 
+      // If not available, convert from GPS DMS
       if (latitude == null) latitude = dmsToDecFlexible(raw?.GPSLatitude, raw?.GPSLatitudeRef);
       if (longitude == null) longitude = dmsToDecFlexible(raw?.GPSLongitude, raw?.GPSLongitudeRef);
 
+      // Build metadata object
       const meta = {
         file_name: file,
         file_path: fullPath,
@@ -90,6 +121,7 @@ export async function importImageMetadata() {
         raw
       };
 
+      // Insert into DB
       await db.execute(sql, { file, meta: JSON.stringify(meta) });
 
       process.stdout.write(`\r - Importing from ${i + 1} of ${files.length} image files...`);
@@ -98,8 +130,9 @@ export async function importImageMetadata() {
     }
   }
 
-  console.log(); // ny rad efter progress
+  console.log(); // Print new line after progress
 
+  // If errors occurred → log them
   if (errors.length > 0) {
     const logDir = path.resolve(process.cwd(), 'backend/imageBackend/image_error_logs');
     if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
@@ -113,6 +146,7 @@ export async function importImageMetadata() {
   await db.end();
 }
 
+// Allow direct run: `node backend/imageBackend/image_db_import.js`
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   importImageMetadata().catch(e => {
     console.error(' - Unexpected error:', e);

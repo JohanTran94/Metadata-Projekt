@@ -11,6 +11,7 @@ export async function importPptMetadata(db) {
   const cleanJson = fs.readFileSync(filePath, 'utf-8');
   const data = JSON.parse(cleanJson);
 
+  // Create table if missing
   await db.execute(`
     CREATE TABLE IF NOT EXISTS powerpoint_metadata (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -18,6 +19,7 @@ export async function importPptMetadata(db) {
     )
   `);
 
+  // Clear table before inserting
   await db.execute('DELETE FROM powerpoint_metadata');
 
   const errors = [];
@@ -44,6 +46,4 @@ export async function importPptMetadata(db) {
     console.log(' - PowerPoint metadata import done.');
     console.log(' - All data loaded. Opening server connection.');
   }
-
 }
-

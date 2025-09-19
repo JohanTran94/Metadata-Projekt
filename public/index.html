@@ -5,18 +5,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SOA: Masters of meta data</title>
+  <!-- Global stylesheet for the SPA skin -->
   <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
-
+  <!-- ===== Site Header: logo + top-level tab navigation (hash-based routing) ===== -->
   <header class="site-header">
     <div class="header-top">
+      <!-- Clicking the logo does not change the route; purely decorative -->
       <a href="#start" class="site-logo">
         <img src="/img/soa_logo_flat.png" alt="Logo">
       </a>
     </div>
+
     <div class="header-tabs">
+      <!-- Tab bar: updates window.location.hash; main.js listens to hashchange -->
       <nav class="tabs">
         <a href="#music">Music</a>
         <a href="#pdf">PDF</a>
@@ -27,14 +31,12 @@
     </div>
   </header>
 
-
-
-
+  <!-- ===== Main app container: the SPA renders into .content-bg ===== -->
   <main id="app" class="container">
-    <div class="content-bg">
-    </div>
+    <div class="content-bg"><!-- Route content gets injected here by main.js --></div>
   </main>
 
+  <!-- ===== Simple footer with repeated nav (convenience) ===== -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <span>© 2025 Sons Of Arholma Search Engine</span>
@@ -49,6 +51,7 @@
     </div>
   </footer>
 
+  <!-- Bootstraps the SPA router -->
   <script type="module" src="./main.js"></script>
 </body>
 

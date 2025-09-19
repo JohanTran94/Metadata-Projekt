@@ -4,6 +4,7 @@ import { parse } from 'csv-parse/sync';
 
 const INPUT_PATH = './warehouse/powerpoint/';
 
+// Find all CSV files in the PowerPoint warehouse
 const csvFiles = fs.readdirSync(INPUT_PATH)
   .filter(f => f.endsWith('.csv'))
   .map(f => ({
@@ -13,18 +14,19 @@ const csvFiles = fs.readdirSync(INPUT_PATH)
 
 if (csvFiles.length === 0) throw new Error('No CSV-file found.');
 
-
+// Pick the latest CSV file based on modification time
 const latestCsv = csvFiles.sort((a, b) => b.mtime - a.mtime)[0].name;
 const CSV_PATH = path.join(INPUT_PATH, latestCsv);
 const OUTPUT_FILE = path.join(INPUT_PATH, 'cleanedPowerpointJson.json');
 
 console.log(`Reading CSV: ${CSV_PATH}`);
 
-
+// Utility: convert snake_case or kebab-case to camelCase
 function toCamelCaseKey(str) {
   return str.replace(/[_-](\w)/g, (_, c) => c.toUpperCase());
 }
 
+// Recursively convert object keys to camelCase
 function keysToCamelCase(obj) {
   if (Array.isArray(obj)) return obj.map(keysToCamelCase);
   if (obj && typeof obj === 'object') {
@@ -36,6 +38,7 @@ function keysToCamelCase(obj) {
   return obj;
 }
 
+// Read CSV file (UTF-16LE, tab-delimited)
 const csvBuffer = fs.readFileSync(CSV_PATH);
 const csvContent = csvBuffer.toString('utf16le');
 
@@ -49,11 +52,13 @@ const records = parse(csvContent, {
 
 const usedFileNames = new Set();
 
+// Clean and normalize metadata records
 const metadataListPowerpoint = records.map(record => {
-
   let baseFileName = record.digest ? `${record.digest}.ppt` : 'unknown.ppt';
   let fileName = baseFileName;
   let counter = 1;
+
+  // Ensure unique file names (avoid collisions)
   while (usedFileNames.has(fileName)) {
     fileName = `${baseFileName.replace(/\.ppt$/, '')}_${counter}.ppt`;
     counter++;
@@ -77,6 +82,7 @@ const metadataListPowerpoint = records.map(record => {
   return cleaned;
 });
 
+// Save as cleaned JSON
 fs.writeFileSync(OUTPUT_FILE, JSON.stringify(metadataListPowerpoint, null, 2), 'utf-8');
 
 console.log(`Processed ${metadataListPowerpoint.length} records. JSON saved to ${OUTPUT_FILE}`);

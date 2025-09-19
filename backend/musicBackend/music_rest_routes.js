@@ -4,10 +4,11 @@ import { Router } from 'express';
 export default function setupMusicRestRoutes(app, db) {
   const router = Router();
 
+  // Middleware: ensure DB connection exists
   const requireDb = (_req, res, next) =>
     db ? next() : res.status(503).json({ error: 'Database not connected' });
 
-  // Gemensamm grund för att slippa lit upprepande kod
+  // Common SQL SELECT clause: fields to return
   const SELECT = `
     SELECT
       id,
@@ -19,7 +20,8 @@ export default function setupMusicRestRoutes(app, db) {
       meta->>'$.common.year'             AS year
     FROM musicJson
   `;
-  // Gemensamm grund för att slippa lit upprepande kod
+
+  // Common ORDER BY (for consistent sorting)
   const ORDER = `
     ORDER BY
       meta->>'$.common.artist',
@@ -27,30 +29,37 @@ export default function setupMusicRestRoutes(app, db) {
       meta->>'$.common.title'
   `;
 
+  // Allowed search fields
   const ALLOWED = new Set(['title', 'album', 'artist', 'genre', 'year', 'file', 'any']);
 
+  // Translate a field name into its SQL path
   const pathFor = (field) =>
-    field === 'genre' // genre är array i metadata, behöver behandlas annorlunda
+    field === 'genre' // genre is stored as array → must extract first element
       ? `JSON_UNQUOTE(JSON_EXTRACT(meta,'$.common.genre[0]'))`
-      : field === 'file' // file ligger också utanför json kolumnen i db.
+      : field === 'file' // file column is outside JSON
         ? `file`
         : `meta->>'$.common.${field}'`;
 
-  const likeify = (s) => `%${s ?? ''}%`; // Hanterar olika möjliga varianter av tex acid
+  // Utility functions
+  const likeify = (s) => `%${s ?? ''}%`; // Wrap string in % for LIKE search
   const norm = (s) => (s ?? '').toLowerCase();
 
-
-  // Sök (title/album/artist/genre/year/file/any)
+  /**
+   * Search endpoint
+   * GET /api/music-search/:field/:searchValue
+   *   field: title | album | artist | genre | year | file | any
+   *   searchValue: value to search for
+   */
   router.get('/api/music-search/:field/:searchValue', requireDb, async (req, res) => {
     const { field, searchValue } = req.params;
     if (!ALLOWED.has(field)) return res.status(400).json({ error: 'Invalid field name!' });
 
-    // Alla fält, med okänd på urprungligen tomma fält i db 
+    // Special handling for "any" field → search across all columns
     if (field === 'any') {
       const raw = String(searchValue ?? '').trim();
       const asksUnknown = raw === 'unknown' || raw === 'Unknown';
-      // kan hanter okänd (genre,artist...)
 
+      // Search for missing/empty values
       if (asksUnknown) {
         const sql = `
           ${SELECT}
@@ -65,6 +74,7 @@ export default function setupMusicRestRoutes(app, db) {
         const [rows] = await db.execute(sql);
         return res.json(rows);
       } else {
+        // Normal free-text search across multiple fields
         const like = likeify(searchValue);
         const sql = `
           ${SELECT}
@@ -81,7 +91,7 @@ export default function setupMusicRestRoutes(app, db) {
       }
     }
 
-
+    // Special handling for year field → supports operators like >=1990
     if (field === 'year') {
       const raw = String(searchValue ?? '').trim();
       const m = raw.match(/^(<=|>=|=|!=|<>|<|>)[ ]*(\d{1,4})$/);
@@ -89,8 +99,9 @@ export default function setupMusicRestRoutes(app, db) {
       const yearText = `JSON_UNQUOTE(JSON_EXTRACT(meta,'$.common.year'))`;
       const yearIsNumeric = `${yearText} REGEXP '^[0-9]{1,4}$'`;
       const yearNum = `CAST(${yearText} AS UNSIGNED)`;
-      //regex för att kolla om det är ett årtal med operator
+
       if (m) {
+        // Query with operator
         let op = m[1];
         const val = parseInt(m[2], 10);
         if (op === '<>') op = '!=';
@@ -101,7 +112,8 @@ export default function setupMusicRestRoutes(app, db) {
         `;
         const [rows] = await db.execute(sql, [val]);
         return res.json(rows);
-      } else { // behöver inte vara ett komplett årtal
+      } else {
+        // Fallback: text-like search
         const sql = `
           ${SELECT}
           WHERE LOWER(COALESCE(${yearText},'')) LIKE LOWER(?)
@@ -112,7 +124,7 @@ export default function setupMusicRestRoutes(app, db) {
       }
     }
 
-
+    // Default case: search in specific field
     const path = pathFor(field);
     const sql = `
       ${SELECT}
@@ -123,14 +135,16 @@ export default function setupMusicRestRoutes(app, db) {
     return res.json(rows);
   });
 
-  // Hämta all metadata för en låt (via id)
+  /**
+   * Get full metadata of a single song by DB id
+   * GET /api/music-all-meta/:id
+   */
   router.get('/api/music-all-meta/:id', requireDb, async (req, res) => {
     const { id } = req.params;
     const [rows] = await db.execute(`SELECT * FROM musicJson WHERE id = ?`, [id]);
     res.json(rows);
   });
 
-
-
+  // Register router with app
   app.use(router);
 }

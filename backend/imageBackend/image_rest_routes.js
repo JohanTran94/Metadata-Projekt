@@ -3,26 +3,44 @@ import fs from 'fs';
 import path from 'path';
 import exifr from 'exifr';
 
+/**
+ * Safely convert a date-like value to ISO 8601 (or null if invalid).
+ * EXIF dates come in various shapes; this normalizes them for storage/search.
+ */
 function toIsoOrNull(v) {
   if (!v) return null;
   const d = new Date(v);
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
+
+/**
+ * Convert a numeric-like value to Number (or null if not parseable).
+ */
 function toNumberOrNull(v) {
   if (v == null) return null;
   const n = Number(v);
   return Number.isNaN(n) ? null : n;
 }
 
+/**
+ * Convert GPS coordinates provided as DMS (degrees, minutes, seconds) or as a
+ * flexible string (e.g., "59; 20; 30" or "59,20,30" or "59 20 30") into a decimal degree.
+ * If ref is 'S' or 'W', the value is negated.
+ * Returns:
+ *   - decimal number if conversion succeeds
+ *   - null if it cannot interpret the input
+ */
 function dmsToDecFlexible(v, ref) {
   if (v == null) return null;
 
+  // If EXIF lib delivered a string, split on common separators into D/M/S
   if (typeof v === 'string') {
     const parts = v.split(/[;,\s]+/).filter(Boolean).map(Number);
     if (parts.length >= 3) v = parts.slice(0, 3);
     else return null;
   }
 
+  // If it's an array [deg, min, sec]
   if (Array.isArray(v)) {
     const [d, m, s] = v.map(Number);
     if (![d, m, s].every(n => Number.isFinite(n))) return null;
@@ -30,20 +48,40 @@ function dmsToDecFlexible(v, ref) {
     return sign * (d + m / 60 + s / 3600);
   }
 
+  // Already a single number? Accept if finite.
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 }
 
-
+/**
+ * Registers image-related REST endpoints on the provided Express app.
+ * Endpoints:
+ *   - GET /api/image/metadata
+ *       Extract EXIF from all images in warehouse/image → write metadata.json and return JSON
+ *   - GET /api/image/search
+ *       Search images by text/make/model/date; optionally filter by geo radius
+ *   - GET /api/image/meta/:id
+ *       Get a single image row's meta (parsed from JSON) by DB id
+ */
 export default function setupImageRestRoutes(app, db) {
   const router = express.Router();
 
-
+  /**
+   * GET /api/image/metadata
+   * Scans the warehouse/image folder, reads EXIF via exifr, normalizes key fields,
+   * persists an aggregated metadata.json at project root, and returns the array.
+   *
+   * Fields pushed per file:
+   *  - file_name, file_path, size_bytes, mtime_iso
+   *  - make, model, create_date (ISO)
+   *  - latitude, longitude (decimal; derived from direct fields or GPS DMS)
+   *  - raw (the full EXIF object for transparency/debugging)
+   */
   router.get('/api/image/metadata', async (_req, res) => {
-
     const imagesFolder = path.resolve(process.cwd(), './warehouse/image');
 
     try {
+      // Collect candidate files by extension
       const files = fs.readdirSync(imagesFolder)
         .filter(f => /\.(jpe?g|tiff?|png|heic)$/i.test(f));
 
@@ -52,11 +90,17 @@ export default function setupImageRestRoutes(app, db) {
         const fullPath = path.join(imagesFolder, file);
         try {
           const stat = fs.statSync(fullPath);
+          // Parse EXIF (exifr returns a large object with Make/Model/GPS/Date fields)
           const raw = await exifr.parse(fullPath);
 
+          // EXIF fields can vary in casing depending on the file/camera/library
           const make = raw?.Make ?? raw?.make ?? null;
           const model = raw?.Model ?? raw?.model ?? null;
+
+          // Pick the most reliable creation timestamp available
           const createRaw = raw?.CreateDate ?? raw?.DateTimeOriginal ?? raw?.ModifyDate ?? null;
+
+          // Prefer decimal lat/lon if available, otherwise convert from GPS DMS
           let lat = raw?.latitude ?? raw?.Latitude ?? null;
           let lon = raw?.longitude ?? raw?.Longitude ?? null;
 
@@ -68,19 +112,20 @@ export default function setupImageRestRoutes(app, db) {
             file_path: fullPath,
             size_bytes: stat.size,
             mtime_iso: stat.mtime.toISOString(),
-            make, model,
+            make,
+            model,
             create_date: toIsoOrNull(createRaw),
             latitude: lat,
             longitude: lon,
             raw
           });
-
         } catch (err) {
+          // Keep going even if one file fails; include the error for visibility
           out.push({ file_name: file, file_path: fullPath, error: err.message });
         }
       }
 
-
+      // Persist a top-level metadata.json snapshot (useful for debugging and import)
       fs.writeFileSync(
         path.resolve(process.cwd(), 'metadata.json'),
         JSON.stringify(out, null, 2),
@@ -93,7 +138,22 @@ export default function setupImageRestRoutes(app, db) {
     }
   });
 
-
+  /**
+   * GET /api/image/search
+   * Query params:
+   *   text     : fuzzy match on file/make/model
+   *   make     : fuzzy match on make
+   *   model    : fuzzy match on model
+   *   from,to  : date range filter (inclusive) on create_date (expects ISO yyyy-mm-dd)
+   *   page,pageSize : pagination (server clamps pageSize to <=100)
+   *   nearLat, nearLon, radius : if all present → apply Haversine distance filter (km)
+   *
+   * Returns: { type, total, page, pageSize, results[] }
+   * Notes:
+   *   - Uses JSON_EXTRACT to read fields from a JSON column `meta`.
+   *   - Relevance ordering: exact/like matches first, then (if geo) nearest distance,
+   *     then most recent create_date.
+   */
   router.get('/api/image/search', async (req, res) => {
     try {
       const {
@@ -102,6 +162,7 @@ export default function setupImageRestRoutes(app, db) {
         nearLat = '', nearLon = '', radius = ''
       } = req.query;
 
+      // Pagination guards
       const limit = Math.min(parseInt(pageSize, 10) || 20, 100);
       const pageNum = Math.max(parseInt(page, 10) || 1, 1);
       const offset = (pageNum - 1) * limit;
@@ -109,7 +170,7 @@ export default function setupImageRestRoutes(app, db) {
       const likeText = text ? `%${text}%` : '';
       const hasGeo = nearLat !== '' && nearLon !== '' && radius !== '';
 
-
+      // Columns to project (some are extracted from JSON `meta`, with fallbacks)
       const COLS = `
         id,
         file,
@@ -164,6 +225,7 @@ export default function setupImageRestRoutes(app, db) {
 
       const BASE = `SELECT ${COLS} FROM image_metadata`;
 
+      // Build WHERE conditions + named params
       const cond = [];
       const whereParams = {};
 
@@ -193,8 +255,7 @@ export default function setupImageRestRoutes(app, db) {
       }
       const WHERE = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
 
-
-
+      // Params that influence ORDER BY relevance
       const relevanceParams = {
         textExact: text || '',
         textLike: likeText,
@@ -206,6 +267,7 @@ export default function setupImageRestRoutes(app, db) {
       let countSql = '';
       let params = {};
 
+      // If geo filter requested, compute distance with Haversine (in km)
       if (hasGeo) {
         dataSql = `
           WITH base AS (${BASE})
@@ -251,6 +313,7 @@ export default function setupImageRestRoutes(app, db) {
           radius: Number(radius)
         };
       } else {
+        // Non-geo search: simple relevance + recency ordering
         dataSql = `
           WITH base AS (${BASE})
           SELECT b.*
@@ -273,8 +336,11 @@ export default function setupImageRestRoutes(app, db) {
         params = { ...whereParams, ...relevanceParams };
       }
 
+      // Run count query first for pagination metadata
       const [countRows] = await db.execute(countSql, params);
       const total = countRows?.[0]?.total ?? 0;
+
+      // Fetch the actual page of results
       const [rows] = await db.execute(dataSql, params);
 
       res.json({ type: 'image', total, page: pageNum, pageSize: limit, results: rows });
@@ -284,8 +350,11 @@ export default function setupImageRestRoutes(app, db) {
     }
   });
 
-
-
+  /**
+   * GET /api/image/meta/:id
+   * Fetch a single row's JSON metadata from the DB by internal numeric ID.
+   * The `meta` column is stored as JSON (or stringified JSON) — we parse it if needed.
+   */
   router.get('/api/image/meta/:id', async (req, res) => {
     try {
       const { id } = req.params;
@@ -303,9 +372,10 @@ export default function setupImageRestRoutes(app, db) {
 
       const row = rows[0];
 
+      // meta may already be an object (JSON column) or a string (TEXT/VARCHAR)
       let meta = row.meta;
       if (typeof meta === 'string') {
-        try { meta = JSON.parse(meta); } catch { }
+        try { meta = JSON.parse(meta); } catch { /* fall through with raw string */ }
       }
 
       res.json({ id: row.id, file: row.file, meta });
@@ -315,5 +385,6 @@ export default function setupImageRestRoutes(app, db) {
     }
   });
 
+  // Register router on the app
   app.use(router);
 }
