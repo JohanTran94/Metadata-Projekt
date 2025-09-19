@@ -1,19 +1,15 @@
+// PDF search UI: supports fielded searches (Title/Author/Subject/Keywords/Text/Pages/Filename)
+// Calls backend /api/pdf-* endpoints and renders rich cards with highlight + "Show metadata"
 export function render(appEl) {
   appEl.innerHTML = `
     <section>
-      <h2>
-      PDF search
-      </h2>
-      <h3> 
-      Find PDF documents by metadata.  
-        
-      </h3>  
-      Search by title, author, subject, keywords, text content or other parameters. Read intriguing documents from all over the globe. 
-      <p>
-        To view more detailed information about a specific document, press <b>show all metadata.
-        <br>
-        <br>
+      <h2>PDF search</h2>
+      <h3>Find PDF documents by metadata.</h3>
+      Search by title, author, subject, keywords, text content or other parameters. Read intriguing documents from all over the globe.
+      <p>To view more detailed information about a specific document, press <b>show all metadata.</b></p>
+      <br>
 
+      <!-- Controls -->
       <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
           Search by:
@@ -31,28 +27,34 @@ export function render(appEl) {
         <input id="pdf-q" type="text" placeholder="(ex: 'AI', '>10', '5-15')" />
       </div>
 
+      <!-- Results counter + container -->
       <p id="pdf-count" class="muted" style="margin-top:8px;"></p>
       <section id="pdf-results" style="display:none;"></section>
     </section>
   `;
 
+  // ===== DOM refs =====
   const fieldEl = appEl.querySelector('#pdf-field');
   const qEl = appEl.querySelector('#pdf-q');
   const countEl = appEl.querySelector('#pdf-count');
   const resultsEl = appEl.querySelector('#pdf-results');
 
+  // Escape user input for building a highlight regex
   const escapeReg = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+  // Simple text highlighter for matched terms
   const highlight = (text, term) => {
     if (!text || !term) return text || '';
     return String(text).replace(new RegExp(`(${escapeReg(term)})`, 'gi'), '<mark>$1</mark>');
   };
 
+  // Show a shorter preview of long text fields
   const truncate = (text, maxLength = 500) => {
     if (!text) return '';
     return String(text).length > maxLength ? String(text).slice(0, maxLength) + '…' : String(text);
   };
 
+  // Render array of rows into result cards
   async function renderResults(rows, term = '') {
     countEl.textContent = `${rows.length} results`;
     resultsEl.style.display = 'block';
@@ -61,7 +63,8 @@ export function render(appEl) {
       resultsEl.innerHTML = '<div class="muted">No hits</div>';
       return;
     }
-    //Unknown, None, No title, Not specified
+
+    // "Unknown" fallbacks to make the UI consistent
     resultsEl.innerHTML = rows.map(r => {
       const filename = r.filename || '';
       const title = r.title || r.xmp_title || 'No title';
@@ -71,7 +74,7 @@ export function render(appEl) {
       const pages = r.numpages ?? 'Unknown';
       const text = r.text || '';
 
-      // Highlight search term in results, and button for show/hide all metadata
+      // Highlighted values + inline download/open links
       return `
         <article class="pdf-result">
           <h3>${term ? highlight(title, term) : title}</h3>
@@ -92,6 +95,7 @@ export function render(appEl) {
     }).join('');
   }
 
+  // Build the URL and perform the search; falls back to default list when empty
   async function search() {
     const field = fieldEl.value;
     const term = qEl.value.trim();
@@ -113,6 +117,7 @@ export function render(appEl) {
     renderResults(rows, term);
   }
 
+  // Fetch an initial set of documents on page load
   async function loadDefault() {
     const res = await fetch(`/api/pdf-default`);
     if (!res.ok) {
@@ -125,16 +130,15 @@ export function render(appEl) {
     renderResults(rows);
   }
 
-  // Debounced live search
+  // Debounced live-search on keystrokes
   let debounceTimer;
   qEl.addEventListener('keyup', () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(search, 100);
   });
-
   fieldEl.addEventListener('change', search);
 
-  // Show all metadata
+  // Toggle/show full JSON metadata inline
   resultsEl.addEventListener('click', async (e) => {
     const btn = e.target.closest('.btn-show-all-pdf-metadata');
     if (!btn) return;
@@ -161,8 +165,7 @@ export function render(appEl) {
     }
   });
 
-  // Load default PDFs on start
+  // Default render on mount
   loadDefault();
 }
-
 export function cleanup() { /* optional */ }

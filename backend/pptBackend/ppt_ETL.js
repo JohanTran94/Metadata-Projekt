@@ -5,10 +5,10 @@ import { parse } from 'csv-parse/sync';
 const INPUT_PATH = './warehouse/ppt/';
 const OUTPUT_FILE = path.join(INPUT_PATH, 'cleanedPptJson.json');
 
+// Utility: convert keys to camelCase
 function toCamelCaseKey(str) {
   return str.replace(/[_-](\w)/g, (_, c) => c.toUpperCase());
 }
-
 function keysToCamelCase(obj) {
   if (Array.isArray(obj)) return obj.map(keysToCamelCase);
   if (obj && typeof obj === 'object') {
@@ -20,6 +20,7 @@ function keysToCamelCase(obj) {
   return obj;
 }
 
+// Format date string into YYYY-MM-DD
 function formatDateToYYYYMMDD(dateStr) {
   if (!dateStr) return null;
   const d = new Date(dateStr);
@@ -30,6 +31,10 @@ function formatDateToYYYYMMDD(dateStr) {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * ETL for PowerPoint metadata.
+ * Reads latest CSV, normalizes metadata, saves as JSON.
+ */
 export async function runPptETL() {
   const csvFiles = fs.readdirSync(INPUT_PATH)
     .filter(f => f.endsWith('.csv'))
@@ -40,6 +45,7 @@ export async function runPptETL() {
 
   if (csvFiles.length === 0) throw new Error(' - No CSV-file found.');
 
+  // Pick most recent CSV
   const latestCsv = csvFiles.sort((a, b) => b.mtime - a.mtime)[0].name;
   const CSV_PATH = path.join(INPUT_PATH, latestCsv);
 
@@ -48,6 +54,7 @@ export async function runPptETL() {
   const csvBuffer = fs.readFileSync(CSV_PATH);
   const csvContent = csvBuffer.toString('utf16le');
 
+  // Parse CSV into records
   const records = parse(csvContent, {
     columns: true,
     skip_empty_lines: true,
@@ -57,10 +64,14 @@ export async function runPptETL() {
   });
 
   const usedFileNames = new Set();
+
+  // Clean each record and normalize fields
   const metadataListPowerpoint = records.map(record => {
     let baseFileName = record.digest ? `${record.digest}.ppt` : 'unknown.ppt';
     let fileName = baseFileName;
     let counter = 1;
+
+    // Ensure unique filename
     while (usedFileNames.has(fileName)) {
       fileName = `${baseFileName.replace(/\.ppt$/, '')}_${counter}.ppt`;
       counter++;
@@ -87,9 +98,7 @@ export async function runPptETL() {
     });
   }).filter(Boolean);
 
+  // Save cleaned metadata to JSON file
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(metadataListPowerpoint, null, 2), 'utf-8');
   console.log(` - Processed ${metadataListPowerpoint.length} records. JSON saved to ${OUTPUT_FILE}`);
 }
-
-
-

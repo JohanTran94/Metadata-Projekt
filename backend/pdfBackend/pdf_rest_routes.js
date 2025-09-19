@@ -3,7 +3,15 @@ import { Router } from 'express';
 export default function setupPdfRestRoutes(app, db) {
   const router = Router();
 
-  // /api/pdf-search/:field/:searchValue
+  /**
+   * Search endpoint
+   * GET /api/pdf-search/:field/:searchValue
+   *   field can be: Title | Author | Subject | Keywords | Pages | Text | Everything | Filename
+   *   searchValue depends on field type:
+   *     - Pages: "12", ">10", "5-15"
+   *     - Text/Everything: free text
+   *     - Filename/Title/Author/...: free text
+   */
   router.get('/api/pdf-search/:field/:searchValue', async (req, res) => {
     const { field, searchValue } = req.params;
     const allowed = ['Title', 'Author', 'Subject', 'Keywords', 'Pages', 'Text', 'Everything', 'Filename'];
@@ -15,10 +23,9 @@ export default function setupPdfRestRoutes(app, db) {
       let sql = '';
       let params = [];
 
-      // pages special handling
-      const isPageQuery = field === 'Pages' || field === 'Everything';
       const pageMatch = searchValue.match(/^(\d+)-(\d+)$|^>(\d+)$|^\d+$/);
 
+      // Special handling for "Pages"
       if (field === 'Pages') {
         if (/^\d+$/.test(searchValue)) {
           sql = `
@@ -63,6 +70,7 @@ export default function setupPdfRestRoutes(app, db) {
           return res.json({ error: 'Invalid format! Use 12, >10 or 5-15.' });
         }
 
+        // Search in text content
       } else if (field === 'Text') {
         sql = `
           SELECT id, filename, numpages, text,
@@ -76,6 +84,7 @@ export default function setupPdfRestRoutes(app, db) {
         `;
         params = [`%${searchValue}%`];
 
+        // Search across everything (text + info + xmp + filename + optional pages)
       } else if (field === 'Everything') {
         sql = `
           SELECT id, filename, numpages, text,
@@ -95,7 +104,7 @@ export default function setupPdfRestRoutes(app, db) {
         `;
         params = Array(7).fill(`%${searchValue}%`);
 
-        // Add page logic if Everythin looks like a number or range.
+        // Extend with page queries if applicable
         if (pageMatch) {
           if (/^\d+$/.test(searchValue)) {
             sql += ' OR numpages = ?';
@@ -110,6 +119,7 @@ export default function setupPdfRestRoutes(app, db) {
           }
         }
 
+        // Search by filename
       } else if (field === 'Filename') {
         sql = `
           SELECT id, filename, numpages, text,
@@ -123,8 +133,8 @@ export default function setupPdfRestRoutes(app, db) {
         `;
         params = [`%${searchValue}%`];
 
+        // Default: Title, Author, Subject, Keywords
       } else {
-        // Title, Author, Subject, Keywords
         sql = `
           SELECT id, filename, numpages, text,
             info->>'$.Title' AS title,
@@ -147,7 +157,10 @@ export default function setupPdfRestRoutes(app, db) {
     }
   });
 
-  // Default startpage: show the first 20 PDFs (with text)
+  /**
+   * GET /api/pdf-default
+   * Returns first 10 PDFs (basic preview).
+   */
   router.get('/api/pdf-default', async (req, res) => {
     try {
       const [rows] = await db.execute(`
@@ -168,7 +181,10 @@ export default function setupPdfRestRoutes(app, db) {
     }
   });
 
-  // Default with optional limit
+  /**
+   * GET /api/pdf-default/:limit
+   * Same as above but allows custom limit.
+   */
   router.get('/api/pdf-default/:limit', async (req, res) => {
     try {
       const limit = parseInt(req.params.limit) || 20;
@@ -190,7 +206,10 @@ export default function setupPdfRestRoutes(app, db) {
     }
   });
 
-  // All metadata by id
+  /**
+   * GET /api/pdf-all-meta/:id
+   * Returns full metadata for a specific PDF.
+   */
   router.get('/api/pdf-all-meta/:id', async (req, res) => {
     try {
       const { id } = req.params;
@@ -202,7 +221,10 @@ export default function setupPdfRestRoutes(app, db) {
     }
   });
 
-  // Only XMP
+  /**
+   * GET /api/pdf-xmp/:id
+   * Returns only the XMP metadata of a PDF.
+   */
   router.get('/api/pdf-xmp/:id', async (req, res) => {
     try {
       const { id } = req.params;
@@ -214,7 +236,10 @@ export default function setupPdfRestRoutes(app, db) {
     }
   });
 
-  // Only text (optional)
+  /**
+   * GET /api/pdf-text/:id
+   * Returns only the text snippet of a PDF.
+   */
   router.get('/api/pdf-text/:id', async (req, res) => {
     try {
       const { id } = req.params;
@@ -226,5 +251,6 @@ export default function setupPdfRestRoutes(app, db) {
     }
   });
 
+  // Register router
   app.use(router);
 }

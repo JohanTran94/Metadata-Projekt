@@ -1,20 +1,21 @@
+// This module renders the Image Search page in the frontend.
+// It provides a search form for image metadata, connects to the backend
+// (/api/image/search, /api/image/meta/:id), and renders results with pagination and modal details.
+
 export function render(appEl) {
+  // --- Render static HTML structure for the Image Search page ---
   appEl.innerHTML = `
     <section id="image-page">
-   
-    <h2>
-    Image search
-   
-    </h2>
-    <h3>
-    Find photos by metadata.
-    </h3> 
-      Search by camera make and model, file name, date, coordinates or other parameters. View beautiful photos and see where in the world they are taken. 
-     <p>
-      To view more detailed information about a specific document, press <b>show all metadata.
-      <br>
-      <br>
+      <h2>Image search</h2>
+      <h3>Find photos by metadata.</h3>
+      Search by camera make and model, file name, date, coordinates or other parameters. 
+      View beautiful photos and see where in the world they are taken.
+      <p>
+        To view more detailed information about a specific document, press <b>show all metadata.</b>
+      <br><br>
+      <!-- Search form -->
       <form id="searchForm" class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+        <!-- Select which type of search -->
         <label>
           Search by
           <select id="searchMode" name="mode">
@@ -27,39 +28,31 @@ export function render(appEl) {
           </select>
         </label>
 
-        <!-- groups -->
+        <!-- Input groups, shown/hidden depending on search mode -->
         <div data-group="all file" class="group">
-          <input id="text"  placeholder="File name / Make / Model" />
+          <input id="text" placeholder="File name / Make / Model" />
         </div>
-
         <div data-group="make" class="group hidden">
-          <input id="make"  placeholder="Sony, Samsung, Nikon…" />
+          <input id="make" placeholder="Sony, Samsung, Nikon…" />
         </div>
-
         <div data-group="model" class="group hidden">
           <input id="model" placeholder="Model" />
         </div>
-
         <div data-group="date" class="group hidden">
-          <label class="inline-label">
-            <span>From</span>
+          <label class="inline-label"><span>From</span>
             <input id="from" type="date" placeholder="yyyy-mm-dd" />
           </label>
-
-          <label class="inline-label">
-            <span>To</span>
+          <label class="inline-label"><span>To</span>
             <input id="to" type="date" placeholder="yyyy-mm-dd" />
           </label>
         </div>
-
-
         <div data-group="geo" class="group hidden">
           <input id="nearLat" placeholder="Latitude" style="width:120px" />
           <input id="nearLon" placeholder="Longitude" style="width:120px" />
-          <input id="radius"  placeholder="km"  style="width:90px" />
+          <input id="radius" placeholder="km" style="width:90px" />
         </div>
 
-
+        <!-- Pagination size selector -->
         <label>
           Per page
           <select id="pageSize" title="Per page">
@@ -73,9 +66,10 @@ export function render(appEl) {
         <button type="submit">Search</button>
       </form>
 
+      <!-- Search summary -->
       <div id="summary" class="muted" style="margin-top:8px;"></div>
 
-
+      <!-- Results table -->
       <div class="music-results-wrapper" id="imageResults" hidden>
         <table id="resultTable">
           <thead>
@@ -87,6 +81,7 @@ export function render(appEl) {
           <tbody id="resultBody"></tbody>
         </table>
 
+        <!-- Pagination controls -->
         <div class="controls" id="pagination">
           <button id="prevBtn" type="button">Prev</button>
           <span id="pageInfo" class="muted"></span>
@@ -94,7 +89,7 @@ export function render(appEl) {
         </div>
       </div>
 
-  
+      <!-- Modal dialog for showing full metadata -->
       <div id="metaModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="metaTitle">
         <div class="modal-backdrop"></div>
         <div class="modal-dialog" role="document">
@@ -110,11 +105,10 @@ export function render(appEl) {
           </div>
         </div>
       </div>
-
     </section>
   `;
 
-  // state + refs
+  // --- State and element references ---
   const state = { page: 1, total: 0, pageSize: 20, lastQuery: '' };
   const form = appEl.querySelector('#searchForm');
   const modeEl = appEl.querySelector('#searchMode');
@@ -132,32 +126,21 @@ export function render(appEl) {
   const modalBackdrop = appEl.querySelector('#metaModal .modal-backdrop');
   const resultsWrap = appEl.querySelector('#imageResults');
 
+  // --- Modal handling ---
   function openMetaModal(show = true) {
     modalEl.classList.toggle('hidden', !show);
-    if (show) {
-
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = show ? 'hidden' : '';
   }
-
-
   modalCloseBtn.addEventListener('click', () => openMetaModal(false));
   modalOkBtn.addEventListener('click', () => openMetaModal(false));
   modalBackdrop.addEventListener('click', () => openMetaModal(false));
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modalEl.classList.contains('hidden')) {
-      openMetaModal(false);
-    }
+    if (e.key === 'Escape' && !modalEl.classList.contains('hidden')) openMetaModal(false);
   });
 
-
-
+  // --- Show/hide relevant input groups depending on search mode ---
   function updateGroups() {
     const mode = modeEl.value;
-
-
     appEl.querySelectorAll('[data-group]').forEach(el => {
       const groups = (el.getAttribute('data-group') || '').split(/\s+/);
       el.classList.toggle(
@@ -165,22 +148,18 @@ export function render(appEl) {
         !groups.includes(mode) && !(mode === 'all' && groups.includes('all'))
       );
     });
-
-
     const textEl = appEl.querySelector('#text');
     if (textEl) {
       textEl.placeholder =
-        (mode === 'file')
-          ? 'File name'
-          : (mode === 'all')
-            ? 'File name / Make / Model'
+        (mode === 'file') ? 'File name'
+          : (mode === 'all') ? 'File name / Make / Model'
             : 'Search...';
     }
   }
-
   modeEl.addEventListener('change', updateGroups);
   updateGroups();
 
+  // --- Form + pagination event handlers ---
   form.addEventListener('submit', (ev) => { ev.preventDefault(); state.page = 1; runSearch(); });
   prevBtn.addEventListener('click', () => { if (state.page > 1) { state.page--; runSearch(true); } });
   nextBtn.addEventListener('click', () => {
@@ -188,15 +167,12 @@ export function render(appEl) {
     if (state.page < maxPage) { state.page++; runSearch(true); }
   });
 
+  // --- Handle click on "Metadata" buttons in result table ---
   tbody.addEventListener('click', async (e) => {
     const btn = e.target.closest('button.btn-meta');
     if (!btn) return;
-
     const id = btn.dataset.id;
-    if (!id) {
-      alert('Missing row id.');
-      return;
-    }
+    if (!id) { alert('Missing row id.'); return; }
 
     try {
       const res = await fetch(`/api/image/meta/${encodeURIComponent(id)}`);
@@ -206,19 +182,19 @@ export function render(appEl) {
         return;
       }
       const data = await res.json();
-      alert(JSON.stringify(data, null, 2));
+      alert(JSON.stringify(data, null, 2)); // Currently uses alert, could be improved to show in modal
     } catch (err) {
       alert('Request error: ' + err.message);
     }
   });
 
-
+  // Run initial search when page loads
   runSearch();
 
+  // --- Fetch search results from backend ---
   async function runSearch(keepQuery = false) {
     const params = buildQueryParams(keepQuery);
     const url = `/api/image/search?${params.toString()}`;
-
     summary.textContent = 'Loading...';
     table.hidden = true;
     pagination.hidden = true;
@@ -232,9 +208,9 @@ export function render(appEl) {
     renderResults(data);
   }
 
+  // --- Build URL query params based on form inputs ---
   function buildQueryParams(keepQuery) {
     const mode = modeEl.value;
-
     const text = (appEl.querySelector('#text')?.value || '').trim();
     const make = (appEl.querySelector('#make')?.value || '').trim();
     const model = (appEl.querySelector('#model')?.value || '').trim();
@@ -249,22 +225,16 @@ export function render(appEl) {
     params.set('page', String(state.page));
     params.set('pageSize', pageSize || '20');
 
-    // only set params needed by the selected mode
-    if (mode === 'all' || mode === 'file') {
-      if (text) params.set('text', text); else params.delete('text');
-    } else {
-      params.delete('text');
-    }
+    // Only include relevant params depending on mode
+    if (mode === 'all' || mode === 'file') { text ? params.set('text', text) : params.delete('text'); }
+    else params.delete('text');
 
-    if (mode === 'make') { if (make) params.set('make', make); else params.delete('make'); }
-    else params.delete('make');
-
-    if (mode === 'model') { if (model) params.set('model', model); else params.delete('model'); }
-    else params.delete('model');
+    if (mode === 'make') { make ? params.set('make', make) : params.delete('make'); } else params.delete('make');
+    if (mode === 'model') { model ? params.set('model', model) : params.delete('model'); } else params.delete('model');
 
     if (mode === 'date') {
-      if (from) params.set('from', from); else params.delete('from');
-      if (to) params.set('to', to); else params.delete('to');
+      from ? params.set('from', from) : params.delete('from');
+      to ? params.set('to', to) : params.delete('to');
     } else { params.delete('from'); params.delete('to'); }
 
     if (mode === 'geo') {
@@ -281,36 +251,36 @@ export function render(appEl) {
     return params;
   }
 
+  // --- Render search results in table ---
   function renderResults(data) {
     const rows = data.results || [];
     tbody.innerHTML = '';
 
+    // Build Google Maps link from coordinates
     const mapUrl = (lat, lon) => `https://maps.google.com/?q=${Number(lat).toFixed(6)},${Number(lon).toFixed(6)}`;
 
     rows.forEach(r => {
       const hasGps = r.latitude != null && r.longitude != null;
-
       const tr = document.createElement('tr');
       tr.innerHTML = `
-      <td title="${r.file_path || ''}">${r.file_name || ''}</td>
-      <td>${r.make || ''}</td>
-      <td>${r.model || ''}</td>
-      <td>${fmtDate(r.create_date)}</td>
-      <td>${r.width ?? ''}</td>
-      <td>${r.height ?? ''}</td>
-      <td>${fmtNum(r.latitude)}</td>
-      <td>${fmtNum(r.longitude)}</td>
-      <td class="row-actions">
-        ${r.file_name ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>` : ''}
-        ${hasGps ? ` | <a href="${mapUrl(r.latitude, r.longitude)}" target="_blank" rel="noopener">Map</a>` : ` | <span class="muted">No GPS</span>`}
-        ${r.id != null ? ` | <button type="button" class="btn-meta" data-id="${r.id}">Metadata</button>` : ''}
-      </td>
-    `;
+        <td title="${r.file_path || ''}">${r.file_name || ''}</td>
+        <td>${r.make || ''}</td>
+        <td>${r.model || ''}</td>
+        <td>${fmtDate(r.create_date)}</td>
+        <td>${r.width ?? ''}</td>
+        <td>${r.height ?? ''}</td>
+        <td>${fmtNum(r.latitude)}</td>
+        <td>${fmtNum(r.longitude)}</td>
+        <td class="row-actions">
+          ${r.file_name ? `<a href="/image/${encodeURIComponent(r.file_name)}" target="_blank" rel="noopener">View</a>` : ''}
+          ${hasGps ? ` | <a href="${mapUrl(r.latitude, r.longitude)}" target="_blank" rel="noopener">Map</a>` : ` | <span class="muted">No GPS</span>`}
+          ${r.id != null ? ` | <button type="button" class="btn-meta" data-id="${r.id}">Metadata</button>` : ''}
+        </td>
+      `;
       tbody.appendChild(tr);
     });
 
     table.hidden = rows.length === 0;
-
     const maxPage = Math.max(1, Math.ceil(state.total / state.pageSize));
     summary.textContent = `Total: ${state.total} | Page ${state.page} of ${maxPage}`;
     pagination.hidden = rows.length === 0;
@@ -318,7 +288,7 @@ export function render(appEl) {
     resultsWrap.hidden = rows.length === 0;
   }
 
-
+  // --- Format helpers ---
   function fmtNum(n) { return (n === null || n === undefined) ? '' : String(n); }
   function fmtDate(dt) {
     if (!dt) return '';
@@ -326,4 +296,6 @@ export function render(appEl) {
     return isNaN(d.getTime()) ? String(dt) : d.toISOString().slice(0, 19).replace('T', ' ');
   }
 }
+
+// Cleanup hook (currently unused)
 export function cleanup() { }
