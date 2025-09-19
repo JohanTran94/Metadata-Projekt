@@ -1,4 +1,3 @@
-
 import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse/sync';
@@ -19,6 +18,16 @@ function keysToCamelCase(obj) {
     }, {});
   }
   return obj;
+}
+
+function formatDateToYYYYMMDD(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return null;
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export async function runPptETL() {
@@ -56,7 +65,12 @@ export async function runPptETL() {
       fileName = `${baseFileName.replace(/\.ppt$/, '')}_${counter}.ppt`;
       counter++;
     }
+
+    const filePath = path.join(INPUT_PATH, fileName);
+    const fileExists = fs.existsSync(filePath);
     usedFileNames.add(fileName);
+
+    if (!fileExists) return null;
 
     return keysToCamelCase({
       original: record.original || null,
@@ -64,16 +78,18 @@ export async function runPptETL() {
       title: record.title || null,
       organisation: record.company || null,
       fileName,
-      creationDate: record.creation_date || null,
+      creationDate: formatDateToYYYYMMDD(record.creation_date),
       lastModified: record.last_modified || null,
       revisionNumber: record.revision_number ? parseInt(record.revision_number, 10) : null,
       slideCount: record.slide_count ? parseInt(record.slide_count, 10) : null,
       wordCount: record.word_count ? parseInt(record.word_count, 10) : null,
       fileSize: record.file_size ? parseInt(record.file_size, 10) : null
     });
-  });
+  }).filter(Boolean);
 
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(metadataListPowerpoint, null, 2), 'utf-8');
   console.log(` - Processed ${metadataListPowerpoint.length} records. JSON saved to ${OUTPUT_FILE}`);
 }
+
+
 

@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 :root {
   --gap: 16px;
   --muted: #666;
@@ -6,6 +13,41 @@
 * {
   box-sizing: border-box;
 }
+
+/* === Google Fonts ===
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+*/
+
+/* --- Grundinställningar --- */
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+/* Rubriker */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Noto Sans', sans-serif;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Specifika rubriker på about-page */
+.about-page h1, .about-page h2, .about-page h3 {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+/* Länkar */
+a, .about-page a, .tabs a, .content-bg table a {
+  font-family: 'Open Sans', sans-serif;
+}
+
+/* Viktigare brödtext */
+.about-page em, .important {
+  font-weight: 600;
+}
+
 
 html,
 body {
@@ -44,22 +86,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  /* logon till vänster */
-  max-width: 1100px;
+  max-width: 1200px;    /* Samma som content-box */
+  margin: 0 auto;        /* Centrerar headern */
   width: 100%;
   padding: 16px var(--gap);
   z-index: 10;
 }
 
-.site-logo {
-  display: inline-block;
-  padding: 0;
-}
 
 .site-logo img {
   display: block;
-  max-height: 80px;
+  max-height: 125px;     /* Höjd justeras efter behov */
   width: auto;
+  padding-left: 32px;          /* Behåller proportioner */
 }
 
 .header-tabs {
@@ -685,4 +724,211 @@ body {
 
 #image-page .music-results-wrapper tbody tr:hover td {
   background-color: rgba(246, 233, 212, 0.08);
+}
+
+#metadata-modal-content {
+  white-space: pre-wrap;
+  word-wrap: break-word; 
+  overflow: auto;
+  max-height: 400px;
+}
+
+/* ==== PPT result styling ==== */
+.ppt-result {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: transparent;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+  overflow-x: auto;
+  backdrop-filter: blur(4px);
+  transition: background 0.12s, box-shadow 0.12s;
+}
+
+.ppt-result:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ppt-result h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  color: #e2e8f0;
+}
+
+.ppt-result p {
+  margin: 4px 0;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.ppt-result a {
+  color: #bcd7ff;
+  text-decoration: underline;
+}
+
+.ppt-result a:hover {
+  color: #fff;
+}
+
+.ppt-result button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.ppt-result button:hover {
+  background: rgba(246, 233, 212, 0.2);
+  border-color: rgba(246, 233, 212, 0.55);
+  color: #0b1220;
+}
+
+.ppt-meta-block {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  margin-top: 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 0.85rem;
+  display: none;
+}
+
+/* Modal for PPT metadata */
+.ppt-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.ppt-modal .modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+}
+
+.ppt-modal .modal-dialog {
+  position: relative;
+  z-index: 1001;
+  width: min(800px, 92vw);
+  max-height: 86vh;
+  background: rgba(1, 11, 33, 0.9);
+  color: #e2e8f0;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ppt-modal .modal-header,
+.ppt-modal .modal-footer {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+.ppt-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ppt-modal .modal-body {
+  padding: 12px 16px;
+  overflow: auto;
+}
+
+.ppt-modal .btn-close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #e2e8f0;
+  padding: 4px 8px;
+}
+
+.about-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  color: #cbd5e1;
+  line-height: 1.5;
+
+  background: rgba(1, 11, 33, 0.75);
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  padding: 4px 24px 24px 24px; /* top, right, bottom, left */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  max-width: 1100px;
+  width: 100%;
+  margin: 24px auto;
+}
+
+.about-header a {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+
+.about-page h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  color: #e2e8f0;
+}
+
+.about-page h2 {
+  font-size: 1.4rem;
+  margin-bottom: 16px;
+  color: #94a3b8;
+}
+
+.about-page h3 {
+  font-size: 1.1rem;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: #cbd5e1;
+}
+
+.about-page p {
+  margin-bottom: 12px;
+}
+
+.about-page ul {
+  margin: 8px 0 12px 20px;
+  padding: 0;
+}
+
+.about-page ul li {
+  margin-bottom: 6px;
+}
+
+.about-page a {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.about-page a:hover {
+  text-decoration: underline;
+}
+
+.team-list li,
+.advisor li {
+  margin-bottom: 8px;
 }

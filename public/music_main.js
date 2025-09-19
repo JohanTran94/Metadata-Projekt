@@ -1,12 +1,17 @@
 export async function render(appEl) {
   appEl.innerHTML = `
-    <section>
-      <h2>Search music</h2>
-      <h4>
-        This search engine lets you find songs by the most common fields.<br />
-        You can also press "Show Metadata" to view more detailed information about a specific track.
-      </h4>
-
+  <section>
+  <h2>
+  Music search
+  </h2>
+  <h3>  
+  Find music files by metadata. 
+  </h3>
+  Search by title, artist, album, year or other parameters, as well as listen to and download your favourite songs.
+  <p>
+    To view more detailed information about a specific track, press <b>show all metadata.
+    <br>
+    <br>
       <div class="controls" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
           Search:

@@ -1,279 +1,147 @@
 import express from 'express';
 
-export default function setupPowerpointRoutes(app, db) {
+export default function setupPptRestRoutes(app, db) {
   const router = express.Router();
-
-  function requireDb(_req, res, next) {
-    if (!db) return res.status(503).json({ error: 'Database not connected' });
-    next();
-  }
 
   const allowedFields = {
     creationDate: "creationDate",
     fileName: "fileName",
-    fileSize: "fileSize",
-    id: "id",
-    lastModified: "lastModified",
-    mimetype: "mimetype",
     organisation: "organisation",
     original: "original",
-    revisionNumber: "revisionNumber",
-    slideCount: "slideCount",
-    title: "title",
-    wordCount: "wordCount"
+    title: "title"
   };
 
-  router.get('/api/ppt-search/:field/:searchValue', requireDb, async (req, res) => {
-    const { field, searchValue } = req.params;
-    const like = `%${searchValue}%`;
-    let limit = Number(req.query.limit) || 100;
-    let offset = Number(req.query.offset) || 0;
-    let sortField = req.query.sortField || 'title';
+  function requireDb(req, res, next) {
+    if (!db) return res.status(503).json({ error: 'Database not connected' });
+    next();
+  }
 
-    limit = Math.max(1, Math.min(500, limit));
-    offset = Math.max(0, offset);
-    if (!allowedFields[sortField]) sortField = 'title';
-
-    try {
-      let sql, params;
-
-      if (field === 'any') {
-        const paths = Object.values(allowedFields).map(
-          f => `LOWER(metadata->>'$.${f}') LIKE LOWER(?)`
-        );
-        sql = `
-          SELECT
-            id,
-            metadata,
-            metadata->>'$.fileName' AS fileName,
-            metadata->>'$.title' AS title,
-            metadata->>'$.organisation' AS organisation,
-            metadata->>'$.creationDate' AS creationDate,
-            metadata->>'$.original' AS original
-          FROM powerpoint_metadata
-          WHERE ${paths.join(' OR ')}
-          ORDER BY metadata->>'$.${sortField}'
-          LIMIT ${limit} OFFSET ${offset}
-        `;
-        params = Array(paths.length).fill(like);
-      } else {
-        if (!allowedFields[field]) {
-          return res.status(400).json({ error: "Invalid field name" });
-        }
-        const sqlPath = `$.${allowedFields[field]}`;
-        sql = `
-          SELECT
-            id,
-            metadata,
-            metadata->>'$.fileName' AS fileName,
-            metadata->>'$.title' AS title,
-            metadata->>'$.organisation' AS organisation,
-            metadata->>'$.creationDate' AS creationDate,
-            metadata->>'$.original' AS original
-          FROM powerpoint_metadata
-          WHERE LOWER(metadata->>'${sqlPath}') LIKE LOWER(?)
-          ORDER BY metadata->>'$.${sortField}'
-          LIMIT ${limit} OFFSET ${offset}
-        `;
-        params = [like];
-      }
-
-      const [rows] = await db.execute(sql, params);
-      res.json({ items: rows, limit, offset, sortField });
-    } catch (err) {
-      console.error("Database error:", err);
-      res.status(500).json({ error: "Database query failed" });
-    }
-  });
-
-  router.get('/api/ppt/:id', requireDb, async (req, res) => {
-    const { id } = req.params;
-    try {
-      const [rows] = await db.execute(
-        `SELECT * FROM powerpoint_metadata WHERE id = ?`,
-        [id]
-      );
-      res.json(rows);
-    } catch (err) {
-      console.error("Database error:", err);
-      res.status(500).json({ error: "Database query failed" });
-    }
-  });
-
+  // --- Slumpmässiga resultat vid initial load ---
   router.get('/api/ppt', requireDb, async (req, res) => {
-    let limit = Number(req.query.limit) || 100;
-    let offset = Number(req.query.offset) || 0;
-    let sortField = req.query.sortField || 'title';
-
-    limit = Math.max(1, Math.min(500, limit));
-    offset = Math.max(0, offset);
-    if (!allowedFields[sortField]) sortField = 'title';
-
+    let limit = Math.max(1, Math.min(500, Number(req.query.limit) || 10));
+  
     try {
-      const [rows] = await db.execute(
-        `
+      const sql = `
         SELECT
           id,
           metadata,
-          metadata->>'$.fileName' AS fileName,
-          metadata->>'$.title' AS title,
-          metadata->>'$.organisation' AS organisation,
-          metadata->>'$.creationDate' AS creationDate,
-          metadata->>'$.original' AS original
+          JSON_UNQUOTE(metadata->>'$.fileName') AS fileName,
+          JSON_UNQUOTE(metadata->>'$.title') AS title,
+          JSON_UNQUOTE(metadata->>'$.organisation') AS organisation,
+          JSON_UNQUOTE(metadata->>'$.creationDate') AS creationDate,
+          JSON_UNQUOTE(metadata->>'$.original') AS original,
+          JSON_UNQUOTE(metadata->>'$.fileSize') AS fileSize
         FROM powerpoint_metadata
-        ORDER BY metadata->>'$.${sortField}'
-        LIMIT ${limit} OFFSET ${offset}
-        `
-      );
-      res.json({ items: rows, limit, offset, sortField });
+        ORDER BY RAND()
+        LIMIT ${limit}`;
+  
+      const [rows] = await db.execute(sql);
+  
+      // Konvertera fileSize till number
+      const normalizedRows = rows.map(r => ({
+        ...r,
+        fileSize: r.fileSize ? Number(r.fileSize) : 0
+      }));
+  
+      const countSql = `SELECT COUNT(*) AS total FROM powerpoint_metadata`;
+      const [[{ total }]] = await db.execute(countSql);
+  
+      res.json({ items: normalizedRows, limit, total });
     } catch (err) {
-      console.error("Database error:", err);
+      console.error("Database error in /api/ppt:", err);
+      res.status(500).json({ error: "Database query failed" });
+    }
+  });
+  
+
+  // --- Sök med offset och ev. datumintervall ---
+  router.get('/api/ppt-search/:field/:searchValue', requireDb, async (req, res) => {
+    let { field, searchValue } = req.params;
+    const { dateFrom, dateTo } = req.query;
+  
+    // Om searchValue är tomt eller '-' → behandla som tom sträng
+    if (!searchValue || searchValue === '-' || searchValue.trim() === '') searchValue = '';
+  
+    const limit = Math.max(1, Math.min(500, Number(req.query.limit) || 100));
+    const offset = Math.max(0, Number(req.query.offset) || 0);
+  
+    try {
+      const conditions = [];
+      const params = [];
+  
+      if (field === 'any') {
+        if (searchValue) {
+          const paths = Object.values(allowedFields).map(
+            f => `LOWER(metadata->>'$.${f}') LIKE LOWER(?)`
+          );
+          conditions.push(`(${paths.join(' OR ')})`);
+          params.push(...Array(paths.length).fill(`%${searchValue}%`));
+        }
+      } else {
+        if (!allowedFields[field]) return res.status(400).json({ error: "Invalid field name" });
+  
+        if (field === 'creationDate') {
+          // Kontrollera att båda datum är angivna
+          if (!dateFrom || !dateTo) {
+            return res.status(400).json({ error: 'Specify both dateFrom and dateTo' });
+          }
+          conditions.push("DATE(JSON_UNQUOTE(metadata->>'$.creationDate')) >= ?");
+          conditions.push("DATE(JSON_UNQUOTE(metadata->>'$.creationDate')) <= ?");
+          params.push(dateFrom, dateTo);
+        } else if (searchValue) {
+          conditions.push(`LOWER(metadata->>'$.${field}') LIKE LOWER(?)`);
+          params.push(`%${searchValue}%`);
+        }
+      }
+  
+      const whereClause = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+  
+      const sql = `
+        SELECT
+          id,
+          metadata,
+          JSON_UNQUOTE(metadata->>'$.fileName') AS fileName,
+          JSON_UNQUOTE(metadata->>'$.title') AS title,
+          JSON_UNQUOTE(metadata->>'$.organisation') AS organisation,
+          JSON_UNQUOTE(metadata->>'$.creationDate') AS creationDate,
+          JSON_UNQUOTE(metadata->>'$.original') AS original,
+          JSON_UNQUOTE(metadata->>'$.fileSize') AS fileSize
+        FROM powerpoint_metadata
+        ${whereClause}
+        LIMIT ${limit} OFFSET ${offset}`;
+  
+      const [rows] = await db.execute(sql, params);
+  
+      const countSql = `SELECT COUNT(*) AS total FROM powerpoint_metadata ${whereClause}`;
+      const [[{ total }]] = await db.execute(countSql, params);
+  
+      const normalizedRows = rows.map(r => ({
+        ...r,
+        fileSize: r.fileSize ? Number(r.fileSize) : 0
+      }));
+  
+      res.json({ items: normalizedRows, limit, offset, total });
+    } catch (err) {
+      console.error("Database error in /api/ppt-search:", err);
+      res.status(500).json({ error: "Database query failed" });
+    }
+  });
+  
+  router.get('/api/ppt/:id/metadata', requireDb, async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      const sql = `SELECT metadata FROM powerpoint_metadata WHERE id = ?`;
+      const [rows] = await db.execute(sql, [id]);
+  
+      if (!rows.length) return res.status(404).json({ error: "Not found" });
+  
+      res.json(rows[0].metadata);
+    } catch (err) {
+      console.error("Database error in /api/ppt/:id/metadata:", err);
       res.status(500).json({ error: "Database query failed" });
     }
   });
 
   app.use(router);
 }
-
-
-/*
-//import { Router } from 'express';
-import express from 'express';
-const router = express.Router();
-
-export default function setupPowerpointRoutes(app, db) {
-  const router = Router();
-
-  function requireDb(_req, res, next) {
-    if (!db) return res.status(503).json({ error: 'Database not connected' });
-    next();
-  }
-
-  const allowedFields = {
-    creationDate: "creationDate",
-    fileName: "fileName",
-    fileSize: "fileSize",
-    id: "id",
-    lastModified: "lastModified",
-    mimetype: "mimetype",
-    organisation: "organisation",
-    original: "original",
-    revisionNumber: "revisionNumber",
-    slideCount: "slideCount",
-    title: "title",
-    wordCount: "wordCount"
-  };
-
-  router.get('/api/ppt-search/:field/:searchValue', requireDb, async (req, res) => {
-    const { field, searchValue } = req.params;
-    const like = `%${searchValue}%`;
-    let limit = Number(req.query.limit) || 100;
-    let offset = Number(req.query.offset) || 0;
-    let sortField = req.query.sortField || 'title';
-
-    limit = Math.max(1, Math.min(500, limit));
-    offset = Math.max(0, offset);
-    if (!allowedFields[sortField]) sortField = 'title';
-
-    try {
-      let sql, params;
-
-      if (field === 'any') {
-        const paths = Object.values(allowedFields).map(f => `LOWER(metadata->>'$.${f}') LIKE LOWER(?)`);
-        sql = `
-          SELECT
-            id,
-            metadata,
-            metadata->>'$.fileName' AS fileName,
-            metadata->>'$.title' AS title,
-            metadata->>'$.organisation' AS organisation,
-            metadata->>'$.creationDate' AS creationDate,
-            metadata->>'$.original' AS original
-          FROM powerpoint_metadata
-          WHERE ${paths.join(' OR ')}
-          ORDER BY metadata->>'$.${sortField}'
-          LIMIT ${limit} OFFSET ${offset}
-        `;
-        params = Array(paths.length).fill(like);
-      } else {
-        if (!allowedFields[field]) {
-          return res.status(400).json({ error: "Invalid field name" });
-        }
-        const sqlPath = `$.${allowedFields[field]}`;
-        sql = `
-          SELECT
-            id,
-            metadata,
-            metadata->>'$.fileName' AS fileName,
-            metadata->>'$.title' AS title,
-            metadata->>'$.organisation' AS organisation,
-            metadata->>'$.creationDate' AS creationDate,
-            metadata->>'$.original' AS original
-          FROM powerpoint_metadata
-          WHERE LOWER(metadata->>'${sqlPath}') LIKE LOWER(?)
-          ORDER BY metadata->>'$.${sortField}'
-          LIMIT ${limit} OFFSET ${offset}
-        `;
-        params = [like];
-      }
-
-      const [rows] = await db.execute(sql, params);
-      res.json({ items: rows, limit, offset, sortField });
-    } catch (err) {
-      console.error("Database error:", err);
-      res.status(500).json({ error: "Database query failed" });
-    }
-  });
-
-
-  router.get('/api/ppt/:id', requireDb, async (req, res) => {
-    const { id } = req.params;
-    try {
-      const [rows] = await db.execute(
-        `SELECT * FROM powerpoint_metadata WHERE id = ?`,
-        [id]
-      );
-      res.json(rows);
-    } catch (err) {
-      console.error("Database error:", err);
-      res.status(500).json({ error: "Database query failed" });
-    }
-  });
-
-
-  router.get('/api/ppt', requireDb, async (req, res) => {
-    let limit = Number(req.query.limit) || 100;
-    let offset = Number(req.query.offset) || 0;
-    let sortField = req.query.sortField || 'title';
-
-    limit = Math.max(1, Math.min(500, limit));
-    offset = Math.max(0, offset);
-    if (!allowedFields[sortField]) sortField = 'title';
-
-    try {
-      const [rows] = await db.execute(
-        `
-        SELECT
-          id,
-          metadata,
-          metadata->>'$.fileName' AS fileName,
-          metadata->>'$.title' AS title,
-          metadata->>'$.organisation' AS organisation,
-          metadata->>'$.creationDate' AS creationDate,
-          metadata->>'$.original' AS original
-        FROM powerpoint_metadata
-        ORDER BY metadata->>'$.${sortField}'
-        LIMIT ${limit} OFFSET ${offset}
-        `
-      );
-      res.json({ items: rows, limit, offset, sortField });
-    } catch (err) {
-      console.error("Database error:", err);
-      res.status(500).json({ error: "Database query failed" });
-    }
-  });
-
-  app.use(router);
-
-}  
-  */

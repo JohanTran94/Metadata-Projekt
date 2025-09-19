@@ -1,12 +1,19 @@
 export function render(appEl) {
   appEl.innerHTML = `
     <section id="image-page">
-      <h2>Search image</h2>
-      <h4>Use this search engine to explore image metadata stored in the database.
-      You can search by file name, camera make or model, date range,
-      or even by geographic location (latitude/longitude with radius).
-      </h4>
-
+   
+    <h2>
+    Image search
+   
+    </h2>
+    <h3>
+    Find photos by metadata.
+    </h3> 
+      Search by camera make and model, file name, date, coordinates or other parameters. View beautiful photos and see where in the world they are taken. 
+     <p>
+      To view more detailed information about a specific document, press <b>show all metadata.
+      <br>
+      <br>
       <form id="searchForm" class="controls" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <label>
           Search by
